@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e0f11">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Trainingslog">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Trainingslog</title>
+<style>
+:root{
+  --bg:#0e0f11; --card:#17191d; --card2:#22252c; --line:#2b2f37;
+  --text:#f2f3f5; --muted:#8d93a0; --accent:#d4ff3a; --accent-ink:#151a00;
+  --danger:#ff6060; --ok:#3ddc84;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.35}
+body{padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+main{padding:12px 16px calc(170px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto}
+h1{font-size:30px;margin:10px 0 14px;letter-spacing:-.02em;line-height:1.1}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:22px 0 8px;font-weight:650}
+p{margin:0 0 10px}
+.card{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px}
+.row{display:flex;align-items:center;gap:8px}
+.between{justify-content:space-between}
+.muted{color:var(--muted);font-size:14px}
+.grow{flex:1;min-width:0}
+button{font:inherit;color:inherit;background:var(--card2);border:0;border-radius:12px;padding:12px 14px;cursor:pointer;touch-action:manipulation}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.3}
+button.primary{background:var(--accent);color:var(--accent-ink);font-weight:750}
+button.dangerbtn{background:var(--danger);color:#fff;font-weight:700}
+button.ghost{background:transparent;color:var(--muted);padding:8px 10px}
+button.danger{color:var(--danger)}
+button.accent{color:var(--accent);font-weight:700}
+button.block{width:100%;display:block}
+button.small{padding:8px 12px;font-size:14px;border-radius:10px}
+.left{text-align:left}
+input,select,textarea{font:inherit;font-size:17px;color:var(--text);background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px;width:100%;-webkit-appearance:none;appearance:none}
+textarea{font-size:13px;font-family:ui-monospace,Menlo,monospace;min-height:160px;resize:vertical}
+input:focus,select,textarea:focus{outline:none}
+input:focus,textarea:focus{border-color:var(--accent)}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:30px}
+.lbl{display:block;font-size:13px;color:var(--muted);margin:14px 0 6px}
+
+/* Start screen */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+.stat{background:var(--card);border-radius:16px;padding:14px}
+.stat b{display:block;font-size:24px;letter-spacing:-.02em}
+.stat span{color:var(--muted);font-size:13px}
+.tpl{display:flex;flex-direction:column;align-items:flex-start;gap:3px;width:100%;text-align:left;background:var(--card);padding:16px;margin-bottom:10px;border-radius:16px}
+.tpl .t{font-size:19px;font-weight:750}
+.tpl .go{color:var(--accent);font-size:13px;font-weight:700;margin-top:4px}
+
+/* Active workout */
+.ex-name{font-weight:720;font-size:17px}
+.last{font-size:13px;color:var(--accent);margin-top:3px}
+.set{display:grid;gap:8px;align-items:center;margin-top:8px}
+.set.head{margin-top:12px}
+.set.head span{font-size:11px;color:var(--muted);text-align:center;text-transform:uppercase;letter-spacing:.06em}
+.set input{text-align:center;padding:11px 4px}
+.num{color:var(--muted);text-align:center;font-weight:650}
+.check{height:46px;padding:0;border-radius:10px;font-size:20px;font-weight:800;color:var(--muted)}
+.set.done .check{background:var(--ok);color:#03190b}
+.set.done input{background:rgba(61,220,132,.13);border-color:transparent}
+.live-head{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0 10px;margin:0 0 6px}
+
+/* Lists */
+.list{padding:0 14px}
+.li{padding:13px 0;border-bottom:1px solid var(--line)}
+.li:last-child{border-bottom:0}
+button.li{background:none;border-radius:0;width:100%;text-align:left;padding:14px 0}
+button.li:active{transform:none;opacity:.6}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* Timer */
+.timer{position:fixed;left:12px;right:12px;bottom:calc(74px + env(safe-area-inset-bottom));max-width:536px;margin:0 auto;
+  background:#24272f;border:1px solid var(--line);border-radius:18px;padding:10px 12px 12px;z-index:40;
+  transform:translateY(160%);transition:transform .25s ease;box-shadow:0 12px 30px rgba(0,0,0,.45);pointer-events:none}
+.timer.show{transform:none;pointer-events:auto}
+.timer.over{border-color:var(--accent);background:#2a3013}
+.bar{height:4px;background:var(--line);border-radius:4px;overflow:hidden;margin-bottom:8px}
+#tfill{height:100%;background:var(--accent);width:0}
+.ttime{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.timer button{padding:9px 11px;font-size:14px}
+#tlabel{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+
+/* Tabs */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:45;display:flex;background:rgba(14,15,17,.93);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+.tab{flex:1;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--muted);padding:6px 0;position:relative;border-radius:0}
+.tab:active{transform:none}
+.tab svg{width:24px;height:24px}
+.tab.on{color:var(--accent)}
+.tab.live::after{content:"";position:absolute;top:3px;left:calc(50% + 10px);width:8px;height:8px;border-radius:50%;background:var(--accent)}
+
+/* Sheet + dialog */
+#sheet,#dlg{position:fixed;inset:0;display:none}
+#sheet{z-index:60}#dlg{z-index:80}
+#sheet.open,#dlg.open{display:block}
+.backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6)}
+.panel{position:absolute;left:0;right:0;bottom:0;max-height:90vh;overflow:auto;-webkit-overflow-scrolling:touch;background:var(--card);
+  border-radius:22px 22px 0 0;padding:0 16px calc(28px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto}
+.panel.anim{animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:.5}}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--card);padding:12px 0 8px;z-index:2}
+.sheet-head b{font-size:16px}
+.dlg-box{position:absolute;left:20px;right:20px;top:50%;transform:translateY(-50%);max-width:380px;margin:0 auto;background:var(--card);border-radius:18px;padding:18px}
+.dlg-box p{font-size:16px;margin-bottom:16px}
+#toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translate(-50%,-150%);transition:transform .25s;z-index:90;
+  background:#2b2f37;color:var(--text);padding:10px 16px;border-radius:999px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.4);width:max-content;max-width:90vw}
+#toast.show{transform:translate(-50%,0)}
+#toast[data-act]{cursor:pointer;box-shadow:0 0 0 1px var(--accent),0 8px 24px rgba(0,0,0,.4)}
+.status{display:flex;gap:8px;align-items:flex-start;font-size:14px;color:var(--muted);margin-bottom:12px}
+.status i{flex:none;width:9px;height:9px;border-radius:50%;margin-top:5px;background:var(--muted)}
+.status.ok i{background:var(--ok)}.status.warn i{background:#ffb341}
+</style>
+</head>
+<body>
+<main id="main"></main>
+
+<div id="timer" class="timer" aria-live="polite">
+  <div class="bar"><div id="tfill"></div></div>
+  <div class="row between">
+    <div><div id="tlabel">Pause</div><div id="ttime" class="ttime">0:00</div></div>
+    <div class="row" style="gap:6px">
+      <button data-act="t-minus">−15</button>
+      <button data-act="t-plus">+15</button>
+      <button data-act="t-skip">Weiter</button>
+    </div>
+  </div>
+</div>
+
+<nav class="tabs">
+  <button class="tab" data-act="tab" data-tab="training"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/></svg><span>Training</span></button>
+  <button class="tab" data-act="tab" data-tab="vorlagen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></svg><span>Vorlagen</span></button>
+  <button class="tab" data-act="tab" data-tab="uebungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg><span>Übungen</span></button>
+  <button class="tab" data-act="tab" data-tab="verlauf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>Verlauf</span></button>
+</nav>
+
+<div id="sheet"></div>
+<div id="dlg"></div>
+<div id="toast"></div>
+<input type="file" id="imp-file" accept=".json,application/json,text/plain" hidden>
+
+<script>
+"use strict";
+/* ---------- Helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-5);
+const num = v => parseFloat(String(v ?? "").replace(",", ".")) || 0;
+const fmtNum = n => String(Math.round(n * 100) / 100).replace(".", ",");
+const fmtDate = t => new Date(t).toLocaleDateString("de-DE", {weekday:"short", day:"2-digit", month:"2-digit"});
+const fmtDateLong = t => new Date(t).toLocaleDateString("de-DE", {weekday:"long", day:"numeric", month:"long"});
+const fmtSec = s => s < 60 ? `${s} s` : `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")} min`;
+const dayStart = t => { const d = new Date(t); d.setHours(0,0,0,0); return d.getTime(); };
+function relDay(t){ const d = Math.round((dayStart(Date.now()) - dayStart(t)) / 864e5); return d <= 0 ? "Heute" : d === 1 ? "Gestern" : `vor ${d} Tagen`; }
+
+const TYPES = {
+  kraft:    {label:"Kraft (Gewicht × Wdh)", f:[["a","kg","decimal"],["b","Wdh","numeric"]]},
+  ausdauer: {label:"Ausdauer (Zeit + Strecke)", f:[["a","min","decimal"],["b","km","decimal"]]},
+  zeit:     {label:"Nur Zeit", f:[["a","min","decimal"]]}
+};
+
+/* ---------- Data ---------- */
+const LEGACY_KEY = "trainingslog-v1";   // localStorage-Eintrag des Prototyps, wird nur noch für die Migration gelesen
+function seed(){
+  const ex = (name, cat, type="kraft") => ({id:uid(), name, cat, type});
+  const list = [
+    ex("Bankdrücken","Brust"), ex("Schrägbankdrücken","Brust"), ex("Schulterdrücken","Schultern"), ex("Seitheben","Schultern"),
+    ex("Dips","Trizeps"), ex("Klimmzüge","Rücken"), ex("Langhantelrudern","Rücken"), ex("Latzug","Rücken"), ex("Bizepscurls","Bizeps"),
+    ex("Kniebeugen","Beine"), ex("Kreuzheben","Beine"), ex("Beinpresse","Beine"), ex("Wadenheben","Beine"),
+    ex("Laufen","Ausdauer","ausdauer"), ex("Padel-Drills","Padel","zeit")
+  ];
+  const by = n => list.find(e => e.name === n).id;
+  return {
+    v:1, updatedAt:0, exercises:list,
+    templates:[
+      {id:uid(), name:"Push", ex:["Bankdrücken","Schrägbankdrücken","Schulterdrücken","Seitheben","Dips"].map(by)},
+      {id:uid(), name:"Pull", ex:["Klimmzüge","Langhantelrudern","Latzug","Bizepscurls"].map(by)},
+      {id:uid(), name:"Legs", ex:["Kniebeugen","Kreuzheben","Beinpresse","Wadenheben"].map(by)},
+      {id:uid(), name:"Ausdauer", ex:["Laufen"].map(by)},
+      {id:uid(), name:"Padel", ex:["Padel-Drills"].map(by)}
+    ],
+    workouts:[], deleted:[], active:null, settings:{rest:90}
+  };
+}
+function loadLegacy(){ try { const s = localStorage.getItem(LEGACY_KEY); if (s) return JSON.parse(s); } catch(e){} return null; }
+function normalize(d){
+  const b = seed();
+  d = d && typeof d === "object" ? d : b;
+  return {
+    v:1, updatedAt:d.updatedAt || 0,
+    exercises:Array.isArray(d.exercises) ? d.exercises : b.exercises,
+    templates:Array.isArray(d.templates) ? d.templates : b.templates,
+    workouts:(Array.isArray(d.workouts) ? d.workouts : []).filter(w => w && w.id).sort((x,y) => x.date - y.date),
+    deleted:Array.isArray(d.deleted) ? d.deleted : [],
+    active:d.active || null,
+    settings:Object.assign({rest:90}, d.settings || {})
+  };
+}
+let S = null;   // wird beim Start aus IndexedDB geladen, siehe boot()
+
+const exById = id => S.exercises.find(e => e.id === id);
+const exName = id => exById(id)?.name || "Gelöschte Übung";
+const exType = id => exById(id)?.type || "kraft";
+
+function lastFor(exId){
+  for (let k = S.workouts.length - 1; k >= 0; k--){
+    const w = S.workouts[k], en = w.entries.find(e => e.exId === exId);
+    if (en && en.sets.length) return {date:w.date, sets:en.sets};
+  }
+  return null;
+}
+function fmtSets(type, sets){
+  if (type === "ausdauer") return sets.map(s => `${s.a || "–"} min${s.b ? ` · ${s.b} km` : ""}`).join(" | ");
+  if (type === "zeit") return sets.map(s => `${s.a || "–"} min`).join(" | ");
+  const w = s => s.a ? `${s.a} kg` : "KG";
+  const weights = new Set(sets.map(s => String(s.a)));
+  if (sets.length > 1 && weights.size === 1) return `${w(sets[0])} × ${sets.map(s => s.b || "–").join(", ")}`;
+  return sets.map(s => `${w(s)} × ${s.b || "–"}`).join(", ");
+}
+function newEntry(exId){
+  const last = lastFor(exId);
+  const sets = last ? last.sets.map(s => ({a:s.a ?? "", b:s.b ?? "", done:false}))
+                    : Array.from({length: exType(exId) === "kraft" ? 3 : 1}, () => ({a:"", b:"", done:false}));
+  return {exId, sets};
+}
+function groupByCat(list){
+  const m = new Map();
+  [...list].sort((a,b) => a.name.localeCompare(b.name, "de")).forEach(e => {
+    const c = e.cat || "Sonstiges"; if (!m.has(c)) m.set(c, []); m.get(c).push(e);
+  });
+  return [...m.entries()].sort((a,b) => a[0].localeCompare(b[0], "de"));
+}
+function bestLabel(e){
+  let best = 0, count = 0;
+  S.workouts.forEach(w => w.entries.forEach(en => { if (en.exId === e.id){ count++; en.sets.forEach(s => best = Math.max(best, num(s.a))); } }));
+  if (!count) return "";
+  return e.type === "kraft" && best > 0 ? `Best ${fmtNum(best)} kg` : `${count}×`;
+}
+
+/* ---------- Speicher (IndexedDB) ----------
+   Datenbank "trainingslog", Schema-Version 1:
+     meta     – ein Eintrag "state": Übungen, Vorlagen, Einstellungen, laufendes Training
+     workouts – ein Eintrag pro gespeichertem Training (Schlüssel: id)
+   Im Arbeitsspeicher (S) und im Backup gilt weiter das Datenformat v1 des Prototyps. */
+const DB_NAME = "trainingslog", DB_VERSION = 1;
+const store = {status:"ok", persisted:false};   // status: "ok" | "error" (Schreiben fehlgeschlagen) | "off" (kein Speicher verfügbar)
+let dbP = null;
+
+function openDb(){
+  if (dbP) return dbP;
+  const p = new Promise((res, rej) => {
+    let late = false;
+    const rq = indexedDB.open(DB_NAME, DB_VERSION);
+    rq.onupgradeneeded = e => {
+      const db = rq.result;
+      // Spätere Schema-Versionen hier als weitere Schritte ergänzen: if (e.oldVersion < 2){ … }
+      if (e.oldVersion < 1){ db.createObjectStore("meta"); db.createObjectStore("workouts", {keyPath:"id"}); }
+    };
+    rq.onsuccess = () => {
+      const db = rq.result;
+      if (late){ db.close(); return; }
+      const forget = () => { if (dbP === p) dbP = null; };
+      db.onversionchange = () => { db.close(); forget(); };   // ein anderer Tab will das Schema ändern
+      db.onclose = forget;                                     // der Browser hat die Verbindung getrennt
+      res(db);
+    };
+    rq.onerror = () => rej(rq.error);
+    setTimeout(() => { late = true; rej(new Error("Die Datenbank antwortet nicht.")); }, 5000);
+  });
+  p.catch(() => { if (dbP === p) dbP = null; });
+  return dbP = p;
+}
+function closeDb(){ const p = dbP; dbP = null; if (p) p.then(db => db.close(), () => {}); }
+
+// Führt work(transaktion) aus und wartet, bis alles gelesen bzw. geschrieben ist.
+function idb(mode, work){
+  return openDb().then(db => new Promise((res, rej) => {
+    const t = db.transaction(["meta","workouts"], mode);
+    t.oncomplete = () => res();
+    t.onabort = () => rej(t.error || new Error("Transaktion abgebrochen"));
+    try { work(t); } catch(e){ try { t.abort(); } catch(_){} rej(e); return; }
+    // Sofort abschließen statt auf die Antworten zu warten – wichtig, wenn iOS die App direkt danach einfriert.
+    if (mode === "readwrite" && t.commit) t.commit();
+  }));
+}
+function setStatus(s){
+  if (store.status === s) return;
+  store.status = s;
+  if (s === "error") toast("Speichern fehlgeschlagen – bitte Backup sichern");
+  if (ui.tab === "verlauf" && !ui.sheet) render();
+}
+
+const stateBody = () => ({v:1, updatedAt:S.updatedAt, exercises:S.exercises, templates:S.templates, settings:S.settings, active:S.active, deleted:S.deleted});
+async function loadDb(){
+  const out = {};
+  await idb("readonly", t => {
+    t.objectStore("meta").get("state").onsuccess = e => { out.state = e.target.result; };
+    t.objectStore("workouts").getAll().onsuccess = e => { out.workouts = e.target.result; };
+  });
+  return out;
+}
+
+/* Änderungen werden vorgemerkt und am Ende des laufenden Klicks/Tastendrucks zusammen in einer
+   Transaktion geschrieben. save() sichert den "state"-Eintrag, save({put:id}) / save({del:id})
+   zusätzlich ein einzelnes Training, save({all:true}) ersetzt alle Trainings (Import). */
+const pending = {state:false, all:false, put:new Set(), del:new Set()};
+let flushQueued = false, saveFails = 0;
+function save(change){
+  S.updatedAt = Date.now();
+  if (store.status === "off") return;   // kein Speicher verfügbar, siehe boot()
+  pending.state = true;
+  if (change){
+    if (change.all) pending.all = true;
+    if (change.put){ pending.put.add(change.put); pending.del.delete(change.put); }
+    if (change.del){ pending.del.add(change.del); pending.put.delete(change.del); }
+  }
+  if (!flushQueued){ flushQueued = true; queueMicrotask(flush); }
+}
+function flush(){
+  flushQueued = false;
+  if (!pending.state && !pending.all && !pending.put.size && !pending.del.size) return Promise.resolve(true);
+  const job = {all:pending.all, put:[...pending.put], del:[...pending.del]};
+  pending.state = pending.all = false; pending.put.clear(); pending.del.clear();
+  return idb("readwrite", t => {
+    const ws = t.objectStore("workouts");
+    if (job.all){ ws.clear(); S.workouts.forEach(w => ws.put(w)); }
+    else {
+      job.del.forEach(id => ws.delete(id));
+      job.put.forEach(id => { const w = S.workouts.find(x => x.id === id); if (w) ws.put(w); });
+    }
+    t.objectStore("meta").put(stateBody(), "state");
+  }).then(() => { saveFails = 0; setStatus("ok"); return true; }, err => {
+    console.warn("Speichern fehlgeschlagen:", err);
+    closeDb();
+    // Alles wieder vormerken – der nächste Versuch schreibt dann den aktuellen Stand.
+    pending.state = true; pending.all = pending.all || job.all;
+    job.put.forEach(id => pending.del.has(id) || pending.put.add(id));
+    job.del.forEach(id => pending.put.has(id) || pending.del.add(id));
+    if (++saveFails === 1) setTimeout(flush, 400);   // einmal mit frischer Verbindung wiederholen
+    else setStatus("error");
+    return false;
+  });
+}
+
+/* ---------- UI state ---------- */
+let ui = {tab:"training", sheet:null, open:null};
+let bootErr = null;   // gesetzt, wenn die Daten beim Start nicht geladen werden konnten
+const timer = {end:0, total:0, rang:false};
+
+/* ---------- Audio (beep at end of rest) ---------- */
+let actx = null, beeps = [];
+function unlockAudio(){
+  try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch(e){}
+}
+function cancelBeep(){ beeps.forEach(o => { try { o.stop(); } catch(e){} }); beeps = []; }
+function scheduleBeep(sec){
+  cancelBeep();
+  if (!actx) return;
+  try {
+    const t0 = actx.currentTime + Math.max(0, sec);
+    [0, .28, .56].forEach((d, i) => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.frequency.value = i === 2 ? 1320 : 880;
+      g.gain.setValueAtTime(0.0001, t0 + d);
+      g.gain.exponentialRampToValueAtTime(0.35, t0 + d + .02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + .2);
+      o.connect(g); g.connect(actx.destination);
+      o.start(t0 + d); o.stop(t0 + d + .22);
+      beeps.push(o);
+    });
+  } catch(e){}
+}
+function startTimer(sec){ timer.end = Date.now() + sec * 1000; timer.total = sec; timer.rang = false; scheduleBeep(sec); tick(); }
+function stopTimer(){ timer.end = 0; cancelBeep(); tick(); }
+function shiftTimer(delta){
+  if (!timer.end) return;
+  timer.end = Math.max(Date.now() + 1000, timer.end + delta * 1000);
+  timer.total = Math.max(timer.total + delta, 1); timer.rang = false;
+  scheduleBeep((timer.end - Date.now()) / 1000); tick();
+}
+
+/* ---------- Dialog + toast ---------- */
+let dlgResolve = null;
+function ask(text, ok = "OK", danger = false){
+  return new Promise(res => {
+    dlgResolve = res;
+    $("#dlg").innerHTML = `<div class="backdrop"></div><div class="dlg-box"><p>${esc(text)}</p><div class="grid2"><button data-act="dlg-no">Abbrechen</button><button class="${danger ? "dangerbtn" : "primary"}" data-act="dlg-yes">${esc(ok)}</button></div></div>`;
+    $("#dlg").classList.add("open");
+  });
+}
+function closeDlg(v){ $("#dlg").classList.remove("open"); $("#dlg").innerHTML = ""; const r = dlgResolve; dlgResolve = null; r && r(v); }
+let toastT = null;
+// act (optional): Aktion aus "actions", die ein Tipp auf den Hinweis auslöst – der Hinweis bleibt dann länger stehen.
+function toast(msg, act){
+  const t = $("#toast"); t.textContent = msg;
+  if (act) t.dataset.act = act; else delete t.dataset.act;
+  t.classList.add("show"); clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove("show"), act ? 10000 : 2200);
+}
+
+/* ---------- Views ---------- */
+function vTraining(){
+  const a = S.active;
+  if (!a){
+    const now = Date.now(), wk = S.workouts.filter(w => now - w.date < 7 * 864e5).length, last = S.workouts[S.workouts.length - 1];
+    return `<h1>Training</h1>
+    <div class="stats">
+      <div class="stat"><b>${wk}</b><span>Trainings in 7 Tagen</span></div>
+      <div class="stat"><b>${last ? relDay(last.date) : "–"}</b><span>${last ? "Zuletzt: " + esc(last.name) : "Noch kein Training"}</span></div>
+    </div>
+    <h2>Vorlage starten</h2>
+    ${S.templates.map(t => `<button class="tpl" data-act="start" data-id="${t.id}">
+      <span class="t">${esc(t.name)}</span>
+      <span class="muted">${t.ex.map(exName).map(esc).join(" · ") || "Keine Übungen"}</span>
+      <span class="go">Starten →</span></button>`).join("")}
+    <button class="block" data-act="start" data-id="">+ Freies Training</button>`;
+  }
+  const done = a.entries.reduce((n, e) => n + e.sets.filter(s => s.done).length, 0);
+  return `<div class="live-head row between">
+      <div class="grow"><h1 style="margin:0 0 2px">${esc(a.name)}</h1><div class="muted"><span id="elapsed"></span> · ${done} ${done === 1 ? "Satz" : "Sätze"} erledigt</div></div>
+      <button class="ghost danger" data-act="discard">Verwerfen</button>
+    </div>
+    ${a.entries.map(vEntry).join("") || `<div class="card muted">Noch keine Übung. Füge unten eine hinzu.</div>`}
+    <button class="block" data-act="pick" data-target="active">+ Übung hinzufügen</button>
+    <button class="block primary" style="margin-top:12px" data-act="finish">Training beenden & speichern</button>`;
+}
+function vEntry(en, i){
+  const ex = exById(en.exId) || {name:"Gelöschte Übung", type:"kraft"};
+  const T = TYPES[ex.type] || TYPES.kraft;
+  const last = lastFor(en.exId);
+  const cols = `grid-template-columns:26px repeat(${T.f.length},1fr) 52px`;
+  return `<div class="card">
+    <div class="row between" style="align-items:flex-start">
+      <div class="grow"><div class="ex-name">${esc(ex.name)}</div>
+      <div class="last">${last ? `Letztes Mal (${fmtDate(last.date)}): ${esc(fmtSets(ex.type, last.sets))}` : `<span class="muted">Erstes Mal – leg los!</span>`}</div></div>
+      <button class="ghost" data-act="del-entry" data-i="${i}" aria-label="Übung entfernen">✕</button>
+    </div>
+    <div class="set head" style="${cols}"><span>#</span>${T.f.map(f => `<span>${f[1]}</span>`).join("")}<span></span></div>
+    ${en.sets.map((s, j) => `<div class="set ${s.done ? "done" : ""}" style="${cols}">
+      <span class="num">${j + 1}</span>
+      ${T.f.map(f => `<input inputmode="${f[2]}" autocomplete="off" data-i="${i}" data-j="${j}" data-f="${f[0]}" value="${esc(s[f[0]])}" placeholder="–">`).join("")}
+      <button class="check" data-act="check" data-i="${i}" data-j="${j}" aria-label="Satz ${j + 1} abhaken">✓</button>
+    </div>`).join("")}
+    <div class="row" style="margin-top:10px">
+      <button class="small" data-act="add-set" data-i="${i}">+ Satz</button>
+      ${en.sets.length > 1 ? `<button class="small ghost" data-act="del-set" data-i="${i}">− Satz</button>` : ""}
+    </div>
+  </div>`;
+}
+function vTemplates(){
+  return `<h1>Vorlagen</h1>
+  ${S.templates.map(t => `<button class="tpl" data-act="edit-tpl" data-id="${t.id}">
+    <span class="t">${esc(t.name)}</span>
+    <span class="muted">${t.ex.length} Übungen · ${t.ex.map(exName).map(esc).join(", ") || "leer"}</span></button>`).join("")}
+  <button class="block" data-act="new-tpl">+ Neue Vorlage</button>`;
+}
+function vExercises(){
+  return `<h1>Übungen</h1>
+  ${groupByCat(S.exercises).map(([cat, list]) => `<h2>${esc(cat)}</h2><div class="card list">
+    ${list.map(e => `<button class="li row between" data-act="edit-ex" data-id="${e.id}"><span>${esc(e.name)}</span><span class="muted">${esc(bestLabel(e))} ›</span></button>`).join("")}
+  </div>`).join("")}
+  <button class="block" data-act="new-ex">+ Neue Übung</button>`;
+}
+function vStatus(){
+  const m = store.status === "off" ? ["warn","In dieser Ansicht lässt der Browser kein Speichern zu. Öffne die App über ihre Adresse (https oder localhost), damit deine Daten erhalten bleiben."]
+    : store.status === "error" ? ["warn","Speichern hat nicht geklappt. Sichere jetzt ein Backup und lade die App danach neu."]
+    : store.persisted ? ["ok","Auf diesem Gerät gespeichert und vor automatischem Löschen geschützt. Ein Backup ab und zu ist trotzdem sinnvoll."]
+    : ["warn","Nur auf diesem Gerät gespeichert. Der Browser kann die Daten bei Speichermangel oder nach längerer Nichtnutzung löschen – mach ab und zu ein Backup."];
+  return `<div class="status ${m[0]}"><i></i><span>${m[1]}</span></div>`;
+}
+function vHistory(){
+  const ws = [...S.workouts].reverse();
+  return `<h1>Verlauf</h1>
+  ${ws.length ? ws.map(w => {
+    const open = ui.open === w.id, n = w.entries.reduce((s, e) => s + e.sets.length, 0);
+    const mins = w.end ? Math.max(1, Math.round((w.end - w.date) / 60000)) : 0;
+    return `<div class="card">
+      <button class="li row between" style="padding:0" data-act="toggle-w" data-id="${w.id}">
+        <span class="grow"><span class="ex-name" style="display:block">${esc(w.name)}</span>
+        <span class="muted">${fmtDateLong(w.date)}${mins ? ` · ${mins} min` : ""} · ${n} ${n === 1 ? "Satz" : "Sätze"}</span></span>
+        <span class="muted">${open ? "▾" : "▸"}</span></button>
+      ${open ? `<div style="margin-top:8px">${w.entries.map(e => `<div class="li"><b>${esc(exName(e.exId))}</b><div class="muted">${esc(fmtSets(exType(e.exId), e.sets))}</div></div>`).join("")}
+        <button class="small ghost danger" style="margin-top:6px;padding-left:0" data-act="del-w" data-id="${w.id}">Training löschen</button></div>` : ""}
+    </div>`;
+  }).join("") : `<div class="card muted">Noch keine Trainings gespeichert. Starte eins im Tab „Training“.</div>`}
+  <h2>Einstellungen</h2>
+  <div class="card row between"><span>Pausen-Timer</span>
+    <select data-setting="rest" style="width:auto">${[45,60,90,120,150,180,240].map(s => `<option value="${s}" ${S.settings.rest == s ? "selected" : ""}>${fmtSec(s)}</option>`).join("")}</select>
+  </div>
+  <h2>Daten & Backup</h2>
+  <div class="card">${vStatus()}
+    <div class="grid2"><button data-act="exp-json">Backup (JSON)</button><button data-act="exp-csv">Export (CSV)</button></div>
+    <button class="block" style="margin-top:8px" data-act="imp">Backup wiederherstellen</button>
+  </div>`;
+}
+
+/* ---------- Sheets ---------- */
+function vSheet(s){
+  if (s.kind === "picker"){
+    const inWorkout = new Set(s.target === "active" && S.active ? S.active.entries.map(e => e.exId) : (s.back?.draft?.ex || []));
+    return `<div class="sheet-head"><button class="ghost" data-act="close">Zurück</button><b>Übung wählen</b><button class="ghost accent" data-act="new-ex-inline">Neu</button></div>
+    <input id="pick-q" placeholder="Suchen …" autocomplete="off">
+    <div id="pick-list">${groupByCat(S.exercises).map(([cat, list]) => `<div class="grp"><h2>${esc(cat)}</h2>
+      ${list.map(e => `<button class="li row between" data-act="picked" data-id="${e.id}" data-name="${esc(e.name.toLowerCase())}"><span>${esc(e.name)}</span>${inWorkout.has(e.id) ? `<span class="muted">✓ drin</span>` : ""}</button>`).join("")}</div>`).join("")}</div>`;
+  }
+  if (s.kind === "template"){
+    const d = s.draft;
+    return `<div class="sheet-head"><button class="ghost" data-act="close">Abbrechen</button><b>${d.isNew ? "Neue Vorlage" : "Vorlage"}</b><button class="ghost accent" data-act="save-tpl">Sichern</button></div>
+    <label class="lbl">Name</label><input data-draft="name" value="${esc(d.name)}" placeholder="z. B. Push" autocomplete="off">
+    <h2>Übungen (Reihenfolge im Training)</h2>
+    <div class="list" style="padding:0">${d.ex.map((id, k) => `<div class="li row between"><span class="grow">${esc(exName(id))}</span>
+      <span class="row" style="gap:4px"><button class="small" data-act="tpl-move" data-k="${k}" data-d="-1" ${k ? "" : "disabled"}>↑</button><button class="small" data-act="tpl-move" data-k="${k}" data-d="1" ${k < d.ex.length - 1 ? "" : "disabled"}>↓</button><button class="small danger" data-act="tpl-rm" data-k="${k}">✕</button></span></div>`).join("") || `<p class="muted">Noch keine Übungen.</p>`}</div>
+    <button class="block" style="margin-top:10px" data-act="pick" data-target="template">+ Übung hinzufügen</button>
+    ${d.isNew ? "" : `<button class="block ghost danger" style="margin-top:14px" data-act="del-tpl">Vorlage löschen</button>`}`;
+  }
+  if (s.kind === "exercise"){
+    const d = s.draft, cats = [...new Set(S.exercises.map(e => e.cat).filter(Boolean))].sort();
+    const hist = d.isNew ? [] : S.workouts.filter(w => w.entries.some(e => e.exId === d.id)).slice(-10).reverse();
+    return `<div class="sheet-head"><button class="ghost" data-act="close">Abbrechen</button><b>${d.isNew ? "Neue Übung" : "Übung"}</b><button class="ghost accent" data-act="save-ex">Sichern</button></div>
+    <label class="lbl">Name</label><input data-draft="name" value="${esc(d.name)}" placeholder="z. B. Bankdrücken" autocomplete="off">
+    <label class="lbl">Kategorie</label><input data-draft="cat" list="cats" value="${esc(d.cat)}" placeholder="z. B. Brust" autocomplete="off">
+    <datalist id="cats">${cats.map(c => `<option value="${esc(c)}">`).join("")}</datalist>
+    <label class="lbl">Erfassung</label><select data-draft="type">${Object.entries(TYPES).map(([k, t]) => `<option value="${k}" ${d.type === k ? "selected" : ""}>${t.label}</option>`).join("")}</select>
+    ${d.isNew ? "" : `<h2>Letzte Einheiten</h2>
+      ${hist.length ? `<div class="list" style="padding:0">${hist.map(w => `<div class="li"><div class="muted">${fmtDate(w.date)} · ${esc(w.name)}</div><div>${esc(fmtSets(exType(d.id), w.entries.find(e => e.exId === d.id).sets))}</div></div>`).join("")}</div>` : `<p class="muted">Noch nicht trainiert.</p>`}
+      <button class="block ghost danger" style="margin-top:14px" data-act="del-ex">Übung löschen</button>`}`;
+  }
+  if (s.kind === "text"){
+    return `<div class="sheet-head"><button class="ghost" data-act="close">Fertig</button><b>${esc(s.title)}</b><button class="ghost accent" data-act="copy-text">Kopieren</button></div>
+    <p class="muted">${esc(s.hint)}</p><textarea id="text-out" readonly>${esc(s.text)}</textarea>`;
+  }
+  if (s.kind === "import"){
+    return `<div class="sheet-head"><button class="ghost" data-act="close">Abbrechen</button><b>Backup wiederherstellen</b><span style="width:70px"></span></div>
+    <p class="muted">Wähle eine Backup-Datei (JSON) oder füge den Backup-Text ein. Achtung: Die aktuellen Daten werden ersetzt.</p>
+    <button class="block" data-act="imp-file">Datei auswählen</button>
+    <label class="lbl">… oder Text einfügen</label><textarea id="imp-text" placeholder='{"v":1, …}'></textarea>
+    <button class="block primary" style="margin-top:10px" data-act="imp-text">Wiederherstellen</button>`;
+  }
+  return "";
+}
+
+/* ---------- Render ---------- */
+// Solange S fehlt: Ladehinweis bzw. Fehlermeldung, wenn die Datenbank nicht geöffnet werden konnte.
+function vBoot(){
+  if (!bootErr) return `<p class="muted" style="text-align:center;margin-top:38vh">Lade …</p>`;
+  return `<h1>Trainingslog</h1>
+  <div class="card"><p>Der Datenspeicher lässt sich gerade nicht öffnen.</p>
+    <p class="muted">Vorhandene Daten bleiben unangetastet. Das kann z. B. im privaten Modus des Browsers passieren.</p>
+    <p class="muted">${esc(bootErr.message || bootErr)}</p>
+    <button class="block primary" data-act="reload">Erneut versuchen</button></div>`;
+}
+function render(){
+  if (!S){ $("#main").innerHTML = vBoot(); return; }
+  const views = {training:vTraining, vorlagen:vTemplates, uebungen:vExercises, verlauf:vHistory};
+  const noStore = store.status === "off" ? `<div class="status warn" style="margin:10px 0 0"><i></i><span>Vorschau ohne Speicher – Eingaben gehen beim Schließen verloren.</span></div>` : "";
+  $("#main").innerHTML = noStore + views[ui.tab]();
+  document.querySelectorAll(".tab").forEach(b => {
+    b.classList.toggle("on", b.dataset.tab === ui.tab);
+    b.classList.toggle("live", b.dataset.tab === "training" && !!S.active);
+  });
+  const sh = $("#sheet"), wasOpen = sh.classList.contains("open"), oldPanel = sh.querySelector(".panel"), st = oldPanel ? oldPanel.scrollTop : 0;
+  if (ui.sheet){
+    sh.innerHTML = `<div class="backdrop" data-act="close"></div><div class="panel${wasOpen ? "" : " anim"}">${vSheet(ui.sheet)}</div>`;
+    sh.classList.add("open");
+    if (wasOpen && ui.sheet === lastSheet) sh.querySelector(".panel").scrollTop = st;
+  } else { sh.innerHTML = ""; sh.classList.remove("open"); }
+  lastSheet = ui.sheet;
+  tick();
+}
+let lastSheet = null;
+
+function tick(){
+  const el = $("#elapsed");
+  if (el && S.active){ const m = Math.floor((Date.now() - S.active.date) / 60000); el.textContent = m < 60 ? `${m} min` : `${Math.floor(m/60)} h ${m%60} min`; }
+  const tb = $("#timer");
+  if (!timer.end){ tb.classList.remove("show","over"); return; }
+  const remMs = timer.end - Date.now(), rem = Math.ceil(remMs / 1000);
+  tb.classList.add("show");
+  if (rem <= 0){
+    if (!timer.rang){ timer.rang = true; try { navigator.vibrate && navigator.vibrate([200,100,200]); } catch(e){} }
+    tb.classList.add("over"); $("#tlabel").textContent = "Pause vorbei"; $("#ttime").textContent = "Nächster Satz!"; $("#tfill").style.width = "100%";
+    if (rem <= -8){ timer.end = 0; tb.classList.remove("show","over"); }
+    return;
+  }
+  tb.classList.remove("over");
+  $("#tlabel").textContent = "Pause";
+  $("#ttime").textContent = `${Math.floor(rem/60)}:${String(rem%60).padStart(2,"0")}`;
+  $("#tfill").style.width = `${Math.min(100, 100 * (1 - remMs / (timer.total * 1000)))}%`;
+}
+setInterval(tick, 250);
+
+/* ---------- Export / Import ---------- */
+const stamp = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0,10); };   // heutiges Datum in Ortszeit
+function backupJson(){ return JSON.stringify({...S, active:null, exportedAt:new Date().toISOString()}, null, 1); }
+function csv(){
+  const rows = [["Datum","Training","Übung","Kategorie","Satz","Gewicht_kg","Wiederholungen","Minuten","km"]];
+  S.workouts.forEach(w => w.entries.forEach(e => {
+    const ex = exById(e.exId) || {name:"Gelöschte Übung", cat:"", type:"kraft"};
+    e.sets.forEach((s, i) => rows.push([new Date(w.date).toLocaleDateString("de-DE"), w.name, ex.name, ex.cat || "", i + 1,
+      ex.type === "kraft" ? s.a : "", ex.type === "kraft" ? s.b : "", ex.type !== "kraft" ? s.a : "", ex.type === "ausdauer" ? s.b : ""]));
+  }));
+  return "﻿" + rows.map(r => r.map(c => { c = String(c ?? ""); return /[;"\n]/.test(c) ? `"${c.replace(/"/g,'""')}"` : c; }).join(";")).join("\n");
+}
+/* Gibt einen Export als Datei heraus:
+   1. auf dem Handy über das Teilen-Menü (dort z. B. „In Dateien sichern“),
+   2. sonst als normalen Datei-Download,
+   3. und wo beides nicht geht, als Text zum Kopieren. */
+async function offerFile(filename, data, type, title){
+  const file = new File([data], filename, {type});
+  const touch = !!window.matchMedia && matchMedia("(pointer: coarse)").matches;
+  if (touch && navigator.canShare && navigator.canShare({files:[file]})){
+    try { await navigator.share({files:[file]}); return; }
+    catch(e){ if (e && e.name === "AbortError") return; console.warn("Teilen fehlgeschlagen:", e); }   // abgebrochen: nichts tun
+  }
+  // In der vom iPhone-Home-Bildschirm gestarteten App ist der Datei-Download nicht verlässlich, dort lieber gleich der Text.
+  if ("download" in HTMLAnchorElement.prototype && navigator.standalone !== true){
+    const url = URL.createObjectURL(file), a = document.createElement("a");
+    a.href = url; a.download = filename; a.hidden = true;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    toast("Download gestartet");
+    return;
+  }
+  ui.sheet = {kind:"text", title, text:data.replace(/^﻿/, ""), hint:"Kopiere den Text und speichere ihn z. B. in der Notizen- oder Dateien-App."};
+  render();
+}
+function applyImport(text){
+  let d;
+  try { d = JSON.parse(text); } catch(e){ toast("Das ist kein gültiges Backup"); return; }
+  if (!d || !Array.isArray(d.exercises) || !Array.isArray(d.workouts)){ toast("Backup unvollständig"); return; }
+  ask(`Backup mit ${d.workouts.length} Trainings laden? Die aktuellen Daten werden ersetzt.`, "Laden", true).then(ok => {
+    if (!ok) return;
+    const before = new Set(S.workouts.map(w => w.id));
+    S = normalize(d); S.active = null;
+    const now = new Set(S.workouts.map(w => w.id));
+    S.deleted = [...new Set([...(S.deleted || []), ...[...before].filter(id => !now.has(id))])];
+    save({all:true});
+    ui.sheet = null; ui.tab = "verlauf"; render(); toast("Backup geladen");
+  });
+}
+
+/* ---------- Actions ---------- */
+const actions = {
+  tab: el => { ui.tab = el.dataset.tab; ui.sheet = null; render(); window.scrollTo(0, 0); },
+  start: el => {
+    const t = S.templates.find(x => x.id === el.dataset.id);
+    S.active = {id:uid(), date:Date.now(), name:t ? t.name : "Freies Training", entries:(t ? t.ex : []).filter(exById).map(newEntry)};
+    save(); render(); window.scrollTo(0, 0);
+  },
+  discard: async () => { if (await ask("Training verwerfen? Nichts davon wird gespeichert.", "Verwerfen", true)){ S.active = null; stopTimer(); save(); render(); } },
+  finish: async () => {
+    const a = S.active;
+    const entries = a.entries.map(e => ({exId:e.exId, sets:e.sets.filter(s => s.done).map(s => ({a:s.a, b:s.b}))})).filter(e => e.sets.length);
+    if (!entries.length){
+      if (await ask("Du hast noch keinen Satz abgehakt. Training ohne Speichern beenden?", "Beenden", true)){ S.active = null; stopTimer(); save(); render(); }
+      return;
+    }
+    const open = a.entries.reduce((n, e) => n + e.sets.filter(s => !s.done).length, 0);
+    if (open && !(await ask(`${open} ${open === 1 ? "Satz ist" : "Sätze sind"} nicht abgehakt und werden nicht gespeichert. Trotzdem beenden?`, "Beenden"))) return;
+    const w = {id:a.id, date:a.date, end:Date.now(), name:a.name, entries};
+    S.workouts.push(w); S.active = null; stopTimer(); save({put:w.id});
+    ui.tab = "verlauf"; ui.open = w.id; render(); window.scrollTo(0, 0); toast(store.status === "off" ? "Training beendet – nicht gespeichert" : "Training gespeichert 💪");
+  },
+  check: el => {
+    const en = S.active.entries[+el.dataset.i], s = en.sets[+el.dataset.j];
+    s.done = !s.done; save();
+    if (s.done && exType(en.exId) === "kraft") startTimer(S.settings.rest);
+    render();
+  },
+  "add-set": el => { const en = S.active.entries[+el.dataset.i], p = en.sets[en.sets.length - 1] || {a:"", b:""}; en.sets.push({a:p.a, b:p.b, done:false}); save(); render(); },
+  "del-set": el => { S.active.entries[+el.dataset.i].sets.pop(); save(); render(); },
+  "del-entry": async el => { if (await ask("Übung aus diesem Training entfernen?", "Entfernen", true)){ S.active.entries.splice(+el.dataset.i, 1); save(); render(); } },
+  pick: el => { ui.sheet = {kind:"picker", target:el.dataset.target, back:ui.sheet}; render(); },
+  picked: el => {
+    const s = ui.sheet, id = el.dataset.id;
+    if (s.target === "active"){ S.active.entries.push(newEntry(id)); save(); ui.sheet = null; render(); setTimeout(() => window.scrollTo({top:document.body.scrollHeight, behavior:"smooth"}), 30); }
+    else { s.back.draft.ex.push(id); ui.sheet = s.back; render(); }
+  },
+  "new-ex-inline": () => { ui.sheet = {kind:"exercise", draft:{isNew:true, id:uid(), name:"", cat:"", type:"kraft"}, back:ui.sheet}; render(); },
+  close: () => { ui.sheet = ui.sheet && ui.sheet.back || null; render(); },
+  "new-tpl": () => { ui.sheet = {kind:"template", draft:{isNew:true, id:uid(), name:"", ex:[]}}; render(); },
+  "edit-tpl": el => { const t = S.templates.find(x => x.id === el.dataset.id); ui.sheet = {kind:"template", draft:{...t, ex:[...t.ex]}}; render(); },
+  "tpl-move": el => { const ex = ui.sheet.draft.ex, k = +el.dataset.k, j = k + +el.dataset.d; [ex[k], ex[j]] = [ex[j], ex[k]]; render(); },
+  "tpl-rm": el => { ui.sheet.draft.ex.splice(+el.dataset.k, 1); render(); },
+  "save-tpl": () => {
+    const d = ui.sheet.draft;
+    if (!d.name.trim()){ toast("Bitte einen Namen eingeben"); return; }
+    const t = {id:d.id, name:d.name.trim(), ex:d.ex}, k = S.templates.findIndex(x => x.id === d.id);
+    if (k >= 0) S.templates[k] = t; else S.templates.push(t);
+    save(); ui.sheet = null; render();
+  },
+  "del-tpl": async () => { const d = ui.sheet.draft; if (await ask(`Vorlage „${d.name}“ löschen?`, "Löschen", true)){ S.templates = S.templates.filter(t => t.id !== d.id); save(); ui.sheet = null; render(); } },
+  "new-ex": () => { ui.sheet = {kind:"exercise", draft:{isNew:true, id:uid(), name:"", cat:"", type:"kraft"}}; render(); },
+  "edit-ex": el => { const e = exById(el.dataset.id); ui.sheet = {kind:"exercise", draft:{...e}}; render(); },
+  "save-ex": () => {
+    const s = ui.sheet, d = s.draft;
+    if (!d.name.trim()){ toast("Bitte einen Namen eingeben"); return; }
+    const e = {id:d.id, name:d.name.trim(), cat:(d.cat || "").trim() || "Sonstiges", type:d.type || "kraft"}, k = S.exercises.findIndex(x => x.id === d.id);
+    if (k >= 0) S.exercises[k] = e; else S.exercises.push(e);
+    save();
+    const back = s.back;
+    if (back && back.kind === "picker"){
+      if (back.target === "active"){ S.active.entries.push(newEntry(e.id)); save(); ui.sheet = null; }
+      else { back.back.draft.ex.push(e.id); ui.sheet = back.back; }
+    } else ui.sheet = null;
+    render();
+  },
+  "del-ex": async () => {
+    const d = ui.sheet.draft;
+    if (!(await ask(`Übung „${d.name}“ löschen? Sie verschwindet aus allen Vorlagen. Alte Trainings bleiben erhalten.`, "Löschen", true))) return;
+    S.exercises = S.exercises.filter(e => e.id !== d.id);
+    S.templates.forEach(t => t.ex = t.ex.filter(id => id !== d.id));
+    save(); ui.sheet = null; render();
+  },
+  "toggle-w": el => { ui.open = ui.open === el.dataset.id ? null : el.dataset.id; render(); },
+  "del-w": async el => {
+    if (!(await ask("Dieses Training endgültig löschen?", "Löschen", true))) return;
+    const id = el.dataset.id;
+    S.workouts = S.workouts.filter(w => w.id !== id); S.deleted.push(id); save({del:id}); render();
+  },
+  "exp-json": () => offerFile(`trainingslog-backup-${stamp()}.json`, backupJson(), "application/json", "Backup (JSON)"),
+  "exp-csv": () => { if (!S.workouts.length){ toast("Noch keine Trainings zum Exportieren"); return; } offerFile(`trainingslog-${stamp()}.csv`, csv(), "text/csv", "Export (CSV)"); },
+  "copy-text": async () => {
+    const t = $("#text-out");
+    try { await navigator.clipboard.writeText(t.value); toast("Kopiert"); }
+    catch(e){ t.focus(); t.select(); toast("Text markiert – jetzt „Kopieren“ wählen"); }
+  },
+  imp: () => { ui.sheet = {kind:"import"}; render(); },
+  "imp-file": () => $("#imp-file").click(),
+  "imp-text": () => applyImport($("#imp-text").value),
+  "t-plus": () => shiftTimer(15),
+  "t-minus": () => shiftTimer(-15),
+  "t-skip": () => stopTimer(),
+  "dlg-yes": () => closeDlg(true),
+  "dlg-no": () => closeDlg(false),
+  reload: () => { saveNow(); location.reload(); }
+};
+
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]");
+  if (!el || el.disabled) return;
+  unlockAudio();
+  const fn = actions[el.dataset.act];
+  if (fn) fn(el, e);
+});
+let saveT = null;
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (t.dataset.f && S.active){
+    const s = S.active.entries[+t.dataset.i]?.sets[+t.dataset.j];
+    if (s){ s[t.dataset.f] = t.value; clearTimeout(saveT); saveT = setTimeout(() => { saveT = null; save(); }, 400); }
+  } else if (t.dataset.draft && ui.sheet?.draft){ ui.sheet.draft[t.dataset.draft] = t.value; }
+  else if (t.id === "pick-q"){
+    const q = t.value.trim().toLowerCase();
+    document.querySelectorAll("#pick-list .grp").forEach(g => {
+      let any = false;
+      g.querySelectorAll("[data-name]").forEach(b => { const hit = !q || b.dataset.name.includes(q); b.style.display = hit ? "" : "none"; any = any || hit; });
+      g.style.display = any ? "" : "none";
+    });
+  }
+});
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.dataset.draft && ui.sheet?.draft) ui.sheet.draft[t.dataset.draft] = t.value;
+  if (t.dataset.setting){ S.settings[t.dataset.setting] = +t.value; save(); toast(`Pause: ${fmtSec(+t.value)}`); }
+  if (t.id === "imp-file" && t.files[0]){ const r = new FileReader(); r.onload = () => applyImport(String(r.result)); r.readAsText(t.files[0]); t.value = ""; }
+});
+// Beim Verlassen der App (und bei der Rückkehr) alles Offene sofort sichern – iOS friert die Seite im Hintergrund ein.
+function saveNow(){ if (saveT){ clearTimeout(saveT); saveT = null; save(); } flush(); }
+document.addEventListener("visibilitychange", () => { saveNow(); tick(); });
+window.addEventListener("pagehide", saveNow);
+
+/* ---------- Start ---------- */
+async function boot(){
+  const slow = setTimeout(render, 600);   // „Lade …“ nur zeigen, wenn es spürbar dauert
+  try {
+    const d = await loadDb();
+    if (d.state) S = normalize({...d.state, workouts:d.workouts});
+    else {
+      // Erster Start mit IndexedDB: Daten des Prototyps aus localStorage übernehmen (Migration), sonst Startdaten anlegen.
+      // Der alte localStorage-Eintrag bleibt als Sicherheitskopie liegen und wird danach nicht mehr gelesen.
+      const old = loadLegacy();
+      S = normalize(old);
+      pending.state = true; S.workouts.forEach(w => pending.put.add(w.id));
+      if (await flush() && old) toast("Bisherige Daten übernommen");
+    }
+  } catch(e){
+    console.error("Start fehlgeschlagen:", e); closeDb();
+    // Speicher in diesem Kontext grundsätzlich gesperrt (z. B. Datei-Vorschau ohne eigene Adresse): ohne Speichern weiterarbeiten.
+    // Bei allen anderen Fehlern könnten Daten vorhanden sein – dann anhalten, statt mit leerem Stand zu starten.
+    if (!window.indexedDB || (e && e.name === "SecurityError")){ S = normalize(loadLegacy()); store.status = "off"; }
+    else bootErr = e;
+  }
+  clearTimeout(slow);
+  render();
+  // Den Browser bitten, die Daten nicht von sich aus zu löschen (klappt v. a. bei installierter App).
+  if (S && store.status !== "off" && navigator.storage && navigator.storage.persist){
+    navigator.storage.persist().then(ok => { store.persisted = ok; if (ok && ui.tab === "verlauf" && !ui.sheet) render(); }, () => {});
+  }
+}
+boot();
+
+/* ---------- Service Worker (Offline-Betrieb; läuft nur über HTTPS oder localhost) ---------- */
+if ("serviceWorker" in navigator){
+  navigator.serviceWorker.addEventListener("message", e => {
+    if (e.data && e.data.type === "update") toast("Neue Version bereit – zum Laden tippen", "reload");
+  });
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(e => console.warn("Service Worker nicht aktiv:", e)));
+}
+</script>
+</body>
+</html>

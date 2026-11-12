@@ -1,0 +1,37 @@
+# Trainingslog – persönliche Fitness-App (PWA)
+
+## Ziel
+Ein Trainings-Tracker nur für mich, auf dem iPhone. Er soll als Web-App (PWA) laufen, die ich in Safari über „Teilen → Zum Home-Bildschirm“ installiere. Kein Backend, kein Login, keine Cloud-Datenbank.
+
+## Aktueller Stand
+- `index.html` enthält die ganze App: HTML, CSS und JavaScript in einer Datei, ohne Framework. Ursprünglich als Claude-Artifact gebaut; der Code für die Artifact-Umgebung (Claude-Konto, Downloads) ist entfernt.
+- PWA-Dateien: `manifest.webmanifest`, `sw.js` (Service Worker) und `icons/` (192 px, 512 px, `apple-touch-icon.png` mit 180×180).
+- Funktionen:
+  - Übungen mit Kategorien und Erfassungsart (Kraft: kg × Wdh, Ausdauer: min + km, nur Zeit)
+  - Vorlagen (Push, Pull, Legs, Ausdauer, Padel), mit einem Tipp startbar
+  - Tracker: „Letztes Mal“-Anzeige pro Übung, Felder mit den Werten vom letzten Mal vorausgefüllt
+  - Automatischer Pausen-Timer nach jedem abgehakten Kraft-Satz (−15/+15/Weiter, Piepton)
+  - Verlauf, Einstellung der Pausendauer, Backup als JSON, Export als CSV, Import
+- Datenhaltung: IndexedDB, Datenbank `trainingslog` (Schema-Version 1). Der Store `meta` hält einen Eintrag `state` (Übungen, Vorlagen, Einstellungen, laufendes Training), der Store `workouts` einen Eintrag pro gespeichertem Training. Im Arbeitsspeicher und im Backup gilt weiter das Datenformat v1 des Prototyps, alte Backups bleiben importierbar.
+- Migration: Findet die App beim Start keine Daten in IndexedDB, übernimmt sie den alten `localStorage`-Eintrag `trainingslog-v1`. Der Eintrag bleibt als Sicherheitskopie liegen und wird danach nicht mehr gelesen.
+- Offline: `sw.js` liefert die App-Dateien aus dem Cache und frischt ihn im Hintergrund auf. Eine geänderte `index.html` ist dadurch erst beim nächsten Öffnen aktiv; die App zeigt dann den Hinweis „Neue Version bereit“. Eine Versionsnummer muss dafür nicht gepflegt werden.
+- Export (JSON, CSV): auf dem Handy über das Teilen-Menü (Web Share API), sonst als Datei-Download. Wo beides nicht geht, zeigt die App den Text zum Kopieren an.
+
+## Lokal testen
+- Im Projektordner `python -m http.server 8080` starten und `http://localhost:8080` öffnen.
+- Der Service Worker läuft nur über `localhost` oder HTTPS, also nicht bei `file://` und nicht über die IP-Adresse im WLAN.
+- Wo der Browser keinen Speicher zulässt (z. B. in einer Datei-Vorschau), startet die App im Vorschau-Modus und speichert nichts.
+
+## Nächste Schritte
+1. Erledigt: Aus dem Prototyp eine echte PWA machen: `manifest.webmanifest`, App-Icons (inkl. `apple-touch-icon` 180×180), Service Worker für den Offline-Betrieb.
+2. Erledigt: Speicherung auf IndexedDB umstellen, weil das robuster ist als localStorage. Das Backup-Format beibehalten, damit alte Backups aus dem Prototyp importierbar bleiben.
+3. Erledigt: Export als echter Datei-Download oder über die Web Share API (Teilen-Menü auf dem iPhone).
+4. Hosting über GitHub Pages, da Service Worker HTTPS brauchen.
+
+## Konventionen
+- Vanilla JS ohne Build-Tools, solange das Projekt überschaubar bleibt.
+- UI-Texte auf Deutsch.
+- Mobile-first: große Tap-Flächen, wenig Klicks während des Trainings, dunkles Design.
+- Bei Änderungen am Datenformat immer eine Migration für alte Daten und Backups mitliefern.
+- Bei Änderungen am Datenbank-Schema `DB_VERSION` erhöhen und in `onupgradeneeded` einen weiteren Schritt ergänzen.
+- Dateien, die offline gebraucht werden, in `PRECACHE` in `sw.js` eintragen.

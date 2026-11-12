@@ -1,0 +1,2 @@
+# Textdateien überall mit LF-Zeilenenden, damit Git unter Windows nichts umschreibt
+* text=auto eol=lf

@@ -22,11 +22,17 @@ Ein Trainings-Tracker nur für mich, auf dem iPhone. Er soll als Web-App (PWA) l
 - Der Service Worker läuft nur über `localhost` oder HTTPS, also nicht bei `file://` und nicht über die IP-Adresse im WLAN.
 - Wo der Browser keinen Speicher zulässt (z. B. in einer Datei-Vorschau), startet die App im Vorschau-Modus und speichert nichts.
 
+## Veröffentlichung
+- Repository: https://github.com/MrLeeDota/trainingslog (öffentlich), Zweig `main`.
+- Die App läuft über GitHub Pages unter https://mrleedota.github.io/trainingslog/. Pages liefert den Zweig `main` aus dem Hauptordner aus; `.nojekyll` schaltet die Jekyll-Verarbeitung ab.
+- Änderungen veröffentlichen: committen und `git push`. Nach wenigen Minuten ist die neue Version online; in der installierten App erscheint sie beim nächsten Öffnen mit dem Hinweis „Neue Version bereit“.
+- Alle Pfade in `index.html`, `manifest.webmanifest` und `sw.js` sind relativ, weil die App in einem Unterordner liegt. Das so beibehalten.
+
 ## Nächste Schritte
 1. Erledigt: Aus dem Prototyp eine echte PWA machen: `manifest.webmanifest`, App-Icons (inkl. `apple-touch-icon` 180×180), Service Worker für den Offline-Betrieb.
 2. Erledigt: Speicherung auf IndexedDB umstellen, weil das robuster ist als localStorage. Das Backup-Format beibehalten, damit alte Backups aus dem Prototyp importierbar bleiben.
 3. Erledigt: Export als echter Datei-Download oder über die Web Share API (Teilen-Menü auf dem iPhone).
-4. Hosting über GitHub Pages, da Service Worker HTTPS brauchen.
+4. Erledigt: Hosting über GitHub Pages, da Service Worker HTTPS brauchen.
 
 ## Konventionen
 - Vanilla JS ohne Build-Tools, solange das Projekt überschaubar bleibt.

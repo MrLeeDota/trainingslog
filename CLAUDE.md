@@ -27,6 +27,7 @@ Ein Trainings-Tracker nur für mich, auf dem iPhone. Er soll als Web-App (PWA) l
 - Im Projektordner `python -m http.server 8080` starten und `http://localhost:8080` öffnen.
 - Der Service Worker läuft nur über `localhost` oder HTTPS, also nicht bei `file://` und nicht über die IP-Adresse im WLAN.
 - Wo der Browser keinen Speicher zulässt (z. B. in einer Datei-Vorschau), startet die App im Vorschau-Modus und speichert nichts.
+- Handy-Rahmen für Tests in echter iPhone-Breite: `http://localhost:8080/.claude/handy.html` (390 × 844, mit `?w=375&h=667` wie ein iPhone SE). Die Seite gehört nicht zur App; sie bietet Hilfen für Tests per JavaScript (`appEval`, `pos`, `posText`), beschrieben im Kommentar oben in der Datei.
 
 ## Veröffentlichung
 - Repository: https://github.com/MrLeeDota/trainingslog (öffentlich), Zweig `main`.

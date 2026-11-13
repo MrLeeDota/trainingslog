@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handy-Rahmen</title>
+<!--
+  Testseite für den Agenten gym-tester (nicht Teil der App).
+  Zeigt die App in einem Rahmen mit echter iPhone-Breite, weil sich das Chrome-Fenster nicht verlässlich verkleinern lässt.
+  Der Rahmen wird vergrößert dargestellt, damit er auf Screenshots gut lesbar ist; die App selbst sieht 390 px Breite.
+
+  Aufruf:  http://localhost:8080/.claude/handy.html
+  Optionen: ?w=375&h=667 (iPhone SE), Standard 390 × 844 (iPhone 12 bis 16); ?zoom=1.5 feste Vergrößerung statt automatisch.
+
+  Hilfen für javascript_tool (die Chrome-Werkzeuge find und read_page sehen nicht in den Rahmen):
+    app()                → window der App, z. B. app().document
+    appEval("S.active")  → Ausdruck im Kontext der App auswerten (S, ui, progress() usw. sind nur so erreichbar)
+    pos('[data-act="start"]', 0)  → Mittelpunkt des n-ten passenden Elements in Seiten-Pixeln {x, y, viewport}
+    posText("Starten", 0)        → dasselbe für ein Element mit diesem sichtbaren Text
+  Ein Screenshot meldet seinen Koordinatenrahmen (z. B. 1531x784). Klick-Koordinate = Seiten-Pixel × (Rahmenbreite / viewport).
+-->
+<style>
+  html,body{margin:0;min-height:100%;background:#1e1e24;color:#c9c9d1;font:16px/1.4 system-ui,sans-serif}
+  body{display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 16px 16px;box-sizing:border-box}
+  #wrap{position:relative;flex:none}
+  iframe{position:absolute;left:0;top:0;border:0;border-radius:28px;background:#000;transform-origin:0 0;
+    box-shadow:0 0 0 10px #000,0 0 0 11px #444,0 20px 50px rgba(0,0,0,.6)}
+</style>
+</head>
+<body>
+<div id="info"></div>
+<div id="wrap"><iframe id="app" title="Trainingslog"></iframe></div>
+<script>
+  "use strict";
+  const q = new URLSearchParams(location.search);
+  const w = Math.max(320, Math.min(1024, +q.get("w") || 390)), h = Math.max(480, Math.min(1400, +q.get("h") || 844));
+  const frame = document.getElementById("app"), wrap = document.getElementById("wrap");
+  let k = 1;
+  function layout(){
+    // Vergrößern, bis der Rahmen die Fensterhöhe füllt (höchstens 2,5-fach), oder fester Wert aus ?zoom=
+    k = +q.get("zoom") || Math.max(1, Math.min(2.5, (innerHeight - 70) / h));
+    frame.width = w; frame.height = h; frame.style.transform = `scale(${k})`;
+    wrap.style.width = `${w * k}px`; wrap.style.height = `${h * k}px`;
+    info();
+  }
+  function info(){
+    let inner = "–";
+    try { inner = app().innerWidth; } catch(e){}
+    document.getElementById("info").textContent = `App im Rahmen ${w} × ${h}, Breite in der App: ${inner} px, Vergrößerung ${k.toFixed(2)}×`;
+  }
+  window.app = () => frame.contentWindow;
+  window.appEval = code => frame.contentWindow.eval(code);
+  // Mittelpunkt eines Elements der App in Seiten-Pixeln dieser Testseite
+  function center(el){
+    if (!el) return null;
+    const r = el.getBoundingClientRect(), f = frame.getBoundingClientRect();
+    return {x: Math.round(f.left + (r.left + r.width / 2) * k), y: Math.round(f.top + (r.top + r.height / 2) * k), viewport: innerWidth,
+            sichtbar: r.bottom > 0 && r.top < h && r.width > 0};
+  }
+  window.pos = (selector, n = 0) => center(app().document.querySelectorAll(selector)[n]);
+  window.posText = (text, n = 0) => {
+    const els = [...app().document.querySelectorAll("button, a, input, select, label, [data-act], span, b, div")]
+      .filter(e => e.offsetParent !== null && e.textContent.trim() === text);
+    return center(els[n]);
+  };
+  frame.addEventListener("load", info);
+  addEventListener("resize", layout);
+  layout();
+  frame.src = new URL("../", location.href).href;   // die App aus dem Projektordner, gleicher Server
+</script>
+</body>
+</html>

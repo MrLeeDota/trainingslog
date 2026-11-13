@@ -34,7 +34,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
     repeating-conic-gradient(from 0deg at 50% -18%,rgba(255,255,255,.04) 0deg 1.5deg,transparent 1.5deg 6deg);
   -webkit-mask-image:linear-gradient(#000,transparent 72%);mask-image:linear-gradient(#000,transparent 72%)}
 main{padding:12px 16px calc(170px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto}
-h1,h2,.ex-name,.ttime,.num,.tpl .t,.tpl .go,.sheet-head b,.hero-text b,button.primary{font-family:var(--display);font-stretch:condensed;font-style:italic;font-weight:900}
+h1,h2,.ex-name,.ttime,.num,.tpl .t,.tpl .go,.sheet-head b,.hero-text b,.lvl b,.stat b,.gain b,.levelup,button.primary{font-family:var(--display);font-stretch:condensed;font-style:italic;font-weight:900}
 h1{width:fit-content;max-width:100%;font-size:44px;line-height:.98;margin:6px 0 16px;padding:.12em .14em 0 0; /* Platz für Umlautpunkte und schräge Buchstaben */text-transform:uppercase;letter-spacing:.01em;
   color:var(--ki);background:linear-gradient(180deg,#fff3a6 0%,var(--ki) 36%,var(--accent) 72%,var(--accent-deep) 100%);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
@@ -80,6 +80,29 @@ select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),
 .orbs svg.lit{filter:drop-shadow(0 0 6px rgba(255,160,40,.8))}
 .hero-text{position:relative;z-index:1;flex-wrap:wrap;gap:2px 12px;margin-top:12px}
 .hero-text b{font-size:24px;color:var(--ki);margin-right:2px}
+button.hero{display:block;width:100%;text-align:left}
+.lvl{position:relative;z-index:1;flex-wrap:wrap;gap:2px 12px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.lvl b{font-size:21px;color:var(--ki);margin-right:2px}
+.xp{position:relative;z-index:1;display:block;height:10px;margin:8px 3px 0;background:var(--well);border:1px solid var(--line);border-radius:3px;overflow:hidden;transform:skewX(-16deg)}
+.xp i{display:block;height:100%;background:linear-gradient(90deg,var(--accent-deep),var(--accent) 40%,var(--ki))}
+.hero-foot{position:relative;z-index:1;margin-top:9px;font-size:13px}
+
+/* Fortschritt und Belohnung nach dem Training */
+.lvl-box .lvl{border-top:0;margin-top:4px;padding-top:0}
+.lvl-box .muted{display:block;margin-top:8px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.stat{background:var(--well);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font-size:22px;color:var(--ki)}
+.stat span{color:var(--muted);font-size:13px}
+.badge{gap:12px}
+.badge svg{flex:none;width:36px;height:36px}
+.badge svg.lit{filter:drop-shadow(0 0 5px rgba(255,160,40,.7))}
+.badge b,.badge .muted{display:block}
+.badge.off b{color:var(--muted)}
+.gain{text-align:center;margin:8px 0 2px}
+.gain b{display:block;font-size:64px;line-height:1;color:var(--ki);filter:drop-shadow(0 3px 0 var(--ink)) drop-shadow(0 0 18px rgba(255,212,59,.5))}
+.gain span{color:var(--muted)}
+.levelup{text-align:center;color:var(--accent);font-size:20px;margin:10px 0 0}
 .tpl{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;gap:3px;width:100%;text-align:left;background:var(--card);
   padding:14px 16px 14px 24px;margin-bottom:12px;border:2px solid var(--ink);border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 4px 0 var(--ink)}
 .tpl:active{box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 2px 0 var(--ink)}
@@ -451,7 +474,85 @@ function toast(msg, act){
   toastT = setTimeout(() => t.classList.remove("show"), act ? 10000 : 2200);
 }
 
+/* ---------- Fortschritt (Spielelemente) ----------
+   Kampfkraft, Stufe, Serie, Rekorde und Erfolge werden bei jedem Anzeigen aus den gespeicherten
+   Trainings berechnet. Nichts davon wird gespeichert, das Datenformat bleibt unverändert. */
+// Kampfkraft für einen Satz: Gewicht × Wdh, Übungen ohne Gewicht zählen wie 30 kg; bei Ausdauer Minuten und Kilometer.
+function setPower(type, s){
+  const a = num(s.a), b = num(s.b);
+  return Math.round(type === "kraft" ? (a > 0 ? a * b / 10 + b : b * 4) : type === "ausdauer" ? a * 10 + b * 20 : a * 10);
+}
+// Woran ein Rekord gemessen wird: [Einheit, Wert]
+function setMark(type, s){
+  const a = num(s.a), b = num(s.b);
+  return type === "kraft" ? (a > 0 ? ["kg", a] : ["Wdh", b]) : type === "ausdauer" && b > 0 ? ["km", b] : ["min", a];
+}
+// Kampfkraft und neue Rekorde eines Trainings, gemessen an den bisherigen Bestwerten. bests wird dabei fortgeschrieben.
+function workoutGain(w, bests){
+  let power = 0, volume = 0; const records = [];
+  w.entries.forEach(en => {
+    const type = exType(en.exId), b = bests[en.exId] || (bests[en.exId] = {}), top = {};
+    en.sets.forEach(s => {
+      power += setPower(type, s);
+      if (type === "kraft") volume += num(s.a) * num(s.b);
+      const [unit, v] = setMark(type, s);
+      if (v > (top[unit] || 0)) top[unit] = v;
+    });
+    Object.keys(top).forEach(unit => {
+      if (b[unit] > 0 && top[unit] > b[unit]) records.push({name:exName(en.exId), unit, v:top[unit], old:b[unit]});   // der erste Wert einer Übung ist noch kein Rekord
+      if (top[unit] > (b[unit] || 0)) b[unit] = top[unit];
+    });
+  });
+  return {power, volume, records};
+}
+const WEEK = 7 * 864e5;
+const weekStart = t => { const d = new Date(t); d.setHours(0,0,0,0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d.getTime(); };   // Montag der Woche
+// Gesamtstand über alle Trainings (list ist nach Datum aufsteigend sortiert).
+function progress(list){
+  const p = {n:list.length, power:0, sets:0, km:0, records:0, maxVolume:0, bests:{}, exercises:new Set(), streak:0, bestStreak:0, seven:false};
+  let run = 0, prevWeek = null;
+  list.forEach((w, i) => {
+    const g = workoutGain(w, p.bests);
+    p.power += g.power; p.records += g.records.length; p.maxVolume = Math.max(p.maxVolume, g.volume);
+    w.entries.forEach(en => { p.exercises.add(en.exId); p.sets += en.sets.length; if (exType(en.exId) === "ausdauer") en.sets.forEach(s => p.km += num(s.b)); });
+    if (i >= 6 && w.date - list[i - 6].date < WEEK) p.seven = true;
+    const wk = weekStart(w.date);
+    if (wk !== prevWeek){ run = prevWeek !== null && Math.round((wk - prevWeek) / WEEK) === 1 ? run + 1 : 1; prevWeek = wk; p.bestStreak = Math.max(p.bestStreak, run); }
+  });
+  // Die Serie läuft weiter, solange diese oder die letzte Woche ein Training hat.
+  if (prevWeek !== null && Math.round((weekStart(Date.now()) - prevWeek) / WEEK) <= 1) p.streak = run;
+  p.level = Math.floor(Math.sqrt(p.power / 400)) + 1;
+  return p;
+}
+const levelFloor = l => 400 * (l - 1) ** 2;   // Kampfkraft, bei der Stufe l beginnt
+const RANKS = [[20,"Legende"],[15,"Großmeister"],[10,"Meister"],[7,"Elitekämpfer"],[4,"Kämpfer"],[2,"Schüler"],[1,"Neuling"]];
+const rankOf = l => RANKS.find(r => l >= r[0])[1];
+const fmtInt = n => Math.round(n).toLocaleString("de-DE");
+const weeks = n => n === 1 ? "1 Woche" : `${n} Wochen`;
+// Erfolge: [Name, Beschreibung, Bedingung auf dem Gesamtstand]
+const ACHIEVEMENTS = [
+  ["Erster Schritt", "Das erste Training gespeichert", p => p.n >= 1],
+  ["Dranbleiber", "10 Trainings gespeichert", p => p.n >= 10],
+  ["Stammgast", "50 Trainings gespeichert", p => p.n >= 50],
+  ["Hundert voll", "100 Trainings gespeichert", p => p.n >= 100],
+  ["Alle sieben", "7 Trainings innerhalb von 7 Tagen", p => p.seven],
+  ["Monatsserie", "4 Wochen in Folge trainiert", p => p.bestStreak >= 4],
+  ["Vierteljahr", "12 Wochen in Folge trainiert", p => p.bestStreak >= 12],
+  ["Über 9000", "Mehr als 9000 Kampfkraft gesammelt", p => p.power > 9000],
+  ["Rekordjäger", "10 eigene Bestwerte übertroffen", p => p.records >= 10],
+  ["Schwergewicht", "10.000 kg in einem Training bewegt", p => p.maxVolume >= 10000],
+  ["Vielseitig", "10 verschiedene Übungen trainiert", p => p.exercises.size >= 10],
+  ["Marathon", "Insgesamt 42 km Ausdauer", p => p.km >= 42]
+];
+
 /* ---------- Views ---------- */
+// Stufe, Kampfkraft und Balken bis zur nächsten Stufe
+function vLevel(p){
+  const from = levelFloor(p.level), to = levelFloor(p.level + 1);
+  return `<span class="row between lvl"><span><b>Stufe ${p.level}</b> ${rankOf(p.level)}</span><span><b>${fmtInt(p.power)}</b> Kampfkraft</span></span>
+    <span class="xp"><i style="width:${Math.round(100 * (p.power - from) / (to - from))}%"></i></span>`;
+}
+const vBadge = (a, got) => `<div class="li row badge${got ? "" : " off"}">${orb(1, got)}<span class="grow"><b>${a[0]}</b><span class="muted">${a[1]}</span></span></div>`;
 // Sternkugel als SVG mit n Sternen (1–7). lit: gesammelt und leuchtend, sonst versteinert.
 const starPath = R => Array.from({length:10}, (_, i) => { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? R * .42 : R; return (i ? "L" : "M") + (Math.cos(a) * r).toFixed(2) + " " + (Math.sin(a) * r).toFixed(2); }).join("") + "Z";
 function orb(n, lit){
@@ -468,15 +569,17 @@ function vTraining(){
   const a = S.active;
   if (!a){
     const now = Date.now(), wk = S.workouts.filter(w => now - w.date < 7 * 864e5).length, last = S.workouts[S.workouts.length - 1];
-    const ago = last ? relDay(last.date) : "";
+    const ago = last ? relDay(last.date) : "", p = progress(S.workouts);
     return `<h1>Training</h1>
-    <div class="hero${wk >= 7 ? " full" : ""}">
-      <div class="orbs" role="img" aria-label="${Math.min(wk, 7)} von 7 Sternkugeln gesammelt">${[1,2,3,4,5,6,7].map(n => orb(n, n <= wk)).join("")}</div>
-      <div class="row between hero-text">
+    <button class="hero${wk >= 7 ? " full" : ""}" data-act="progress">
+      <span class="orbs" role="img" aria-label="${Math.min(wk, 7)} von 7 Sternkugeln gesammelt">${[1,2,3,4,5,6,7].map(n => orb(n, n <= wk)).join("")}</span>
+      <span class="row between hero-text">
         <span><b>${wk}</b> ${wk === 1 ? "Training" : "Trainings"} in 7 Tagen</span>
         <span class="muted">${last ? `Zuletzt ${esc(last.name)}, ${ago[0].toLowerCase() + ago.slice(1)}` : "Sammle deine erste Sternkugel"}</span>
-      </div>
-    </div>
+      </span>
+      ${vLevel(p)}
+      <span class="row between muted hero-foot"><span>${p.streak ? `Serie: ${weeks(p.streak)}` : "Noch keine Serie"}</span><span>Erfolge ${ACHIEVEMENTS.filter(a => a[2](p)).length}/${ACHIEVEMENTS.length} ›</span></span>
+    </button>
     <h2>Vorlage starten</h2>
     ${S.templates.map(t => `<button class="tpl" data-act="start" data-id="${t.id}">
       <span class="t">${esc(t.name)}</span>
@@ -597,6 +700,31 @@ function vSheet(s){
   if (s.kind === "text"){
     return `<div class="sheet-head"><button class="ghost" data-act="close">Fertig</button><b>${esc(s.title)}</b><button class="ghost accent" data-act="copy-text">Kopieren</button></div>
     <p class="muted">${esc(s.hint)}</p><textarea id="text-out" readonly>${esc(s.text)}</textarea>`;
+  }
+  if (s.kind === "progress"){
+    const p = progress(S.workouts), got = ACHIEVEMENTS.filter(a => a[2](p));
+    return `<div class="sheet-head"><button class="ghost" data-act="close">Fertig</button><b>Fortschritt</b><span style="width:60px"></span></div>
+    <div class="lvl-box">${vLevel(p)}<span class="muted">Noch ${fmtInt(levelFloor(p.level + 1) - p.power)} Kampfkraft bis Stufe ${p.level + 1}: ${rankOf(p.level + 1)}</span></div>
+    <div class="stats">
+      <div class="stat"><b>${fmtInt(p.n)}</b><span>Trainings</span></div>
+      <div class="stat"><b>${fmtInt(p.sets)}</b><span>Sätze</span></div>
+      <div class="stat"><b>${weeks(p.streak)}</b><span>Serie, längste: ${weeks(p.bestStreak)}</span></div>
+      <div class="stat"><b>${fmtInt(p.records)}</b><span>Rekorde</span></div>
+    </div>
+    <h2>Erfolge (${got.length} von ${ACHIEVEMENTS.length})</h2>
+    <div class="list" style="padding:0">${ACHIEVEMENTS.map(a => vBadge(a, got.includes(a))).join("")}</div>
+    <p class="muted" style="margin-top:14px">Kampfkraft gibt es für jeden gespeicherten Satz. Mehr Gewicht, Wiederholungen, Minuten oder Kilometer bringen mehr. Die Serie zählt die Wochen in Folge mit mindestens einem Training.</p>`;
+  }
+  if (s.kind === "result"){
+    return `<div class="sheet-head"><span style="width:60px"></span><b>Training geschafft</b><button class="ghost accent" data-act="close">Weiter</button></div>
+    <div class="gain"><b>+${fmtInt(s.power)}</b><span>Kampfkraft</span></div>
+    ${s.level ? `<p class="levelup">Stufe ${s.level} erreicht: ${rankOf(s.level)}</p>` : ""}
+    <div class="lvl-box">${vLevel(progress(S.workouts))}</div>
+    ${s.records.length ? `<h2>${s.records.length === 1 ? "Neuer Rekord" : "Neue Rekorde"}</h2>
+      <div class="list" style="padding:0">${s.records.map(r => `<div class="li row between"><span>${esc(r.name)}</span><span><b>${fmtNum(r.v)} ${r.unit}</b> <span class="muted">vorher ${fmtNum(r.old)}</span></span></div>`).join("")}</div>` : ""}
+    ${s.earned.length ? `<h2>${s.earned.length === 1 ? "Neuer Erfolg" : "Neue Erfolge"}</h2>
+      <div class="list" style="padding:0">${s.earned.map(a => vBadge(a, true)).join("")}</div>` : ""}
+    <button class="block primary" style="margin-top:18px" data-act="close">Weiter</button>`;
   }
   if (s.kind === "import"){
     return `<div class="sheet-head"><button class="ghost" data-act="close">Abbrechen</button><b>Backup wiederherstellen</b><span style="width:70px"></span></div>
@@ -727,7 +855,11 @@ const actions = {
     const open = a.entries.reduce((n, e) => n + e.sets.filter(s => !s.done).length, 0);
     if (open && !(await ask(`${open} ${open === 1 ? "Satz ist" : "Sätze sind"} nicht abgehakt und werden nicht gespeichert. Trotzdem beenden?`, "Beenden"))) return;
     const w = {id:a.id, date:a.date, end:Date.now(), name:a.name, entries};
+    const before = progress(S.workouts);
     S.workouts.push(w); S.active = null; stopTimer(); save({put:w.id});
+    // Belohnung: was dieses Training gebracht hat
+    const after = progress(S.workouts), gain = workoutGain(w, before.bests);
+    ui.sheet = {kind:"result", power:gain.power, records:gain.records, level:after.level > before.level ? after.level : 0, earned:ACHIEVEMENTS.filter(x => x[2](after) && !x[2](before))};
     ui.tab = "verlauf"; ui.open = w.id; render(); window.scrollTo(0, 0); toast(store.status === "off" ? "Training beendet – nicht gespeichert" : "Training gespeichert 💪");
   },
   check: el => {
@@ -735,6 +867,12 @@ const actions = {
     s.done = !s.done; save();
     if (s.done && exType(en.exId) === "kraft") startTimer(S.settings.rest);
     render();
+    if (s.done){
+      // Sofort melden, wenn der Satz den bisherigen Bestwert der Übung übertrifft (und nicht schon ein früherer Satz heute).
+      const type = exType(en.exId), [unit, v] = setMark(type, s), best = (progress(S.workouts).bests[en.exId] || {})[unit] || 0;
+      const today = Math.max(0, ...en.sets.filter(x => x !== s && x.done).map(x => { const m = setMark(type, x); return m[0] === unit ? m[1] : 0; }));
+      if (best > 0 && v > best && v > today) toast(`Neuer Rekord: ${fmtNum(v)} ${unit} bei ${exName(en.exId)}`);
+    }
   },
   "add-set": el => { const en = S.active.entries[+el.dataset.i], p = en.sets[en.sets.length - 1] || {a:"", b:""}; en.sets.push({a:p.a, b:p.b, done:false}); save(); render(); },
   "del-set": el => { S.active.entries[+el.dataset.i].sets.pop(); save(); render(); },
@@ -802,6 +940,7 @@ const actions = {
   "t-skip": () => stopTimer(),
   "dlg-yes": () => closeDlg(true),
   "dlg-no": () => closeDlg(false),
+  progress: () => { ui.sheet = {kind:"progress"}; render(); },
   reload: () => { saveNow(); location.reload(); }
 };
 

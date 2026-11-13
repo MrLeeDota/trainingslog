@@ -36,6 +36,11 @@ Herkunft: Hevy (angeheftete Übungsnotizen, die bei jedem Training wieder ersche
 
 Herkunft: JEFIT (Kalender als Heatmap für Regelmäßigkeit, Volumen pro Muskelgruppe), Strava (Trainingslog mit Wochen- und Monatssummen), Apple Fitness (Trends: letzte 90 Tage gegen die letzten 365). Skizze: Im Fortschritt-Sheet ein Monatsraster, Trainingstage eingefärbt; darunter „diese Woche gegen Durchschnitt der letzten 4 Wochen“ (Trainings, Sätze, km) und die Sätze pro Kategorie der letzten 7 Tage. Alles wird wie die Spielwerte aus `S.workouts` berechnet.
 
+### 11. Übungsbibliothek in der App
+- Nutzen und Aufwand: noch nicht bewertet · Datenformat: noch offen
+
+Herkunft: eigener Vorschlag (13.11.2026). Beim Anlegen einer Übung oder Vorlage aus `bibliothek/` auswählen statt alles selbst einzutippen. Eigene Übungen und Daten bleiben unverändert.
+
 ## Angenommen
 
 Noch nichts.

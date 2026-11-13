@@ -40,12 +40,14 @@ Ein Trainings-Tracker nur für mich, auf dem iPhone. Er soll als Web-App (PWA) l
 - Alle Pfade in `index.html`, `manifest.webmanifest` und `sw.js` sind relativ, weil die App in einem Unterordner liegt. Das so beibehalten.
 
 ## Agenten
-In `.claude/agents/` liegen vier Subagenten. Sie liefern Ideen oder prüfen; umgesetzt wird immer in der Hauptsitzung, nicht von den Agenten.
+In `.claude/agents/` liegen fünf Subagenten. Sie liefern Ideen oder prüfen; umgesetzt wird immer in der Hauptsitzung, nicht von den Agenten.
 - Ideen für die Weiterentwicklung → `produkt-scout`. Er wertet `NOTIZEN.md` (meine Notizen aus dem Training) aus, recherchiert Vorbild-Apps und schreibt Vorschläge nach `IDEEN.md`.
 - Änderungen an Daten, Backup oder Import → `daten-waechter`. Er prüft den git diff auf Datenverlust.
 - Änderungen an Oberfläche oder Abläufen → `gym-tester`. Er spielt die App in Chrome auf `http://localhost:8080` im iPhone-Format durch, nie auf der Live-Seite.
 - Übungen, Vorlagen, Trainingslogik → `trainings-experte`. Er pflegt die Übungsbibliothek und Programm-Vorlagen in `bibliothek/` (Format in `bibliothek/README.md`), prüft fachliche Regeln wie Progression, 1RM-Schätzung, Pausen und Kampfkraft und wertet auf Wunsch ein Backup aus.
+- Wie gut ist eine vorhandene Funktion im Vergleich zu anderen Apps → `funktions-tester`. Er prüft pro Durchlauf eine Funktion im Handy-Rahmen und per Recherche (Strong, Hevy und eine dritte App), pflegt `VERGLEICH.md` und trägt höchstens 5 Verbesserungen in `IDEEN.md` ein, markiert mit „(aus Funktionsvergleich: …)“.
 - Ablauf: Idee in `IDEEN.md` nach „Angenommen“ verschieben → umsetzen → passende Agenten prüfen lassen → nach „Erledigt“ verschieben → committen und pushen.
+- Nach einer neuen Funktion: erst `gym-tester` (Fehler), dann `funktions-tester` (Vergleich und Verbesserungen).
 
 ## Nächste Schritte
 1. Erledigt: Aus dem Prototyp eine echte PWA machen: `manifest.webmanifest`, App-Icons (inkl. `apple-touch-icon` 180×180), Service Worker für den Offline-Betrieb.

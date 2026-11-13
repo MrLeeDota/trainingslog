@@ -38,7 +38,7 @@ Du startest ohne Gesprächsverlauf. Lies deshalb als Erstes `CLAUDE.md` im Proje
 
 ## Ergebnis
 
-- Schreibe höchstens 10 Ideen unter „Vorschläge“ in `IDEEN.md`, sortiert nach Nutzen im Verhältnis zum Aufwand, die beste zuerst. Ersetze dabei die bisherigen Vorschläge durch die neue, zusammengeführte Liste.
+- Schreibe höchstens 10 Ideen unter „Vorschläge“ in `IDEEN.md`, sortiert nach Nutzen im Verhältnis zum Aufwand, die beste zuerst. Ersetze dabei deine bisherigen Vorschläge durch die neue, zusammengeführte Liste. Einträge mit „(aus Funktionsvergleich: …)“ stammen vom Agenten `funktions-tester`: Lass sie stehen, wie sie sind, und zähl sie nicht zu deinen 10 Ideen. Neue Ideen bekommen die nächste freie Nummer (höchste Nummer in der ganzen Datei plus 1).
 - Je Idee: Titel, Nutzen, Aufwand, Datenformat (ja/nein), dann 2–3 Sätze mit der Herkunft (die Notiz mit Datum oder die Vorbild-App) und einer groben Umsetzungsskizze.
 - Schlage nichts erneut vor, was unter „Abgelehnt“ oder „Erledigt“ steht, und nichts, was schon unter „Angenommen“ steht. Die Abschnitte „Angenommen“, „Abgelehnt“ und „Erledigt“ änderst du nicht.
 - Fasse zum Schluss in deiner Antwort die Top 3 kurz zusammen, jeweils mit Nutzen und Aufwand, und nenne, wie viele Notizen du verarbeitet hast.

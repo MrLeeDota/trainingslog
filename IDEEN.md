@@ -6,16 +6,6 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 Erste Runde vom 13.11.2026. NOTIZEN.md war noch leer, die Ideen stammen aus der Recherche zu Strong, Hevy, JEFIT, Fitbod, Apple Fitness, Strava und Runna und aus dem Blick auf `index.html`. Sortiert nach Nutzen im Verhältnis zum Aufwand.
 
-### 3. Steigerungsvorschlag beim Gewicht
-- Nutzen: hoch · Aufwand: M · Datenformat: nein
-
-Herkunft: Fitbod erhöht Gewicht oder Wiederholungen automatisch, wenn die letzte Einheit gut lief; Hevy arbeitet mit Wiederholungsbereichen (z. B. 6–8). Skizze: Haben die letzten zwei Einheiten einer Kraftübung in allen Sätzen dasselbe Gewicht mit mindestens 10 Wdh, erscheint neben „Letztes Mal“ ein kleiner Knopf „Steigern: 62,5 kg“ (+2,5 kg); ein Tipp setzt das Gewicht in allen offenen Sätzen der Übung. Wer ihn ignoriert, trainiert wie bisher mit den vorausgefüllten Werten; wer steigern will, spart das Ändern jedes einzelnen kg-Felds. Schwelle und Schritt erst als feste Werte, einstellbar pro Übung wäre eine spätere Formatänderung.
-
-### 4. Fortschrittskurve pro Übung
-- Nutzen: hoch · Aufwand: M · Datenformat: nein
-
-Herkunft: Strong (Diagramme zu Volumen und 1RM, „Verlauf der besten Sätze“ im Pro-Abo), JEFIT (Diagramme pro Übung, 1RM über die Zeit). Skizze: Im Übungs-Sheet über „Letzte Einheiten“ eine kleine Inline-SVG-Linie aus `S.workouts`: bei Kraft das geschätzte Maximum pro Einheit (Epley: kg × (1 + Wdh/30)), bei Ausdauer das Tempo, bei „nur Zeit“ die Minuten. Rekorde und Kampfkraft bleiben wie sie sind, damit sich alte Spielwerte nicht nachträglich ändern.
-
 ### 5. „Zuletzt vor X Tagen“ an jeder Vorlage
 - Nutzen: mittel · Aufwand: S · Datenformat: nein
 
@@ -56,7 +46,19 @@ Noch nichts.
 
 ## Erledigt
 
-Umgesetzt am 13.11.2026:
+Umgesetzt am 13.11.2026 (zweite Runde):
+
+### 3. Steigerungsvorschlag beim Gewicht
+- Nutzen: hoch · Aufwand: M · Datenformat: nein
+
+Herkunft: Fitbod erhöht Gewicht oder Wiederholungen automatisch, wenn die letzte Einheit gut lief; Hevy arbeitet mit Wiederholungsbereichen (z. B. 6–8). Skizze: Haben die letzten zwei Einheiten einer Kraftübung in allen Sätzen dasselbe Gewicht mit mindestens 10 Wdh, erscheint neben „Letztes Mal“ ein kleiner Knopf „Steigern: 62,5 kg“ (+2,5 kg); ein Tipp setzt das Gewicht in allen offenen Sätzen der Übung. Wer ihn ignoriert, trainiert wie bisher mit den vorausgefüllten Werten; wer steigern will, spart das Ändern jedes einzelnen kg-Felds. Schwelle und Schritt erst als feste Werte, einstellbar pro Übung wäre eine spätere Formatänderung.
+
+### 4. Fortschrittskurve pro Übung
+- Nutzen: hoch · Aufwand: M · Datenformat: nein
+
+Herkunft: Strong (Diagramme zu Volumen und 1RM, „Verlauf der besten Sätze“ im Pro-Abo), JEFIT (Diagramme pro Übung, 1RM über die Zeit). Skizze: Im Übungs-Sheet über „Letzte Einheiten“ eine kleine Inline-SVG-Linie aus `S.workouts`: bei Kraft das geschätzte Maximum pro Einheit (Epley: kg × (1 + Wdh/30)), bei Ausdauer das Tempo, bei „nur Zeit“ die Minuten. Rekorde und Kampfkraft bleiben wie sie sind, damit sich alte Spielwerte nicht nachträglich ändern.
+
+Umgesetzt am 13.11.2026 (erste Runde):
 
 ### 1. Bildschirm bleibt während des Trainings an
 - Nutzen: hoch · Aufwand: S · Datenformat: nein

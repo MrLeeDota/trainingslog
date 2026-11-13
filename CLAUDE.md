@@ -10,6 +10,8 @@ Ein Trainings-Tracker nur für mich, auf dem iPhone. Er soll als Web-App (PWA) l
   - Übungen mit Kategorien und Erfassungsart (Kraft: kg × Wdh, Ausdauer: min + km, nur Zeit)
   - Vorlagen (Push, Pull, Legs, Ausdauer, Padel), mit einem Tipp startbar
   - Tracker: „Letztes Mal“-Anzeige pro Übung, Felder mit den Werten vom letzten Mal vorausgefüllt
+  - Steigerungsvorschlag: Wurden in den letzten zwei Einheiten einer Kraftübung alle Sätze mit demselben Gewicht und mindestens 10 Wdh geschafft, zeigt der Tracker „Steigern: +2,5 kg“; ein Tipp setzt das Gewicht in allen offenen Sätzen (`stepUp()`, Werte in `STEP_REPS` und `STEP_KG`).
+  - Fortschrittskurve im Übungs-Sheet ab zwei Einheiten (`vChart()`, `exSeries()`): Kraft als geschätztes Maximum für 1 Wdh nach Epley, ohne Gewicht die meisten Wdh, Ausdauer als Tempo, „nur Zeit“ als Minuten. Wird wie die Spielwerte nur berechnet.
   - Automatischer Pausen-Timer nach jedem abgehakten Kraft-Satz (−15/+15/Weiter, Piepton)
   - Verlauf, Einstellung der Pausendauer, Backup als JSON, Export als CSV, Import
   - Bildschirm bleibt an, solange ein Training läuft (`keepAwake()`, Screen Wake Lock; auf dem iPhone in der installierten App ab iOS 18.4)

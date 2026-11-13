@@ -116,6 +116,20 @@ button.hero{display:block;width:100%;text-align:left}
 /* Active workout */
 .ex-name{font-size:22px;line-height:1.1;letter-spacing:.01em}
 .last{font-size:13px;color:var(--scan);margin-top:4px}
+/* Steigerungsvorschlag: schräger Knopf in Gold wie die Energieanzeigen */
+button.step-up{margin-top:8px;padding:6px 14px 7px 12px;font-size:14px;font-weight:800;color:var(--accent-ink);border-radius:3px;transform:skewX(-10deg);
+  background:linear-gradient(180deg,#fff3a6,var(--ki) 55%,var(--accent));box-shadow:2px 2px 0 var(--ink),0 0 12px rgba(255,212,59,.4)}
+button.step-up:active{transform:skewX(-10deg) translateY(2px);box-shadow:0 0 0 var(--ink)}
+
+/* Fortschrittskurve im Übungs-Sheet */
+.chart{background:var(--well);border:1px solid var(--line);border-radius:12px;padding:10px 10px 8px}
+.chart svg{display:block;width:100%;height:auto;margin:8px 0 4px;overflow:visible}
+.chart-now{font-family:var(--display);font-stretch:condensed;font-style:italic;font-weight:900;font-size:20px;color:var(--ki)}
+.chart-line{fill:none;stroke:var(--ki);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.chart-best{stroke:var(--line);stroke-width:1;stroke-dasharray:4 4}
+.chart-dot{fill:var(--well);stroke:var(--ki);stroke-width:2}
+.chart-last{fill:var(--ki);stroke:var(--ink);stroke-width:1.5;filter:drop-shadow(0 0 5px rgba(255,212,59,.8))}
+.chart-foot{font-size:12px}
 .set{display:grid;gap:8px;align-items:center;margin-top:8px}
 .set.head{margin-top:12px}
 .set.head span{font-size:12px;font-weight:700;color:var(--muted);text-align:center}
@@ -318,6 +332,69 @@ function bestLabel(e){
   S.workouts.forEach(w => w.entries.forEach(en => { if (en.exId === e.id){ count++; en.sets.forEach(s => best = Math.max(best, num(s.a))); } }));
   if (!count) return "";
   return e.type === "kraft" && best > 0 ? `Best ${fmtNum(best)} kg` : `${count}×`;
+}
+
+/* Steigerungsvorschlag: Wurden in den letzten zwei Einheiten einer Kraftübung alle Sätze mit demselben Gewicht
+   und mindestens STEP_REPS Wiederholungen geschafft, schlägt die App STEP_KG mehr vor. Ergebnis: neues Gewicht oder null. */
+const STEP_REPS = 10, STEP_KG = 2.5;
+function stepUp(exId){
+  if (exType(exId) !== "kraft") return null;
+  const runs = [];
+  for (let k = S.workouts.length - 1; k >= 0 && runs.length < 2; k--){
+    const en = S.workouts[k].entries.find(e => e.exId === exId);
+    if (en && en.sets.length) runs.push(en.sets);
+  }
+  if (runs.length < 2) return null;
+  const kg = num(runs[0][0].a);
+  if (!(kg > 0)) return null;
+  return runs.every(sets => sets.every(s => num(s.a) === kg && num(s.b) >= STEP_REPS)) ? kg + STEP_KG : null;
+}
+
+/* Fortschrittskurve einer Übung: ein Wert pro Einheit.
+   Kraft: geschätztes Maximum für 1 Wdh nach Epley (kg × (1 + Wdh/30)), ohne Gewicht die meisten Wiederholungen;
+   Ausdauer: Tempo in min/km (kleiner ist besser); nur Zeit: Minuten der Einheit. */
+function exSeries(exId){
+  const type = exType(exId), pts = [], sum = (sets, f) => sets.reduce((t, s) => t + num(s[f]), 0);
+  const runs = S.workouts.map(w => ({date:w.date, sets:(w.entries.find(e => e.exId === exId) || {}).sets})).filter(r => r.sets && r.sets.length);
+  if (type === "kraft"){
+    const weighted = runs.some(r => r.sets.some(s => num(s.a) > 0));
+    const e1rm = s => num(s.b) > 1 ? num(s.a) * (1 + num(s.b) / 30) : num(s.a);
+    runs.forEach(r => {
+      const v = weighted ? Math.max(0, ...r.sets.filter(s => num(s.a) > 0 && num(s.b) > 0).map(e1rm)) : Math.max(0, ...r.sets.map(s => num(s.b)));
+      if (v > 0) pts.push({date:r.date, v});
+    });
+    return weighted ? {pts, label:"Geschätztes Maximum für 1 Wdh", fmt:v => `${fmtNum(Math.round(v * 2) / 2)} kg`}
+                    : {pts, label:"Meiste Wiederholungen in einem Satz", fmt:v => `${Math.round(v)} Wdh`};
+  }
+  if (type === "ausdauer"){
+    runs.forEach(r => { const min = sum(r.sets, "a"), km = sum(r.sets, "b"); if (min > 0 && km > 0) pts.push({date:r.date, v:min / km}); });
+    return {pts, label:"Tempo (oben ist schneller)", lowerIsBetter:true, fmt:v => { const s = Math.round(v * 60); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")} min/km`; }};
+  }
+  runs.forEach(r => { const min = sum(r.sets, "a"); if (min > 0) pts.push({date:r.date, v:min}); });
+  return {pts, label:"Minuten pro Einheit", fmt:v => `${fmtNum(v)} min`};
+}
+// Linie der letzten 20 Einheiten, gleichmäßig verteilt; oben ist immer besser. Ab zwei Einheiten.
+function vChart(exId){
+  const c = exSeries(exId), pts = c.pts.slice(-20);
+  if (pts.length < 2) return "";
+  const W = 320, H = 112, top = 10, bottom = 8, vals = pts.map(p => p.v);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if (hi - lo < 1e-6){ lo -= 1; hi += 1; }
+  const x = i => 6 + (W - 12) * i / (pts.length - 1);
+  const y = v => { const t = (v - lo) / (hi - lo); return top + (H - top - bottom) * (c.lowerIsBetter ? t : 1 - t); };
+  const line = pts.map((p, i) => `${x(i).toFixed(1)},${y(p.v).toFixed(1)}`).join(" ");
+  const best = c.lowerIsBetter ? Math.min(...vals) : Math.max(...vals), lastP = pts[pts.length - 1];
+  return `<div class="chart">
+    <div class="row between"><span class="muted">${c.label}</span><span class="chart-now">${c.fmt(lastP.v)}</span></div>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(c.label)} der letzten ${pts.length} Einheiten, zuletzt ${esc(c.fmt(lastP.v))}, Bestwert ${esc(c.fmt(best))}">
+      <defs><linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--ki);stop-opacity:.35"/><stop offset="1" style="stop-color:var(--ki);stop-opacity:0"/></linearGradient></defs>
+      <line class="chart-best" x1="0" x2="${W}" y1="${y(best).toFixed(1)}" y2="${y(best).toFixed(1)}"/>
+      <polygon fill="url(#chart-fill)" points="${x(0).toFixed(1)},${H} ${line} ${x(pts.length - 1).toFixed(1)},${H}"/>
+      <polyline class="chart-line" points="${line}"/>
+      ${pts.map((p, i) => `<circle class="${i === pts.length - 1 ? "chart-last" : "chart-dot"}" cx="${x(i).toFixed(1)}" cy="${y(p.v).toFixed(1)}" r="${i === pts.length - 1 ? 5 : 3}"/>`).join("")}
+    </svg>
+    <div class="row between muted chart-foot"><span>${fmtDate(pts[0].date)}</span><span>Bestwert ${c.fmt(best)}</span><span>${fmtDate(lastP.date)}</span></div>
+  </div>`;
 }
 
 /* ---------- Speicher (IndexedDB) ----------
@@ -608,10 +685,13 @@ function vEntry(en, i){
   const T = TYPES[ex.type] || TYPES.kraft;
   const last = lastFor(en.exId);
   const cols = `grid-template-columns:26px repeat(${T.f.length},1fr) 52px`;
+  // Steigerungsknopf nur, solange noch ein offener Satz unter dem vorgeschlagenen Gewicht liegt
+  const up = stepUp(en.exId), showUp = up && en.sets.some(s => !s.done && num(s.a) < up);
   return `<div class="card">
     <div class="row between" style="align-items:flex-start">
       <div class="grow"><div class="ex-name">${esc(ex.name)}</div>
-      <div class="last">${last ? `Letztes Mal (${fmtDate(last.date)}): ${esc(fmtSets(ex.type, last.sets))}` : `<span class="muted">Erstes Mal – leg los!</span>`}</div></div>
+      <div class="last">${last ? `Letztes Mal (${fmtDate(last.date)}): ${esc(fmtSets(ex.type, last.sets))}` : `<span class="muted">Erstes Mal – leg los!</span>`}</div>
+      ${showUp ? `<button class="step-up" data-act="step-up" data-i="${i}" aria-label="Gewicht in den offenen Sätzen auf ${fmtNum(up)} kg erhöhen">Steigern: ${fmtNum(up)} kg</button>` : ""}</div>
       <button class="ghost" data-act="del-entry" data-i="${i}" aria-label="Übung entfernen">✕</button>
     </div>
     <div class="set head" style="${cols}"><span>#</span>${T.f.map(f => `<span>${f[1]}</span>`).join("")}<span></span></div>
@@ -697,12 +777,14 @@ function vSheet(s){
   if (s.kind === "exercise"){
     const d = s.draft, cats = [...new Set(S.exercises.map(e => e.cat).filter(Boolean))].sort();
     const hist = d.isNew ? [] : S.workouts.filter(w => w.entries.some(e => e.exId === d.id)).slice(-10).reverse();
+    const chart = d.isNew ? "" : vChart(d.id);
     return `<div class="sheet-head"><button class="ghost" data-act="close">Abbrechen</button><b>${d.isNew ? "Neue Übung" : "Übung"}</b><button class="ghost accent" data-act="save-ex">Sichern</button></div>
     <label class="lbl">Name</label><input data-draft="name" value="${esc(d.name)}" placeholder="z. B. Bankdrücken" autocomplete="off">
     <label class="lbl">Kategorie</label><input data-draft="cat" list="cats" value="${esc(d.cat)}" placeholder="z. B. Brust" autocomplete="off">
     <datalist id="cats">${cats.map(c => `<option value="${esc(c)}">`).join("")}</datalist>
     <label class="lbl">Erfassung</label><select data-draft="type">${Object.entries(TYPES).map(([k, t]) => `<option value="${k}" ${d.type === k ? "selected" : ""}>${t.label}</option>`).join("")}</select>
-    ${d.isNew ? "" : `<h2>Letzte Einheiten</h2>
+    ${d.isNew ? "" : `${chart ? `<h2>Entwicklung</h2>${chart}` : ""}
+      <h2>Letzte Einheiten</h2>
       ${hist.length ? `<div class="list" style="padding:0">${hist.map(w => `<div class="li"><div class="muted">${fmtDate(w.date)} · ${esc(w.name)}</div><div>${esc(fmtSets(exType(d.id), w.entries.find(e => e.exId === d.id).sets))}</div></div>`).join("")}</div>` : `<p class="muted">Noch nicht trainiert.</p>`}
       <button class="block ghost danger" style="margin-top:14px" data-act="del-ex">Übung löschen</button>`}`;
   }
@@ -925,6 +1007,12 @@ const actions = {
       const today = Math.max(0, ...en.sets.filter(x => x !== s && x.done).map(x => { const m = setMark(type, x); return m[0] === unit ? m[1] : 0; }));
       if (best > 0 && v > best && v > today) toast(`Neuer Rekord: ${fmtNum(v)} ${unit} bei ${exName(en.exId)}`);
     }
+  },
+  "step-up": el => {
+    const en = S.active.entries[+el.dataset.i], up = stepUp(en.exId);
+    if (!up) return;
+    en.sets.forEach(s => { if (!s.done) s.a = fmtNum(up); });
+    save(); render();
   },
   "add-set": el => { const en = S.active.entries[+el.dataset.i], p = en.sets[en.sets.length - 1] || {a:"", b:""}; en.sets.push({a:p.a, b:p.b, done:false}); save(); render(); },
   "del-set": el => { S.active.entries[+el.dataset.i].sets.pop(); save(); render(); },

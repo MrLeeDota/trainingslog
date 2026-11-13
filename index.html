@@ -103,6 +103,8 @@ button.hero{display:block;width:100%;text-align:left}
 .gain b{display:block;font-size:64px;line-height:1;color:var(--ki);filter:drop-shadow(0 3px 0 var(--ink)) drop-shadow(0 0 18px rgba(255,212,59,.5))}
 .gain span{color:var(--muted)}
 .levelup{text-align:center;color:var(--accent);font-size:20px;margin:10px 0 0}
+.backup-due{margin-top:18px;padding:12px;border:2px solid #ffb341;border-radius:12px;background:rgba(255,179,65,.08)}
+.backup-due p{font-size:14px}
 .tpl{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;gap:3px;width:100%;text-align:left;background:var(--card);
   padding:14px 16px 14px 24px;margin-bottom:12px;border:2px solid var(--ink);border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 4px 0 var(--ink)}
 .tpl:active{box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 2px 0 var(--ink)}
@@ -259,6 +261,11 @@ function seed(){
   };
 }
 function loadLegacy(){ try { const s = localStorage.getItem(LEGACY_KEY); if (s) return JSON.parse(s); } catch(e){} return null; }
+// Optionales Feld lastBackup: nur eine gültige Zahl behalten, sonst gilt „noch kein Backup“.
+function cleanSettings(s){
+  if (!(Number.isFinite(s.lastBackup) && s.lastBackup > 0)) delete s.lastBackup;
+  return s;
+}
 function normalize(d){
   const b = seed();
   d = d && typeof d === "object" ? d : b;
@@ -269,7 +276,7 @@ function normalize(d){
     workouts:(Array.isArray(d.workouts) ? d.workouts : []).filter(w => w && w.id).sort((x,y) => x.date - y.date),
     deleted:Array.isArray(d.deleted) ? d.deleted : [],
     active:d.active || null,
-    settings:Object.assign({rest:90}, d.settings || {})
+    settings:cleanSettings(Object.assign({rest:90}, d.settings || {}))
   };
 }
 let S = null;   // wird beim Start aus IndexedDB geladen, siehe boot()
@@ -623,7 +630,7 @@ function vTemplates(){
   return `<h1>Vorlagen</h1>
   ${S.templates.map(t => `<button class="tpl" data-act="edit-tpl" data-id="${t.id}">
     <span class="t">${esc(t.name)}</span>
-    <span class="muted">${t.ex.length} Übungen · ${t.ex.map(exName).map(esc).join(", ") || "leer"}</span></button>`).join("")}
+    <span class="muted">${t.ex.length} ${t.ex.length === 1 ? "Übung" : "Übungen"} ·${t.ex.map(exName).map(esc).join(", ") || "leer"}</span></button>`).join("")}
   <button class="block" data-act="new-tpl">+ Neue Vorlage</button>`;
 }
 function vExercises(){
@@ -638,7 +645,9 @@ function vStatus(){
     : store.status === "error" ? ["warn","Speichern hat nicht geklappt. Sichere jetzt ein Backup und lade die App danach neu."]
     : store.persisted ? ["ok","Auf diesem Gerät gespeichert und vor automatischem Löschen geschützt. Ein Backup ab und zu ist trotzdem sinnvoll."]
     : ["warn","Nur auf diesem Gerät gespeichert. Der Browser kann die Daten bei Speichermangel oder nach längerer Nichtnutzung löschen – mach ab und zu ein Backup."];
-  return `<div class="status ${m[0]}"><i></i><span>${m[1]}</span></div>`;
+  const last = S.settings.lastBackup, ago = last ? relDay(last) : "";
+  const when = store.status === "off" ? "" : `<p class="muted">${last ? `Letztes Backup: ${ago[0].toLowerCase() + ago.slice(1)}` : "Noch kein Backup gesichert"}</p>`;
+  return `<div class="status ${m[0]}"><i></i><span>${m[1]}</span></div>${when}`;
 }
 function vHistory(){
   const ws = [...S.workouts].reverse();
@@ -724,6 +733,7 @@ function vSheet(s){
       <div class="list" style="padding:0">${s.records.map(r => `<div class="li row between"><span>${esc(r.name)}</span><span><b>${fmtNum(r.v)} ${r.unit}</b> <span class="muted">vorher ${fmtNum(r.old)}</span></span></div>`).join("")}</div>` : ""}
     ${s.earned.length ? `<h2>${s.earned.length === 1 ? "Neuer Erfolg" : "Neue Erfolge"}</h2>
       <div class="list" style="padding:0">${s.earned.map(a => vBadge(a, true)).join("")}</div>` : ""}
+    ${vBackupDue()}
     <button class="block primary" style="margin-top:18px" data-act="close">Weiter</button>`;
   }
   if (s.kind === "import"){
@@ -763,8 +773,24 @@ function render(){
   } else { sh.innerHTML = ""; sh.classList.remove("open"); }
   lastSheet = ui.sheet;
   tick();
+  keepAwake();
 }
 let lastSheet = null;
+
+/* Bildschirm wachhalten, solange ein Training läuft (Screen Wake Lock; auf dem iPhone in der installierten App ab iOS 18.4).
+   Wird nach jedem render() und bei der Rückkehr in die App aufgerufen. Der Browser gibt die Sperre beim Wechsel
+   in eine andere App selbst frei; ohne Unterstützung passiert nichts. */
+let wakeLock = null, wakeBusy = false;
+function keepAwake(){
+  if (!("wakeLock" in navigator)) return;
+  const want = !!(S && S.active) && document.visibilityState === "visible";
+  if (!want){ if (wakeLock){ wakeLock.release().catch(() => {}); wakeLock = null; } return; }
+  if (wakeBusy || (wakeLock && !wakeLock.released)) return;
+  wakeBusy = true;
+  navigator.wakeLock.request("screen")
+    .then(l => { wakeLock = l; }, () => { wakeLock = null; })
+    .finally(() => { wakeBusy = false; if (!(S && S.active)) keepAwake(); });   // Training inzwischen beendet: gleich wieder freigeben
+}
 
 function tick(){
   const el = $("#elapsed");
@@ -788,7 +814,29 @@ setInterval(tick, 250);
 
 /* ---------- Export / Import ---------- */
 const stamp = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0,10); };   // heutiges Datum in Ortszeit
-function backupJson(){ return JSON.stringify({...S, active:null, exportedAt:new Date().toISOString()}, null, 1); }
+// at: Zeitpunkt dieses Backups. Er steht im Backup als settings.lastBackup, damit nach einem Import klar ist, wie aktuell die Daten gesichert sind.
+function backupJson(at = Date.now()){ return JSON.stringify({...S, settings:{...S.settings, lastBackup:at}, active:null, exportedAt:new Date(at).toISOString()}, null, 1); }
+// Nach einem Backup, das wirklich gespeichert oder geteilt wurde.
+function markBackup(at){
+  S.settings.lastBackup = at; save();
+  if (ui.tab === "verlauf" || (ui.sheet && ui.sheet.kind === "result")) render();
+}
+/* Ist ein Backup fällig? Nur wenn es seit dem letzten Backup neue Trainings gibt und das Backup mehr als 14 Tage
+   zurückliegt oder 10 Trainings fehlen. Ohne Backup zählen die 14 Tage ab dem ersten noch ungesicherten Training. */
+function backupDue(){
+  const now = Date.now(), last = Math.min(S.settings.lastBackup || 0, now);   // ein Zeitpunkt in der Zukunft (falsche Uhr) zählt als jetzt
+  const open = S.workouts.filter(w => (w.end || w.date) > last);
+  if (!open.length || store.status === "off") return null;
+  const days = Math.round((dayStart(now) - dayStart(last || open[0].date)) / 864e5);   // Kalendertage wie relDay()
+  return open.length >= 10 || days >= 14 ? {count:open.length, days, never:!last} : null;
+}
+function vBackupDue(){
+  const due = backupDue();
+  if (!due) return "";
+  const n = due.count === 1 ? "1 Training ist" : `${due.count} Trainings sind`;
+  return `<div class="backup-due"><p>${due.never ? `Noch kein Backup gesichert. ${n} nur auf diesem Gerät gespeichert.` : `Letztes Backup vor ${due.days} ${due.days === 1 ? "Tag" : "Tagen"}. ${n} noch nicht gesichert.`}</p>
+    <button class="block" data-act="exp-json">Jetzt sichern</button></div>`;
+}
 function csv(){
   const rows = [["Datum","Training","Übung","Kategorie","Satz","Gewicht_kg","Wiederholungen","Minuten","km"]];
   S.workouts.forEach(w => w.entries.forEach(e => {
@@ -802,12 +850,13 @@ function csv(){
    1. auf dem Handy über das Teilen-Menü (dort z. B. „In Dateien sichern“),
    2. sonst als normalen Datei-Download,
    3. und wo beides nicht geht, als Text zum Kopieren. */
-async function offerFile(filename, data, type, title){
+// Ergebnis: "shared", "downloaded", "text" (zum Kopieren angezeigt) oder "cancelled". backupAt: nur beim Backup, siehe "copy-text".
+async function offerFile(filename, data, type, title, backupAt){
   const file = new File([data], filename, {type});
   const touch = !!window.matchMedia && matchMedia("(pointer: coarse)").matches;
   if (touch && navigator.canShare && navigator.canShare({files:[file]})){
-    try { await navigator.share({files:[file]}); return; }
-    catch(e){ if (e && e.name === "AbortError") return; console.warn("Teilen fehlgeschlagen:", e); }   // abgebrochen: nichts tun
+    try { await navigator.share({files:[file]}); return "shared"; }
+    catch(e){ if (e && e.name === "AbortError") return "cancelled"; console.warn("Teilen fehlgeschlagen:", e); }   // abgebrochen: nichts tun
   }
   // In der vom iPhone-Home-Bildschirm gestarteten App ist der Datei-Download nicht verlässlich, dort lieber gleich der Text.
   if ("download" in HTMLAnchorElement.prototype && navigator.standalone !== true){
@@ -816,10 +865,11 @@ async function offerFile(filename, data, type, title){
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 60000);
     toast("Download gestartet");
-    return;
+    return "downloaded";
   }
-  ui.sheet = {kind:"text", title, text:data.replace(/^﻿/, ""), hint:"Kopiere den Text und speichere ihn z. B. in der Notizen- oder Dateien-App."};
+  ui.sheet = {kind:"text", title, backupAt, text:data.replace(/^﻿/, ""), hint:"Kopiere den Text und speichere ihn z. B. in der Notizen- oder Dateien-App."};
   render();
+  return "text";
 }
 function applyImport(text){
   let d;
@@ -829,6 +879,8 @@ function applyImport(text){
     if (!ok) return;
     const before = new Set(S.workouts.map(w => w.id));
     S = normalize(d); S.active = null;
+    // Ältere Backups kennen settings.lastBackup noch nicht: Die geladenen Daten sind auf dem Stand ihres Exports gesichert.
+    if (!S.settings.lastBackup && Date.parse(d.exportedAt) > 0) S.settings.lastBackup = Date.parse(d.exportedAt);
     const now = new Set(S.workouts.map(w => w.id));
     S.deleted = [...new Set([...(S.deleted || []), ...[...before].filter(id => !now.has(id))])];
     save({all:true});
@@ -925,11 +977,15 @@ const actions = {
     const id = el.dataset.id;
     S.workouts = S.workouts.filter(w => w.id !== id); S.deleted.push(id); save({del:id}); render();
   },
-  "exp-json": () => offerFile(`trainingslog-backup-${stamp()}.json`, backupJson(), "application/json", "Backup (JSON)"),
+  "exp-json": async () => {
+    const at = Date.now(), r = await offerFile(`trainingslog-backup-${stamp()}.json`, backupJson(at), "application/json", "Backup (JSON)", at);
+    if (r === "shared"){ markBackup(at); toast("Backup gesichert"); }
+    else if (r === "downloaded") markBackup(at);
+  },
   "exp-csv": () => { if (!S.workouts.length){ toast("Noch keine Trainings zum Exportieren"); return; } offerFile(`trainingslog-${stamp()}.csv`, csv(), "text/csv", "Export (CSV)"); },
   "copy-text": async () => {
     const t = $("#text-out");
-    try { await navigator.clipboard.writeText(t.value); toast("Kopiert"); }
+    try { await navigator.clipboard.writeText(t.value); toast("Kopiert"); if (ui.sheet && ui.sheet.backupAt) markBackup(ui.sheet.backupAt); }
     catch(e){ t.focus(); t.select(); toast("Text markiert – jetzt „Kopieren“ wählen"); }
   },
   imp: () => { ui.sheet = {kind:"import"}; render(); },
@@ -975,7 +1031,7 @@ document.addEventListener("change", e => {
 });
 // Beim Verlassen der App (und bei der Rückkehr) alles Offene sofort sichern – iOS friert die Seite im Hintergrund ein.
 function saveNow(){ if (saveT){ clearTimeout(saveT); saveT = null; save(); } flush(); }
-document.addEventListener("visibilitychange", () => { saveNow(); tick(); });
+document.addEventListener("visibilitychange", () => { saveNow(); tick(); keepAwake(); });
 window.addEventListener("pagehide", saveNow);
 
 /* ---------- Start ---------- */

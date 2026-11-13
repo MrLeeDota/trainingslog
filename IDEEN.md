@@ -6,16 +6,6 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 Erste Runde vom 13.11.2026. NOTIZEN.md war noch leer, die Ideen stammen aus der Recherche zu Strong, Hevy, JEFIT, Fitbod, Apple Fitness, Strava und Runna und aus dem Blick auf `index.html`. Sortiert nach Nutzen im Verhältnis zum Aufwand.
 
-### 1. Bildschirm bleibt während des Trainings an
-- Nutzen: hoch · Aufwand: S · Datenformat: nein
-
-Herkunft: Blick auf die App und PWA-Recherche (firt.dev: Screen Wake Lock geht in Home-Bildschirm-Apps ab iOS 18.4). Hevy löst dasselbe Problem nativ mit Live Activity und Mitteilung, das kann eine PWA nicht. Heute sperrt sich das iPhone in der Pause, dann pausiert die App und der Piepton kommt vermutlich nicht (nicht auf dem Gerät geprüft); Vibration fällt als Ersatz weg, weil Safari `navigator.vibrate` nicht unterstützt. Skizze: beim Start eines Trainings `navigator.wakeLock.request("screen")`, im vorhandenen `visibilitychange`-Handler neu anfordern, bei „Beenden“ und „Verwerfen“ freigeben; ohne Unterstützung läuft alles wie bisher. Auf dem iPhone testen.
-
-### 2. Backup-Erinnerung
-- Nutzen: hoch · Aufwand: S · Datenformat: ja (klein)
-
-Herkunft: Blick auf die App; Strong sichert über „Strong Cloud“, hier gibt es keine Cloud, und der Hinweis im Verlauf nennt keinen Zeitpunkt. Skizze: Nach erfolgreichem Backup `S.settings.lastBackup = Date.now()` setzen; liegt das letzte Backup mehr als 14 Tage oder 10 Trainings zurück, zeigt die Belohnungs-Ansicht nach dem Training eine Zeile „Letztes Backup vor 23 Tagen“ mit Knopf „Jetzt sichern“. Migration: Das Feld ist optional, `normalize()` füllt `settings` schon per `Object.assign` mit Standardwerten auf, alte Daten und Backups laufen ohne Umschreiben.
-
 ### 3. Steigerungsvorschlag beim Gewicht
 - Nutzen: hoch · Aufwand: M · Datenformat: nein
 
@@ -66,4 +56,14 @@ Noch nichts.
 
 ## Erledigt
 
-Noch nichts.
+Umgesetzt am 13.11.2026:
+
+### 1. Bildschirm bleibt während des Trainings an
+- Nutzen: hoch · Aufwand: S · Datenformat: nein
+
+Herkunft: Blick auf die App und PWA-Recherche (firt.dev: Screen Wake Lock geht in Home-Bildschirm-Apps ab iOS 18.4). Hevy löst dasselbe Problem nativ mit Live Activity und Mitteilung, das kann eine PWA nicht. Heute sperrt sich das iPhone in der Pause, dann pausiert die App und der Piepton kommt vermutlich nicht (nicht auf dem Gerät geprüft); Vibration fällt als Ersatz weg, weil Safari `navigator.vibrate` nicht unterstützt. Skizze: beim Start eines Trainings `navigator.wakeLock.request("screen")`, im vorhandenen `visibilitychange`-Handler neu anfordern, bei „Beenden“ und „Verwerfen“ freigeben; ohne Unterstützung läuft alles wie bisher. Auf dem iPhone testen.
+
+### 2. Backup-Erinnerung
+- Nutzen: hoch · Aufwand: S · Datenformat: ja (klein)
+
+Herkunft: Blick auf die App; Strong sichert über „Strong Cloud“, hier gibt es keine Cloud, und der Hinweis im Verlauf nennt keinen Zeitpunkt. Skizze: Nach erfolgreichem Backup `S.settings.lastBackup = Date.now()` setzen; liegt das letzte Backup mehr als 14 Tage oder 10 Trainings zurück, zeigt die Belohnungs-Ansicht nach dem Training eine Zeile „Letztes Backup vor 23 Tagen“ mit Knopf „Jetzt sichern“. Migration: Das Feld ist optional, `normalize()` füllt `settings` schon per `Object.assign` mit Standardwerten auf, alte Daten und Backups laufen ohne Umschreiben.

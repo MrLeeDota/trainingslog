@@ -50,12 +50,18 @@
   }
   window.app = () => frame.contentWindow;
   window.appEval = code => frame.contentWindow.eval(code);
-  // Mittelpunkt eines Elements der App in Seiten-Pixeln dieser Testseite
+  // Mittelpunkt eines Elements der App in Seiten-Pixeln dieser Testseite.
+  // sichtbar: Der Mittelpunkt liegt im Handy und im Fenster und wird von nichts verdeckt (z. B. Tab-Leiste, Timer, Hinweis).
   function center(el){
     if (!el) return null;
     const r = el.getBoundingClientRect(), f = frame.getBoundingClientRect();
-    return {x: Math.round(f.left + (r.left + r.width / 2) * k), y: Math.round(f.top + (r.top + r.height / 2) * k), viewport: innerWidth,
-            sichtbar: r.bottom > 0 && r.top < h && r.width > 0};
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const x = Math.round(f.left + cx * k), y = Math.round(f.top + cy * k);
+    const inFrame = r.width > 0 && cx >= 0 && cx < w && cy >= 0 && cy < h, inWindow = y > 0 && y < innerHeight;
+    const hit = inFrame ? app().document.elementFromPoint(cx, cy) : null;
+    const frei = !!hit && (hit === el || el.contains(hit));
+    return {x, y, viewport: innerWidth, sichtbar: inFrame && inWindow && frei,
+            grund: !inFrame ? "außerhalb des Handys, erst in der App scrollen" : !inWindow ? "außerhalb des Fensters" : !frei ? `verdeckt von ${hit ? (hit.className || hit.tagName) : "?"}` : ""};
   }
   window.pos = (selector, n = 0) => center(app().document.querySelectorAll(selector)[n]);
   window.posText = (text, n = 0) => {

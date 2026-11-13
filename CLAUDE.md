@@ -8,7 +8,8 @@ Ein Trainings-Tracker nur für mich, auf dem iPhone. Er soll als Web-App (PWA) l
 - PWA-Dateien: `manifest.webmanifest`, `sw.js` (Service Worker) und `icons/` (192 px, 512 px, `apple-touch-icon.png` mit 180×180).
 - Funktionen:
   - Übungen mit Kategorien und Erfassungsart (Kraft: kg × Wdh, Ausdauer: min + km, nur Zeit)
-  - Vorlagen (Push, Pull, Legs, Ausdauer, Padel), mit einem Tipp startbar
+  - Vorlagen (Push, Pull, Legs, Ausdauer, Padel), mit einem Tipp startbar. Unter jeder Vorlage steht, wann sie zuletzt trainiert wurde (erkannt am Trainingsnamen); die am längsten nicht trainierte bekommt das Schild „Dran“ (`templateDays()`).
+  - Tempo bei Ausdauer: Bei Minuten und km zeigt die App überall auch min/km (`fmtPace()`, `paceOf()`); die CSV hat dafür hinten die Spalte `Tempo_min_km`.
   - Tracker: „Letztes Mal“-Anzeige pro Übung, Felder mit den Werten vom letzten Mal vorausgefüllt
   - Steigerungsvorschlag: Wurden in den letzten zwei Einheiten einer Kraftübung alle Sätze mit demselben Gewicht und mindestens 10 Wdh geschafft, zeigt der Tracker „Steigern: +2,5 kg“; ein Tipp setzt das Gewicht in allen offenen Sätzen (`stepUp()`, Werte in `STEP_REPS` und `STEP_KG`).
   - Fortschrittskurve im Übungs-Sheet ab zwei Einheiten (`vChart()`, `exSeries()`): Kraft als geschätztes Maximum für 1 Wdh nach Epley, ohne Gewicht die meisten Wdh, Ausdauer als Tempo, „nur Zeit“ als Minuten. Wird wie die Spielwerte nur berechnet.

@@ -6,16 +6,6 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 Erste Runde vom 13.11.2026. NOTIZEN.md war noch leer, die Ideen stammen aus der Recherche zu Strong, Hevy, JEFIT, Fitbod, Apple Fitness, Strava und Runna und aus dem Blick auf `index.html`. Sortiert nach Nutzen im Verhältnis zum Aufwand.
 
-### 5. „Zuletzt vor X Tagen“ an jeder Vorlage
-- Nutzen: mittel · Aufwand: S · Datenformat: nein
-
-Herkunft: Fitbod führt pro Muskelgruppe einen Erholungsstand und plant danach; hier reicht die einfache Form davon. Skizze: Auf dem Startbildschirm unter jeder Vorlage „zuletzt vor 5 Tagen“, ermittelt über den Trainingsnamen (`w.name === t.name`); die Vorlage, die am längsten her ist, bekommt einen orangen Rand „Dran“. Kein zusätzlicher Tipp; nach dem Umbenennen einer Vorlage zählen alte Trainings nicht mehr mit.
-
-### 6. Tempo (min/km) bei Ausdauer
-- Nutzen: mittel · Aufwand: S · Datenformat: nein
-
-Herkunft: Strava (Bestleistungen und schnellstes Tempo nach Distanz), Runna (Lauftraining nach Tempovorgaben). Skizze: `fmtSets()` hängt bei Ausdauer mit Minuten und km „· 5:12 /km“ an, damit steht das Tempo in „Letztes Mal“, im Verlauf und in der Übungshistorie; die CSV bekommt eine Spalte „Tempo“. Ein Tempo-Rekord wäre ein zweiter Schritt, er würde aber die Rekordzahl und den Erfolg „Rekordjäger“ rückwirkend ändern.
-
 ### 7. Vorlage nach dem Training anpassen
 - Nutzen: mittel · Aufwand: S · Datenformat: nein
 
@@ -50,6 +40,18 @@ Noch nichts.
 Noch nichts.
 
 ## Erledigt
+
+Umgesetzt am 13.11.2026 (dritte Runde):
+
+### 5. „Zuletzt vor X Tagen“ an jeder Vorlage
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Herkunft: Fitbod führt pro Muskelgruppe einen Erholungsstand und plant danach; hier reicht die einfache Form davon. Skizze: Auf dem Startbildschirm unter jeder Vorlage „zuletzt vor 5 Tagen“, ermittelt über den Trainingsnamen (`w.name === t.name`); die Vorlage, die am längsten her ist, bekommt einen orangen Rand „Dran“. Kein zusätzlicher Tipp; nach dem Umbenennen einer Vorlage zählen alte Trainings nicht mehr mit.
+
+### 6. Tempo (min/km) bei Ausdauer
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Herkunft: Strava (Bestleistungen und schnellstes Tempo nach Distanz), Runna (Lauftraining nach Tempovorgaben). Skizze: `fmtSets()` hängt bei Ausdauer mit Minuten und km „· 5:12 /km“ an, damit steht das Tempo in „Letztes Mal“, im Verlauf und in der Übungshistorie; die CSV bekommt eine Spalte „Tempo“. Ein Tempo-Rekord wäre ein zweiter Schritt, er würde aber die Rekordzahl und den Erfolg „Rekordjäger“ rückwirkend ändern.
 
 Umgesetzt am 13.11.2026 (zweite Runde):
 

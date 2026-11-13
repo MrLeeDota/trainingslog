@@ -59,7 +59,7 @@ button.ghost{background:transparent;color:var(--muted);padding:8px 10px}
 button.danger{color:var(--danger)}
 button.accent{color:var(--accent);font-weight:800}
 button.block{width:100%;display:block}
-button.small{padding:8px 12px;font-size:14px;border-radius:10px}
+button.small{padding:8px 12px;font-size:14px;border-radius:10px;min-height:44px;min-width:44px}   /* Mindestgröße für Tap-Flächen */
 button.ghost,button.li,button.tab{box-shadow:none}
 .left{text-align:left}
 input,select,textarea{font:inherit;font-size:17px;color:var(--text);background:var(--well);border:2px solid var(--line);border-radius:10px;padding:10px;width:100%;-webkit-appearance:none;appearance:none}
@@ -110,7 +110,13 @@ button.hero{display:block;width:100%;text-align:left}
 .tpl:active{box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 2px 0 var(--ink)}
 .tpl::before{content:"";position:absolute;left:0;top:0;bottom:0;width:9px;background:linear-gradient(180deg,var(--accent-hi),var(--accent-deep))} /* Gürtel */
 .tpl .t{font-size:25px;line-height:1.05;letter-spacing:.01em}
-.tpl .go{margin-top:8px;padding:3px 16px 4px 14px;font-size:16px;letter-spacing:.02em;color:var(--accent-ink);
+.tpl-foot{display:flex;align-items:center;gap:14px;margin-top:8px}
+.tpl-foot .muted{font-size:13px}
+/* Vorlage, die am längsten her ist */
+.tpl.due{border-color:var(--accent);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 4px 0 var(--ink),0 0 18px rgba(255,138,31,.35)}
+.due-tag{position:absolute;top:12px;right:14px;padding:2px 10px 3px;font-size:13px;font-weight:800;color:var(--accent-ink);border-radius:3px;transform:skewX(-10deg);
+  background:linear-gradient(180deg,#fff3a6,var(--ki) 55%,var(--accent));box-shadow:2px 2px 0 var(--ink)}
+.tpl .go{padding:3px 16px 4px 14px;font-size:16px;letter-spacing:.02em;color:var(--accent-ink);
   background:linear-gradient(180deg,var(--accent-hi),var(--accent-deep));border-radius:3px;transform:skewX(-10deg);box-shadow:2px 2px 0 var(--ink)}
 
 /* Active workout */
@@ -306,9 +312,13 @@ function lastFor(exId){
   }
   return null;
 }
+// Tempo aus Minuten pro Kilometer, z. B. 5.2 → "5:12"
+const fmtPace = minPerKm => { const s = Math.round(minPerKm * 60); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
+const paceOf = s => num(s.a) > 0 && num(s.b) > 0 ? fmtPace(num(s.a) / num(s.b)) : "";
 function fmtSets(type, sets){
-  if (type === "ausdauer") return sets.map(s => `${s.a || "–"} min${s.b ? ` · ${s.b} km` : ""}`).join(" | ");
-  if (type === "zeit") return sets.map(s => `${s.a || "–"} min`).join(" | ");
+  // Zahl und Einheit mit geschütztem Leerzeichen, damit sie in schmalen Zeilen zusammenbleiben
+  if (type === "ausdauer") return sets.map(s => `${s.a || "–"} min${s.b ? ` · ${s.b} km` : ""}${paceOf(s) ? ` · ${paceOf(s)} min/km` : ""}`).join(" | ");
+  if (type === "zeit") return sets.map(s => `${s.a || "–"} min`).join(" | ");
   const w = s => s.a ? `${s.a} kg` : "KG";
   const weights = new Set(sets.map(s => String(s.a)));
   if (sets.length > 1 && weights.size === 1) return `${w(sets[0])} × ${sets.map(s => s.b || "–").join(", ")}`;
@@ -367,8 +377,9 @@ function exSeries(exId){
                     : {pts, label:"Meiste Wiederholungen in einem Satz", fmt:v => `${Math.round(v)} Wdh`};
   }
   if (type === "ausdauer"){
-    runs.forEach(r => { const min = sum(r.sets, "a"), km = sum(r.sets, "b"); if (min > 0 && km > 0) pts.push({date:r.date, v:min / km}); });
-    return {pts, label:"Tempo (oben ist schneller)", lowerIsBetter:true, fmt:v => { const s = Math.round(v * 60); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")} min/km`; }};
+    // nur Einträge mit Minuten und km, sonst zählen Läufe ohne Strecke ins Tempo hinein
+    runs.forEach(r => { const both = r.sets.filter(s => num(s.a) > 0 && num(s.b) > 0), min = sum(both, "a"), km = sum(both, "b"); if (min > 0 && km > 0) pts.push({date:r.date, v:min / km}); });
+    return {pts, label:"Tempo (oben ist schneller)", lowerIsBetter:true, fmt:v => `${fmtPace(v)} min/km`};
   }
   runs.forEach(r => { const min = sum(r.sets, "a"); if (min > 0) pts.push({date:r.date, v:min}); });
   return {pts, label:"Minuten pro Einheit", fmt:v => `${fmtNum(v)} min`};
@@ -649,11 +660,20 @@ function orb(n, lit){
     ${pts.map(p => `<path transform="translate(${p[0].toFixed(1)} ${p[1].toFixed(1)})" d="${star}" fill="${lit ? "#e03131" : "#141c5c"}"/>`).join("")}
     ${lit ? `<ellipse cx="-8" cy="-10" rx="7" ry="3.6" transform="rotate(-35 -8 -10)" fill="#fff" opacity=".6"/>` : ""}</svg>`;
 }
+/* Wann jede Vorlage zuletzt trainiert wurde (erkannt am Trainingsnamen, umbenannte Vorlagen verlieren ihre alten Trainings)
+   und welche „dran“ ist: von den schon einmal trainierten Vorlagen die, die am längsten her ist, sofern nicht heute. */
+function templateDays(){
+  const last = {};
+  S.workouts.forEach(w => { last[w.name] = Math.max(last[w.name] || 0, w.date); });
+  const done = S.templates.filter(t => last[t.name]);
+  const oldest = done.length >= 2 ? done.reduce((a, b) => last[b.name] < last[a.name] ? b : a) : null;
+  return {last, due: oldest && dayStart(last[oldest.name]) < dayStart(Date.now()) ? oldest.id : null};
+}
 function vTraining(){
   const a = S.active;
   if (!a){
     const now = Date.now(), wk = S.workouts.filter(w => now - w.date < 7 * 864e5).length, last = S.workouts[S.workouts.length - 1];
-    const ago = last ? relDay(last.date) : "", p = progress(S.workouts);
+    const ago = last ? relDay(last.date) : "", p = progress(S.workouts), td = templateDays();
     return `<h1>Training</h1>
     <button class="hero${wk >= 7 ? " full" : ""}" data-act="progress">
       <span class="orbs" role="img" aria-label="${Math.min(wk, 7)} von 7 Sternkugeln gesammelt">${[1,2,3,4,5,6,7].map(n => orb(n, n <= wk)).join("")}</span>
@@ -665,10 +685,11 @@ function vTraining(){
       <span class="row between muted hero-foot"><span>${p.streak ? `Serie: ${weeks(p.streak)}` : "Noch keine Serie"}</span><span>Erfolge ${ACHIEVEMENTS.filter(a => a[2](p)).length}/${ACHIEVEMENTS.length} ›</span></span>
     </button>
     <h2>Vorlage starten</h2>
-    ${S.templates.map(t => `<button class="tpl" data-act="start" data-id="${t.id}">
-      <span class="t">${esc(t.name)}</span>
+    ${S.templates.map(t => { const seen = td.last[t.name], due = t.id === td.due, ago = seen ? relDay(seen) : "";
+      return `<button class="tpl${due ? " due" : ""}" data-act="start" data-id="${t.id}">
+      <span class="t">${esc(t.name)}</span>${due ? `<span class="due-tag">Dran</span>` : ""}
       <span class="muted">${t.ex.map(exName).map(esc).join(" · ") || "Keine Übungen"}</span>
-      <span class="go">Starten</span></button>`).join("")}
+      <span class="tpl-foot"><span class="go">Starten</span><span class="muted">${seen ? `Zuletzt ${ago[0].toLowerCase() + ago.slice(1)}` : "Noch nie trainiert"}</span></span></button>`; }).join("")}
     <button class="block" data-act="start" data-id="">+ Freies Training</button>`;
   }
   const done = a.entries.reduce((n, e) => n + e.sets.filter(s => s.done).length, 0);
@@ -920,11 +941,13 @@ function vBackupDue(){
     <button class="block" data-act="exp-json">Jetzt sichern</button></div>`;
 }
 function csv(){
-  const rows = [["Datum","Training","Übung","Kategorie","Satz","Gewicht_kg","Wiederholungen","Minuten","km"]];
+  // Neue Spalten nur hinten anhängen, damit bestehende Auswertungen der CSV weiter passen
+  const rows = [["Datum","Training","Übung","Kategorie","Satz","Gewicht_kg","Wiederholungen","Minuten","km","Tempo_min_km"]];
   S.workouts.forEach(w => w.entries.forEach(e => {
     const ex = exById(e.exId) || {name:"Gelöschte Übung", cat:"", type:"kraft"};
     e.sets.forEach((s, i) => rows.push([new Date(w.date).toLocaleDateString("de-DE"), w.name, ex.name, ex.cat || "", i + 1,
-      ex.type === "kraft" ? s.a : "", ex.type === "kraft" ? s.b : "", ex.type !== "kraft" ? s.a : "", ex.type === "ausdauer" ? s.b : ""]));
+      ex.type === "kraft" ? s.a : "", ex.type === "kraft" ? s.b : "", ex.type !== "kraft" ? s.a : "", ex.type === "ausdauer" ? s.b : "",
+      ex.type === "ausdauer" ? paceOf(s) : ""]));
   }));
   return "﻿" + rows.map(r => r.map(c => { c = String(c ?? ""); return /[;"\n]/.test(c) ? `"${c.replace(/"/g,'""')}"` : c; }).join(";")).join("\n");
 }

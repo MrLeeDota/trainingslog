@@ -122,6 +122,27 @@ button.hero{display:block;width:100%;text-align:left}
 /* Active workout */
 .ex-name{font-size:22px;line-height:1.1;letter-spacing:.01em}
 .last{font-size:13px;color:var(--scan);margin-top:4px}
+.ex-note{font-size:13px;color:var(--muted);margin-top:2px}
+/* Eigene Texte (Namen, Notizen) dürfen notfalls mitten im Wort umbrechen, damit nichts aus der Karte läuft */
+.ex-note,.ex-name,.last,.tpl .t,.tpl .muted,.li{overflow-wrap:anywhere}
+
+/* Kalender und Wochenvergleich im Fortschritt */
+.cal{background:var(--well);border:1px solid var(--line);border-radius:12px;padding:4px 8px 8px}
+.cal-month{font-family:var(--display);font-stretch:condensed;font-style:italic;font-weight:900;font-size:19px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;margin-top:2px}
+.cal-wd{font-size:11px;font-weight:700;color:var(--muted);padding:2px 0 4px}
+.cal-day{display:flex;align-items:center;justify-content:center;aspect-ratio:1;max-height:40px;margin:0 auto;width:100%;max-width:40px;border-radius:50%;font-size:14px;color:var(--muted)}
+.cal-day.on{background:radial-gradient(circle at 35% 30%,#fff3a6,var(--ki) 45%,var(--accent) 100%);color:var(--accent-ink);font-weight:800;box-shadow:0 0 8px rgba(255,212,59,.45)}
+.cal-day.today{box-shadow:inset 0 0 0 2px var(--accent)}
+.cal-day.on.today{box-shadow:inset 0 0 0 2px var(--ink),0 0 10px rgba(255,138,31,.7)}
+.cal-sum{margin:8px 4px 0;font-size:13px}
+.cmp{display:grid;grid-template-columns:1fr auto auto;gap:8px 18px;align-items:baseline;background:var(--well);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.cmp-h{font-size:12px;color:var(--muted);text-align:right}
+.cmp b{font-family:var(--display);font-stretch:condensed;font-style:italic;font-weight:900;font-size:20px;color:var(--ki);text-align:right}
+.cmp .muted{text-align:right}
+.catbar{display:grid;grid-template-columns:96px 1fr 30px;gap:10px;align-items:center;margin:8px 0;font-size:14px}
+.catbar i{display:block;height:10px;border-radius:2px;transform:skewX(-16deg);background:linear-gradient(90deg,var(--accent-deep),var(--accent) 50%,var(--ki))}
+.catbar b{text-align:right;color:var(--ki)}
 /* Steigerungsvorschlag: schräger Knopf in Gold wie die Energieanzeigen */
 button.step-up{margin-top:8px;padding:6px 14px 7px 12px;font-size:14px;font-weight:800;color:var(--accent-ink);border-radius:3px;transform:skewX(-10deg);
   background:linear-gradient(180deg,#fff3a6,var(--ki) 55%,var(--accent));box-shadow:2px 2px 0 var(--ink),0 0 12px rgba(255,212,59,.4)}
@@ -647,6 +668,47 @@ function vLevel(p){
   return `<span class="row between lvl"><span><b>Stufe ${p.level}</b> ${rankOf(p.level)}</span><span><b>${fmtInt(p.power)}</b> Kampfkraft</span></span>
     <span class="xp"><i style="width:${Math.round(100 * (p.power - from) / (to - from))}%"></i></span>`;
 }
+// Monatskalender, Trainingstage als leuchtende Kugeln. offset 0 = aktueller Monat, −1 = Vormonat usw.
+function vCalendar(offset){
+  const now = new Date(), first = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+  const next = new Date(first.getFullYear(), first.getMonth() + 1, 1), days = new Date(next - 864e5).getDate();
+  const trained = new Set(S.workouts.map(w => dayStart(w.date))), today = dayStart(Date.now());
+  const n = S.workouts.filter(w => w.date >= first.getTime() && w.date < next.getTime()).length;
+  const cells = Array.from({length:(first.getDay() + 6) % 7}, () => `<span></span>`);   // Woche beginnt am Montag
+  for (let d = 1; d <= days; d++){
+    const t = new Date(first.getFullYear(), first.getMonth(), d).getTime();
+    cells.push(`<span class="cal-day${trained.has(t) ? " on" : ""}${t === today ? " today" : ""}">${d}</span>`);
+  }
+  return `<div class="cal">
+    <div class="row between"><button class="small ghost" data-act="cal" data-d="-1" aria-label="Vorheriger Monat">‹</button>
+      <b class="cal-month">${first.toLocaleDateString("de-DE", {month:"long", year:"numeric"})}</b>
+      <button class="small ghost" data-act="cal" data-d="1" ${offset >= 0 ? "disabled" : ""} aria-label="Nächster Monat">›</button></div>
+    <div class="cal-grid">${["Mo","Di","Mi","Do","Fr","Sa","So"].map(d => `<span class="cal-wd">${d}</span>`).join("")}${cells.join("")}</div>
+    <p class="muted cal-sum">${n === 1 ? "1 Training" : `${n} Trainings`} in diesem Monat</p>
+  </div>`;
+}
+// Diese Woche (ab Montag) im Vergleich zum Schnitt der vier Wochen davor, dazu Sätze pro Kategorie der letzten 7 Tage
+function vWeekCompare(){
+  const monday = i => { const d = new Date(weekStart(Date.now())); d.setDate(d.getDate() - 7 * i); return d.getTime(); };
+  const stats = (from, to) => {
+    const r = {n:0, sets:0, km:0};
+    S.workouts.forEach(w => { if (w.date < from || w.date >= to) return; r.n++;
+      w.entries.forEach(en => { r.sets += en.sets.length; if (exType(en.exId) === "ausdauer") en.sets.forEach(s => r.km += num(s.b)); }); });
+    return r;
+  };
+  const cur = stats(monday(0), Infinity), past = [1,2,3,4].map(i => stats(monday(i), monday(i - 1)));
+  const avg = k => past.reduce((t, r) => t + r[k], 0) / 4, one = v => fmtNum(Math.round(v * 10) / 10);
+  const rows = [["Trainings", cur.n, avg("n")], ["Sätze", cur.sets, avg("sets")]];
+  if (cur.km || avg("km")) rows.push(["Kilometer", cur.km, avg("km")]);
+  const since = Date.now() - WEEK, cats = {};
+  S.workouts.filter(w => w.date >= since).forEach(w => w.entries.forEach(en => { const c = (exById(en.exId) || {}).cat || "Sonstiges"; cats[c] = (cats[c] || 0) + en.sets.length; }));
+  const list = Object.entries(cats).sort((a, b) => b[1] - a[1]), max = list.length ? list[0][1] : 1;
+  return `<h2>Diese Woche</h2>
+    <div class="cmp"><span></span><span class="cmp-h">Diese Woche</span><span class="cmp-h">Ø 4 Wochen davor</span>
+      ${rows.map(r => `<span>${r[0]}</span><b>${one(r[1])}</b><span class="muted">${one(r[2])}</span>`).join("")}</div>
+    ${list.length ? `<h2>Sätze nach Kategorie, letzte 7 Tage</h2>
+      ${list.map(([c, n]) => `<div class="catbar"><span>${esc(c)}</span><i style="width:${Math.max(4, Math.round(100 * n / max))}%"></i><b>${n}</b></div>`).join("")}` : ""}`;
+}
 const vBadge = (a, got) => `<div class="li row badge${got ? "" : " off"}">${orb(1, got)}<span class="grow"><b>${a[0]}</b><span class="muted">${a[1]}</span></span></div>`;
 // Sternkugel als SVG mit n Sternen (1–7). lit: gesammelt und leuchtend, sonst versteinert.
 const starPath = R => Array.from({length:10}, (_, i) => { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? R * .42 : R; return (i ? "L" : "M") + (Math.cos(a) * r).toFixed(2) + " " + (Math.sin(a) * r).toFixed(2); }).join("") + "Z";
@@ -710,7 +772,7 @@ function vEntry(en, i){
   const up = stepUp(en.exId), showUp = up && en.sets.some(s => !s.done && num(s.a) < up);
   return `<div class="card">
     <div class="row between" style="align-items:flex-start">
-      <div class="grow"><div class="ex-name">${esc(ex.name)}</div>
+      <div class="grow"><div class="ex-name">${esc(ex.name)}</div>${ex.note ? `<div class="ex-note">${esc(ex.note)}</div>` : ""}
       <div class="last">${last ? `Letztes Mal (${fmtDate(last.date)}): ${esc(fmtSets(ex.type, last.sets))}` : `<span class="muted">Erstes Mal – leg los!</span>`}</div>
       ${showUp ? `<button class="step-up" data-act="step-up" data-i="${i}" aria-label="Gewicht in den offenen Sätzen auf ${fmtNum(up)} kg erhöhen">Steigern: ${fmtNum(up)} kg</button>` : ""}</div>
       <button class="ghost" data-act="del-entry" data-i="${i}" aria-label="Übung entfernen">✕</button>
@@ -804,6 +866,7 @@ function vSheet(s){
     <label class="lbl">Kategorie</label><input data-draft="cat" list="cats" value="${esc(d.cat)}" placeholder="z. B. Brust" autocomplete="off">
     <datalist id="cats">${cats.map(c => `<option value="${esc(c)}">`).join("")}</datalist>
     <label class="lbl">Erfassung</label><select data-draft="type">${Object.entries(TYPES).map(([k, t]) => `<option value="${k}" ${d.type === k ? "selected" : ""}>${t.label}</option>`).join("")}</select>
+    <label class="lbl">Notiz (steht im Training unter dem Namen)</label><input data-draft="note" value="${esc(d.note || "")}" placeholder="z. B. Sitz Stufe 4, enger Griff" maxlength="140" autocomplete="off">
     ${d.isNew ? "" : `${chart ? `<h2>Entwicklung</h2>${chart}` : ""}
       <h2>Letzte Einheiten</h2>
       ${hist.length ? `<div class="list" style="padding:0">${hist.map(w => `<div class="li"><div class="muted">${fmtDate(w.date)} · ${esc(w.name)}</div><div>${esc(fmtSets(exType(d.id), w.entries.find(e => e.exId === d.id).sets))}</div></div>`).join("")}</div>` : `<p class="muted">Noch nicht trainiert.</p>`}
@@ -823,6 +886,8 @@ function vSheet(s){
       <div class="stat"><b>${weeks(p.streak)}</b><span>Serie, längste: ${weeks(p.bestStreak)}</span></div>
       <div class="stat"><b>${fmtInt(p.records)}</b><span>Rekorde</span></div>
     </div>
+    <h2>Kalender</h2>${vCalendar(s.cal || 0)}
+    ${vWeekCompare()}
     <h2>Erfolge (${got.length} von ${ACHIEVEMENTS.length})</h2>
     <div class="list" style="padding:0">${ACHIEVEMENTS.map(a => vBadge(a, got.includes(a))).join("")}</div>
     <p class="muted" style="margin-top:14px">Kampfkraft gibt es für jeden gespeicherten Satz. Mehr Gewicht, Wiederholungen, Minuten oder Kilometer bringen mehr. Die Serie zählt die Wochen in Folge mit mindestens einem Training.</p>`;
@@ -1065,7 +1130,11 @@ const actions = {
   "save-ex": () => {
     const s = ui.sheet, d = s.draft;
     if (!d.name.trim()){ toast("Bitte einen Namen eingeben"); return; }
-    const e = {id:d.id, name:d.name.trim(), cat:(d.cat || "").trim() || "Sonstiges", type:d.type || "kraft"}, k = S.exercises.findIndex(x => x.id === d.id);
+    // Alle übrigen Felder der Übung bleiben erhalten, auch solche, die diese Version noch nicht kennt.
+    // note ist optional: ohne Notiz bleibt die Übung im bisherigen Format {id, name, cat, type}
+    const {isNew, ...rest} = d, note = String(d.note || "").trim().slice(0, 140);
+    const e = {...rest, name:d.name.trim(), cat:(d.cat || "").trim() || "Sonstiges", type:d.type || "kraft"}, k = S.exercises.findIndex(x => x.id === d.id);
+    if (note) e.note = note; else delete e.note;
     if (k >= 0) S.exercises[k] = e; else S.exercises.push(e);
     save();
     const back = s.back;
@@ -1108,6 +1177,7 @@ const actions = {
   "dlg-yes": () => closeDlg(true),
   "dlg-no": () => closeDlg(false),
   progress: () => { ui.sheet = {kind:"progress"}; render(); },
+  cal: el => { if (ui.sheet && ui.sheet.kind === "progress"){ ui.sheet.cal = Math.min(0, (ui.sheet.cal || 0) + +el.dataset.d); render(); } },
   reload: () => { saveNow(); location.reload(); }
 };
 

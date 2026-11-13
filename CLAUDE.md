@@ -30,6 +30,13 @@ Ein Trainings-Tracker nur für mich, auf dem iPhone. Er soll als Web-App (PWA) l
 - Änderungen veröffentlichen: committen und `git push`. Nach wenigen Minuten ist die neue Version online; in der installierten App erscheint sie beim nächsten Öffnen mit dem Hinweis „Neue Version bereit“.
 - Alle Pfade in `index.html`, `manifest.webmanifest` und `sw.js` sind relativ, weil die App in einem Unterordner liegt. Das so beibehalten.
 
+## Agenten
+In `.claude/agents/` liegen drei Subagenten. Sie liefern Ideen oder prüfen; umgesetzt wird immer in der Hauptsitzung, nicht von den Agenten.
+- Ideen für die Weiterentwicklung → `produkt-scout`. Er wertet `NOTIZEN.md` (meine Notizen aus dem Training) aus, recherchiert Vorbild-Apps und schreibt Vorschläge nach `IDEEN.md`.
+- Änderungen an Daten, Backup oder Import → `daten-waechter`. Er prüft den git diff auf Datenverlust.
+- Änderungen an Oberfläche oder Abläufen → `gym-tester`. Er spielt die App in Chrome auf `http://localhost:8080` im iPhone-Format durch, nie auf der Live-Seite.
+- Ablauf: Idee in `IDEEN.md` nach „Angenommen“ verschieben → umsetzen → passende Agenten prüfen lassen → nach „Erledigt“ verschieben → committen und pushen.
+
 ## Nächste Schritte
 1. Erledigt: Aus dem Prototyp eine echte PWA machen: `manifest.webmanifest`, App-Icons (inkl. `apple-touch-icon` 180×180), Service Worker für den Offline-Betrieb.
 2. Erledigt: Speicherung auf IndexedDB umstellen, weil das robuster ist als localStorage. Das Backup-Format beibehalten, damit alte Backups aus dem Prototyp importierbar bleiben.

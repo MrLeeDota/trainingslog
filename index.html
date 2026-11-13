@@ -123,6 +123,20 @@ button.hero{display:block;width:100%;text-align:left}
 .ex-name{font-size:22px;line-height:1.1;letter-spacing:.01em}
 .last{font-size:13px;color:var(--scan);margin-top:4px}
 .ex-note{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* Übungsbibliothek und Programme */
+.lib-title{margin-top:30px;padding-top:16px;border-top:2px solid var(--line);font-size:20px;scroll-margin-top:64px}
+.plan{font-size:13px;color:var(--ki);margin-top:3px}
+.lib-add{flex:none;color:var(--accent);font-weight:900;font-size:22px;line-height:1;padding-left:12px}
+.hints{margin:0;padding-left:20px;font-size:14px}
+.hints li{margin:4px 0}
+.prog{padding:2px 14px 6px}
+.prog-desc{margin:2px 0 6px}
+.unit{border-top:1px solid var(--line);padding:12px 0 6px}
+.unit-name{font-size:16px}
+.unit .small{flex:none}
+.unit-ex{margin:8px 0 6px;padding-left:18px;font-size:14px}
+.unit-ex li{margin:3px 0}
 /* Eigene Texte (Namen, Notizen) dürfen notfalls mitten im Wort umbrechen, damit nichts aus der Karte läuft */
 .ex-note,.ex-name,.last,.tpl .t,.tpl .muted,.li{overflow-wrap:anywhere}
 
@@ -345,10 +359,11 @@ function fmtSets(type, sets){
   if (sets.length > 1 && weights.size === 1) return `${w(sets[0])} × ${sets.map(s => s.b || "–").join(", ")}`;
   return sets.map(s => `${w(s)} × ${s.b || "–"}`).join(", ");
 }
-function newEntry(exId){
-  const last = lastFor(exId);
+// plan (optional): Richtwert aus einem Bibliotheks-Programm; gibt beim ersten Mal die Zahl der leeren Sätze vor
+function newEntry(exId, plan){
+  const last = lastFor(exId), first = plan && plan.saetze > 0 ? Math.min(10, plan.saetze) : exType(exId) === "kraft" ? 3 : 1;
   const sets = last ? last.sets.map(s => ({a:s.a ?? "", b:s.b ?? "", done:false}))
-                    : Array.from({length: exType(exId) === "kraft" ? 3 : 1}, () => ({a:"", b:"", done:false}));
+                    : Array.from({length:first}, () => ({a:"", b:"", done:false}));
   return {exId, sets};
 }
 function groupByCat(list){
@@ -427,6 +442,84 @@ function vChart(exId){
     </svg>
     <div class="row between muted chart-foot"><span>${fmtDate(pts[0].date)}</span><span>Bestwert ${c.fmt(best)}</span><span>${fmtDate(lastP.date)}</span></div>
   </div>`;
+}
+
+/* ---------- Übungsbibliothek (bibliothek/uebungen.json und vorlagen.json, Format in bibliothek/README.md) ----------
+   Wird nach dem Start im Hintergrund geladen. Übernommene Übungen und Vorlagen bekommen das optionale Feld lib
+   mit der ID aus der Bibliothek; eigene Übungen und Daten bleiben unverändert. */
+const lib = {state:"idle", ex:[], progs:[], byId:new Map()};
+// Lädt nur aus dem Zustand "idle". Nach einem Fehler setzt retryLib() beim nächsten Öffnen einer Ansicht zurück (keine Endlosschleife offline).
+function loadLib(){
+  if (lib.state !== "idle") return;
+  lib.state = "loading";
+  const get = url => fetch(url).then(r => { if (!r.ok) throw new Error(`${url}: ${r.status}`); return r.json(); });
+  Promise.all([get("bibliothek/uebungen.json"), get("bibliothek/vorlagen.json")])
+    .then(([u, v]) => {
+      lib.ex = (Array.isArray(u && u.uebungen) ? u.uebungen : []).filter(l => l && l.id && l.name);
+      lib.progs = (Array.isArray(v && v.vorlagen) ? v.vorlagen : []).filter(p => p && p.id && Array.isArray(p.einheiten));
+      lib.byId = new Map(lib.ex.map(l => [l.id, l])); lib.state = "ready";
+    })
+    .catch(e => { console.warn("Übungsbibliothek nicht geladen:", e); lib.state = "error"; })   // fängt auch Fehler beim Auswerten ab
+    .finally(() => {   // offene Ansicht nachziehen, aber nicht, während jemand tippt
+      if (ui.sheet && ["picker","programs","exercise"].includes(ui.sheet.kind) && !document.activeElement?.matches("input,textarea,select")) render();
+    });
+}
+function retryLib(){ if (lib.state === "error") lib.state = "idle"; }
+// Eigene Übung zu einem Bibliothekseintrag: über die gespeicherte ID oder den gleichen Namen
+function libOwner(l){ const n = l.name.toLowerCase(); return S.exercises.find(e => e.lib === l.id || String(e.name).toLowerCase() === n); }
+function libOf(e){
+  if (lib.state !== "ready" || !e) return null;
+  const n = String(e.name || "").toLowerCase();
+  return (e.lib && lib.byId.get(e.lib)) || lib.ex.find(l => l.name.toLowerCase() === n) || null;
+}
+// Übernimmt einen Bibliothekseintrag in die eigene Liste (falls noch nicht vorhanden) und gibt die ID der eigenen Übung zurück
+function addFromLib(l){
+  const own = libOwner(l);
+  if (own) return own.id;
+  const e = {id:uid(), name:l.name, cat:l.cat || "Sonstiges", type:TYPES[l.type] ? l.type : "kraft", lib:l.id};
+  S.exercises.push(e);
+  return e.id;
+}
+// Dosierung aus einer Programm-Einheit, z. B. „3 × 6-8 Wdh · Pause 3:00 min“
+function libDose(x){
+  const what = x.wdh ? `${x.wdh} Wdh` : x.dauerMin ? `${x.dauerMin} min` : "";
+  return `${x.saetze ? `${x.saetze} × ` : ""}${what}${x.jeSeite ? " je Seite" : ""}${x.pauseSek ? ` · Pause ${fmtSec(x.pauseSek)}` : ""}`;
+}
+/* Richtwert einer Übung aus dem Bibliotheks-Programm, aus dem eine Vorlage stammt (Feld lib der Vorlage).
+   Wird nur nachgeschlagen, nicht gespeichert. planFor() gilt für das laufende Training, erkannt am Vorlagennamen. */
+function planOf(t, exId){
+  if (!t || !t.lib || lib.state !== "ready") return null;
+  const u = lib.progs.flatMap(p => p.einheiten).find(x => x.id === t.lib), l = libOf(exById(exId));
+  return u && l ? (u.uebungen || []).find(x => x.uebung === l.id) || null : null;
+}
+const planFor = exId => S.active ? planOf(S.templates.find(t => t.lib && t.name === S.active.name), exId) : null;
+function vLibList(){
+  if (lib.state !== "ready"){ loadLib(); return `<p class="muted">${lib.state === "error" ? "Die Übungsbibliothek ist gerade nicht erreichbar." : "Lade Übungsbibliothek …"}</p>`; }
+  const free = lib.ex.filter(l => !libOwner(l));
+  if (!free.length) return `<p class="muted">Alle Übungen der Bibliothek stehen schon in deiner Liste.</p>`;
+  return groupByCat(free).map(([cat, list]) => `<div class="grp lib-grp"><h2>${esc(cat)}</h2>
+    ${list.map(l => `<button class="li row between" data-act="picked-lib" data-lib="${esc(l.id)}" data-name="${esc(l.name.toLowerCase())}">
+      <span>${esc(l.name)} <span class="muted">${esc((l.geraet || []).join(", "))}</span></span><span class="lib-add" aria-hidden="true">+</span></button>`).join("")}</div>`).join("");
+}
+function vUnit(p, u){
+  const taken = S.templates.find(t => t.lib === u.id);
+  return `<div class="unit"><div class="row between"><b class="unit-name">${esc(u.name)}</b>
+    ${taken ? `<span class="muted">✓ als „${esc(taken.name)}“</span>` : `<button class="small" data-act="prog-take" data-p="${esc(p.id)}" data-u="${esc(u.id)}">Als Vorlage übernehmen</button>`}</div>
+    <ul class="unit-ex">${(u.uebungen || []).map(x => `<li>${esc((lib.byId.get(x.uebung) || {}).name || x.uebung)} <span class="muted">${esc(libDose(x))}</span></li>`).join("")}</ul>
+    ${u.hinweis ? `<p class="muted">${esc(u.hinweis)}</p>` : ""}</div>`;
+}
+// Suche im Auswahl-Sheet; bleibt nach einem Neuzeichnen erhalten (ui.sheet.q)
+function filterPick(q){
+  q = q.trim().toLowerCase();
+  document.querySelectorAll("#pick-list .grp").forEach(g => {
+    let any = false;
+    g.querySelectorAll("[data-name]").forEach(b => { const hit = !q || b.dataset.name.includes(q); b.style.display = hit ? "" : "none"; any = any || hit; });
+    g.style.display = any ? "" : "none";
+  });
+  const t = $("#pick-list .lib-title");
+  if (t) t.style.display = [...document.querySelectorAll("#pick-list .lib-grp")].some(g => g.style.display !== "none") || !q ? "" : "none";
+  const none = $("#pick-none");
+  if (none) none.hidden = !q || [...document.querySelectorAll("#pick-list .grp")].some(g => g.style.display !== "none");
 }
 
 /* ---------- Speicher (IndexedDB) ----------
@@ -770,10 +863,12 @@ function vEntry(en, i){
   const cols = `grid-template-columns:26px repeat(${T.f.length},1fr) 52px`;
   // Steigerungsknopf nur, solange noch ein offener Satz unter dem vorgeschlagenen Gewicht liegt
   const up = stepUp(en.exId), showUp = up && en.sets.some(s => !s.done && num(s.a) < up);
+  const plan = planFor(en.exId);   // Richtwert, wenn die Vorlage aus einem Bibliotheks-Programm stammt
   return `<div class="card">
     <div class="row between" style="align-items:flex-start">
       <div class="grow"><div class="ex-name">${esc(ex.name)}</div>${ex.note ? `<div class="ex-note">${esc(ex.note)}</div>` : ""}
       <div class="last">${last ? `Letztes Mal (${fmtDate(last.date)}): ${esc(fmtSets(ex.type, last.sets))}` : `<span class="muted">Erstes Mal – leg los!</span>`}</div>
+      ${plan ? `<div class="plan">Programm: ${esc(libDose(plan))}</div>` : ""}
       ${showUp ? `<button class="step-up" data-act="step-up" data-i="${i}" aria-label="Gewicht in den offenen Sätzen auf ${fmtNum(up)} kg erhöhen">Steigern: ${fmtNum(up)} kg</button>` : ""}</div>
       <button class="ghost" data-act="del-entry" data-i="${i}" aria-label="Übung entfernen">✕</button>
     </div>
@@ -794,14 +889,16 @@ function vTemplates(){
   ${S.templates.map(t => `<button class="tpl" data-act="edit-tpl" data-id="${t.id}">
     <span class="t">${esc(t.name)}</span>
     <span class="muted">${t.ex.length} ${t.ex.length === 1 ? "Übung" : "Übungen"} ·${t.ex.map(exName).map(esc).join(", ") || "leer"}</span></button>`).join("")}
-  <button class="block" data-act="new-tpl">+ Neue Vorlage</button>`;
+  <button class="block" data-act="new-tpl">+ Neue Vorlage</button>
+  <button class="block" style="margin-top:8px" data-act="programs">+ Programm aus der Bibliothek</button>`;
 }
 function vExercises(){
   return `<h1>Übungen</h1>
+  <div class="grid2" style="margin-bottom:6px"><button data-act="new-ex">+ Neue Übung</button><button data-act="lib-pick">+ Aus der Bibliothek</button></div>
   ${groupByCat(S.exercises).map(([cat, list]) => `<h2>${esc(cat)}</h2><div class="card list">
     ${list.map(e => `<button class="li row between" data-act="edit-ex" data-id="${e.id}"><span>${esc(e.name)}</span><span class="muted">${esc(bestLabel(e))} ›</span></button>`).join("")}
   </div>`).join("")}
-  <button class="block" data-act="new-ex">+ Neue Übung</button>`;
+  `;
 }
 function vStatus(){
   const m = store.status === "off" ? ["warn","In dieser Ansicht lässt der Browser kein Speichern zu. Öffne die App über ihre Adresse (https oder localhost), damit deine Daten erhalten bleiben."]
@@ -841,11 +938,16 @@ function vHistory(){
 /* ---------- Sheets ---------- */
 function vSheet(s){
   if (s.kind === "picker"){
+    // target "lib": nur Bibliothek, um Übungen in die eigene Liste zu holen (Tab Übungen)
+    const onlyLib = s.target === "lib";
     const inWorkout = new Set(s.target === "active" && S.active ? S.active.entries.map(e => e.exId) : (s.back?.draft?.ex || []));
-    return `<div class="sheet-head"><button class="ghost" data-act="close">Zurück</button><b>Übung wählen</b><button class="ghost accent" data-act="new-ex-inline">Neu</button></div>
+    return `<div class="sheet-head"><button class="ghost" data-act="close">${onlyLib ? "Fertig" : "Zurück"}</button><b>${onlyLib ? "Übungsbibliothek" : "Übung wählen"}</b>${onlyLib ? `<span style="width:60px"></span>` : `<button class="ghost accent" data-act="new-ex-inline">Neu</button>`}</div>
     <input id="pick-q" placeholder="Suchen …" autocomplete="off">
-    <div id="pick-list">${groupByCat(S.exercises).map(([cat, list]) => `<div class="grp"><h2>${esc(cat)}</h2>
-      ${list.map(e => `<button class="li row between" data-act="picked" data-id="${e.id}" data-name="${esc(e.name.toLowerCase())}"><span>${esc(e.name)}</span>${inWorkout.has(e.id) ? `<span class="muted">✓ drin</span>` : ""}</button>`).join("")}</div>`).join("")}</div>`;
+    ${onlyLib ? "" : `<button class="small ghost accent" style="margin-top:6px;padding-left:0" data-act="to-lib">↓ Zur Übungsbibliothek</button>`}
+    <p class="muted" id="pick-none" style="margin-top:12px" hidden>${onlyLib ? "Keine passende Übung in der Bibliothek." : "Keine passende Übung. Über „Neu“ legst du eine eigene an."}</p>
+    <div id="pick-list">${onlyLib ? "" : groupByCat(S.exercises).map(([cat, list]) => `<div class="grp"><h2>${esc(cat)}</h2>
+      ${list.map(e => `<button class="li row between" data-act="picked" data-id="${e.id}" data-name="${esc(e.name.toLowerCase())}"><span>${esc(e.name)}</span>${inWorkout.has(e.id) ? `<span class="muted">✓ drin</span>` : ""}</button>`).join("")}</div>`).join("")}
+      ${onlyLib ? `<p class="muted">Tippen übernimmt die Übung in deine Liste.</p>` : `<h2 class="lib-title">Aus der Bibliothek</h2>`}${vLibList()}</div>`;
   }
   if (s.kind === "template"){
     const d = s.draft;
@@ -861,16 +963,29 @@ function vSheet(s){
     const d = s.draft, cats = [...new Set(S.exercises.map(e => e.cat).filter(Boolean))].sort();
     const hist = d.isNew ? [] : S.workouts.filter(w => w.entries.some(e => e.exId === d.id)).slice(-10).reverse();
     const chart = d.isNew ? "" : vChart(d.id);
+    if (lib.state === "idle") loadLib();
+    const tech = d.isNew ? null : libOf(d);   // Technik-Hinweise aus der Bibliothek, falls die Übung dort steht
     return `<div class="sheet-head"><button class="ghost" data-act="close">Abbrechen</button><b>${d.isNew ? "Neue Übung" : "Übung"}</b><button class="ghost accent" data-act="save-ex">Sichern</button></div>
     <label class="lbl">Name</label><input data-draft="name" value="${esc(d.name)}" placeholder="z. B. Bankdrücken" autocomplete="off">
     <label class="lbl">Kategorie</label><input data-draft="cat" list="cats" value="${esc(d.cat)}" placeholder="z. B. Brust" autocomplete="off">
     <datalist id="cats">${cats.map(c => `<option value="${esc(c)}">`).join("")}</datalist>
     <label class="lbl">Erfassung</label><select data-draft="type">${Object.entries(TYPES).map(([k, t]) => `<option value="${k}" ${d.type === k ? "selected" : ""}>${t.label}</option>`).join("")}</select>
     <label class="lbl">Notiz (steht im Training unter dem Namen)</label><input data-draft="note" value="${esc(d.note || "")}" placeholder="z. B. Sitz Stufe 4, enger Griff" maxlength="140" autocomplete="off">
+    ${tech && tech.hinweise && tech.hinweise.length ? `<h2>Technik</h2><ul class="hints">${tech.hinweise.map(h => `<li>${esc(h)}</li>`).join("")}</ul>` : ""}
     ${d.isNew ? "" : `${chart ? `<h2>Entwicklung</h2>${chart}` : ""}
       <h2>Letzte Einheiten</h2>
       ${hist.length ? `<div class="list" style="padding:0">${hist.map(w => `<div class="li"><div class="muted">${fmtDate(w.date)} · ${esc(w.name)}</div><div>${esc(fmtSets(exType(d.id), w.entries.find(e => e.exId === d.id).sets))}</div></div>`).join("")}</div>` : `<p class="muted">Noch nicht trainiert.</p>`}
       <button class="block ghost danger" style="margin-top:14px" data-act="del-ex">Übung löschen</button>`}`;
+  }
+  if (s.kind === "programs"){
+    const head = `<div class="sheet-head"><button class="ghost" data-act="close">Fertig</button><b>Programme</b><span style="width:60px"></span></div>`;
+    if (lib.state !== "ready"){ loadLib(); return head + `<p class="muted">${lib.state === "error" ? "Die Programme sind gerade nicht erreichbar." : "Lade Programme …"}</p>`; }
+    return head + `<p class="muted">Jede Einheit lässt sich als Vorlage übernehmen. Fehlende Übungen kommen dabei in deine Liste. Sätze, Wiederholungen und Pausen stehen hier als Richtwert.</p>
+    ${lib.progs.map(p => { const open = s.open === p.id, days = (p.tageProWoche || []).join(" oder ");
+      return `<div class="card prog"><button class="li row between" data-act="prog-open" data-id="${esc(p.id)}" aria-expanded="${open}">
+        <span class="grow"><span class="ex-name" style="display:block">${esc(p.name)}</span><span class="muted">${days ? `${days} Tage pro Woche · ` : ""}${esc((p.erfahrung || []).join(", "))}</span></span>
+        <span class="muted">${open ? "▾" : "▸"}</span></button>
+        ${open ? `<p class="muted prog-desc">${esc(p.beschreibung || "")}</p>${p.einheiten.map(u => vUnit(p, u)).join("")}` : ""}</div>`; }).join("")}`;
   }
   if (s.kind === "text"){
     return `<div class="sheet-head"><button class="ghost" data-act="close">Fertig</button><b>${esc(s.title)}</b><button class="ghost accent" data-act="copy-text">Kopieren</button></div>
@@ -940,6 +1055,7 @@ function render(){
     if (wasOpen && ui.sheet === lastSheet) sh.querySelector(".panel").scrollTop = st;
   } else { sh.innerHTML = ""; sh.classList.remove("open"); }
   lastSheet = ui.sheet;
+  if (ui.sheet && ui.sheet.kind === "picker" && ui.sheet.q){ $("#pick-q").value = ui.sheet.q; filterPick(ui.sheet.q); }
   tick();
   keepAwake();
 }
@@ -1063,7 +1179,7 @@ const actions = {
   tab: el => { ui.tab = el.dataset.tab; ui.sheet = null; render(); window.scrollTo(0, 0); },
   start: el => {
     const t = S.templates.find(x => x.id === el.dataset.id);
-    S.active = {id:uid(), date:Date.now(), name:t ? t.name : "Freies Training", entries:(t ? t.ex : []).filter(exById).map(newEntry)};
+    S.active = {id:uid(), date:Date.now(), name:t ? t.name : "Freies Training", entries:(t ? t.ex : []).filter(exById).map(id => newEntry(id, planOf(t, id)))};
     save(); render(); window.scrollTo(0, 0);
   },
   discard: async () => { if (await ask("Training verwerfen? Nichts davon wird gespeichert.", "Verwerfen", true)){ S.active = null; stopTimer(); save(); render(); } },
@@ -1105,11 +1221,31 @@ const actions = {
   "add-set": el => { const en = S.active.entries[+el.dataset.i], p = en.sets[en.sets.length - 1] || {a:"", b:""}; en.sets.push({a:p.a, b:p.b, done:false}); save(); render(); },
   "del-set": el => { S.active.entries[+el.dataset.i].sets.pop(); save(); render(); },
   "del-entry": async el => { if (await ask("Übung aus diesem Training entfernen?", "Entfernen", true)){ S.active.entries.splice(+el.dataset.i, 1); save(); render(); } },
-  pick: el => { ui.sheet = {kind:"picker", target:el.dataset.target, back:ui.sheet}; render(); },
+  pick: el => { retryLib(); ui.sheet = {kind:"picker", target:el.dataset.target, back:ui.sheet}; render(); },
   picked: el => {
     const s = ui.sheet, id = el.dataset.id;
     if (s.target === "active"){ S.active.entries.push(newEntry(id)); save(); ui.sheet = null; render(); setTimeout(() => window.scrollTo({top:document.body.scrollHeight, behavior:"smooth"}), 30); }
+    else if (s.back.draft.ex.includes(id)) toast(`„${exName(id)}“ ist schon in der Vorlage`);   // in Vorlagen keine Doppelten
     else { s.back.draft.ex.push(id); ui.sheet = s.back; render(); }
+  },
+  "picked-lib": el => {
+    const l = lib.byId.get(el.dataset.lib);
+    if (!l || !ui.sheet) return;
+    const id = addFromLib(l); save();
+    if (ui.sheet.target === "lib"){ render(); toast(`„${l.name}“ hinzugefügt`); return; }
+    actions.picked({dataset:{id}});
+  },
+  "to-lib": () => { const t = $("#pick-list .lib-title"), p = $("#sheet .panel"); if (t && p) p.scrollTo({top:t.offsetTop - 64, behavior:"smooth"}); },   // 64 px: Platz für die Kopfzeile des Sheets
+  "lib-pick": () => { retryLib(); ui.sheet = {kind:"picker", target:"lib"}; render(); },
+  programs: () => { retryLib(); ui.sheet = {kind:"programs"}; render(); },
+  "prog-open": el => { ui.sheet.open = ui.sheet.open === el.dataset.id ? null : el.dataset.id; render(); },
+  "prog-take": el => {
+    const p = lib.progs.find(x => x.id === el.dataset.p), u = p && p.einheiten.find(x => x.id === el.dataset.u);
+    if (!u || S.templates.some(t => t.lib === u.id)) return;
+    const ex = [...new Set((u.uebungen || []).map(x => lib.byId.get(x.uebung)).filter(Boolean).map(addFromLib))];
+    const name = S.templates.some(t => t.name === u.name) ? `${u.name} (${p.name})` : u.name;   // gleiche Namen vermeiden, „Zuletzt …“ hängt am Namen
+    S.templates.push({id:uid(), name, ex, lib:u.id});
+    save(); render(); toast(`Vorlage „${name}“ angelegt`);
   },
   "new-ex-inline": () => { ui.sheet = {kind:"exercise", draft:{isNew:true, id:uid(), name:"", cat:"", type:"kraft"}, back:ui.sheet}; render(); },
   close: () => { ui.sheet = ui.sheet && ui.sheet.back || null; render(); },
@@ -1120,7 +1256,8 @@ const actions = {
   "save-tpl": () => {
     const d = ui.sheet.draft;
     if (!d.name.trim()){ toast("Bitte einen Namen eingeben"); return; }
-    const t = {id:d.id, name:d.name.trim(), ex:d.ex}, k = S.templates.findIndex(x => x.id === d.id);
+    const {isNew, ...rest} = d;   // übrige Felder (z. B. lib) bleiben erhalten
+    const t = {...rest, name:d.name.trim(), ex:d.ex}, k = S.templates.findIndex(x => x.id === d.id);
     if (k >= 0) S.templates[k] = t; else S.templates.push(t);
     save(); ui.sheet = null; render();
   },
@@ -1195,14 +1332,7 @@ document.addEventListener("input", e => {
     const s = S.active.entries[+t.dataset.i]?.sets[+t.dataset.j];
     if (s){ s[t.dataset.f] = t.value; clearTimeout(saveT); saveT = setTimeout(() => { saveT = null; save(); }, 400); }
   } else if (t.dataset.draft && ui.sheet?.draft){ ui.sheet.draft[t.dataset.draft] = t.value; }
-  else if (t.id === "pick-q"){
-    const q = t.value.trim().toLowerCase();
-    document.querySelectorAll("#pick-list .grp").forEach(g => {
-      let any = false;
-      g.querySelectorAll("[data-name]").forEach(b => { const hit = !q || b.dataset.name.includes(q); b.style.display = hit ? "" : "none"; any = any || hit; });
-      g.style.display = any ? "" : "none";
-    });
-  }
+  else if (t.id === "pick-q"){ if (ui.sheet) ui.sheet.q = t.value; filterPick(t.value); }
 });
 document.addEventListener("change", e => {
   const t = e.target;
@@ -1238,6 +1368,7 @@ async function boot(){
   }
   clearTimeout(slow);
   render();
+  if (S) loadLib();   // Übungsbibliothek im Hintergrund laden
   // Den Browser bitten, die Daten nicht von sich aus zu löschen (klappt v. a. bei installierter App).
   if (S && store.status !== "off" && navigator.storage && navigator.storage.persist){
     navigator.storage.persist().then(ok => { store.persisted = ok; if (ok && ui.tab === "verlauf" && !ui.sheet) render(); }, () => {});

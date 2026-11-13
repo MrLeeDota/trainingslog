@@ -6,11 +6,6 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 Erste Runde vom 13.11.2026. NOTIZEN.md war noch leer, die Ideen stammen aus der Recherche zu Strong, Hevy, JEFIT, Fitbod, Apple Fitness, Strava und Runna und aus dem Blick auf `index.html`. Sortiert nach Nutzen im Verhältnis zum Aufwand.
 
-### 11. Übungsbibliothek in der App
-- Nutzen und Aufwand: noch nicht bewertet · Datenformat: noch offen
-
-Herkunft: eigener Vorschlag (13.11.2026). Beim Anlegen einer Übung oder Vorlage aus `bibliothek/` auswählen statt alles selbst einzutippen. Eigene Übungen und Daten bleiben unverändert.
-
 ## Angenommen
 
 Noch nichts.
@@ -32,6 +27,11 @@ Herkunft: Hevy (Pausen-Timer pro Übung von 5 s bis 5 min oder aus); Strong nenn
 ## Erledigt
 
 Umgesetzt am 14.11.2026:
+
+### 11. Übungsbibliothek in der App
+- Nutzen: hoch · Aufwand: M · Datenformat: ja (optionales Feld `lib` an Übungen und Vorlagen)
+
+Herkunft: eigener Vorschlag (13.11.2026). Beim Anlegen einer Übung oder Vorlage aus `bibliothek/` auswählen statt alles selbst einzutippen. Eigene Übungen und Daten bleiben unverändert.
 
 ### 9. Feste Notiz pro Übung
 - Nutzen: mittel · Aufwand: S · Datenformat: ja

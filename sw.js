@@ -15,7 +15,8 @@ const ROOT = new URL(SCOPE).pathname;
 
 // Wird bei der Installation geladen, damit die App schon nach dem ersten Besuch offline startet.
 // Neue Dateien, die offline gebraucht werden, hier eintragen.
-const PRECACHE = ["./", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
+const PRECACHE = ["./", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png",
+  "bibliothek/uebungen.json", "bibliothek/vorlagen.json"];
 
 self.addEventListener("install", event => {
   event.waitUntil(

@@ -1,0 +1,377 @@
+{
+  "v": 1,
+  "vorlagen": [
+    {
+      "id": "push-pull-legs",
+      "name": "Push/Pull/Legs",
+      "beschreibung": "Split in Drücken (Brust, Schultern, Trizeps), Ziehen (Rücken, Bizeps) und Beine. Jede Einheit beginnt mit einer schweren Grundübung, danach folgen Übungen im mittleren Wiederholungsbereich.",
+      "erfahrung": ["fortgeschritten", "erfahren"],
+      "ziel": ["muskelaufbau", "kraft"],
+      "tageProWoche": [3, 6],
+      "wochenplan": "6 Tage: Push, Pull, Legs, Push, Pull, Legs, Ruhetag. Jede Muskelgruppe kommt 2× pro Woche dran, die großen Muskelgruppen auf etwa 12 bis 18 direkte Sätze pro Woche. 3 Tage: Push, Pull, Legs mit Ruhetagen dazwischen; dann trainiert jede Muskelgruppe nur 1× pro Woche mit etwa 6 bis 9 Sätzen, also unter den für Muskelaufbau empfohlenen 10 Sätzen. Wer nur 3 Tage hat, fährt mit Ganzkörper oder Ober-/Unterkörper meist besser.",
+      "aufwaermen": "5 min locker auf Rad, Rudergerät oder mit dem Springseil. Vor der ersten Übung 2 bis 3 Aufwärmsätze mit steigendem Gewicht und wenigen Wdh, etwa mit 50, 70 und 85 % des Arbeitsgewichts.",
+      "intensitaet": "Arbeitssätze mit etwa 2 bis 3 Wdh in Reserve beenden; Muskelversagen ist nicht nötig.",
+      "progression": "Doppelte Progression: das Gewicht halten, bis alle Sätze die obere Wdh-Grenze erreichen, dann um den kleinsten Schritt erhöhen (2,5 kg an der Langhantel, 1 bis 2 kg an Kurzhantel und Kabel) und wieder an der unteren Grenze beginnen.",
+      "einheiten": [
+        {
+          "id": "push-pull-legs-push",
+          "name": "Push",
+          "uebungen": [
+            {"uebung": "bankdruecken-langhantel", "saetze": 3, "wdh": "6-8", "pauseSek": 180},
+            {"uebung": "schraegbankdruecken-kurzhantel", "saetze": 3, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "schulterdruecken-kurzhantel", "saetze": 3, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "seitheben-kurzhantel", "saetze": 3, "wdh": "12-15", "pauseSek": 90},
+            {"uebung": "dips", "saetze": 2, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "trizepsstrecken-ueberkopf-kabel", "saetze": 2, "wdh": "10-15", "pauseSek": 90}
+          ]
+        },
+        {
+          "id": "push-pull-legs-pull",
+          "name": "Pull",
+          "uebungen": [
+            {"uebung": "klimmzuege", "saetze": 3, "wdh": "6-10", "pauseSek": 150, "hinweis": "Wer keine 6 Klimmzüge schafft, nimmt den Latzug mit 8 bis 10 Wdh."},
+            {"uebung": "rudern-langhantel", "saetze": 3, "wdh": "6-10", "pauseSek": 150},
+            {"uebung": "latzug", "saetze": 3, "wdh": "10-12", "pauseSek": 120},
+            {"uebung": "face-pulls", "saetze": 3, "wdh": "12-15", "pauseSek": 60},
+            {"uebung": "bizepscurls-langhantel", "saetze": 3, "wdh": "8-12", "pauseSek": 90},
+            {"uebung": "hammercurls-kurzhantel", "saetze": 2, "wdh": "10-15", "pauseSek": 90}
+          ]
+        },
+        {
+          "id": "push-pull-legs-legs",
+          "name": "Legs",
+          "uebungen": [
+            {"uebung": "kniebeugen-langhantel", "saetze": 3, "wdh": "6-8", "pauseSek": 180},
+            {"uebung": "rumaenisches-kreuzheben-langhantel", "saetze": 3, "wdh": "8-10", "pauseSek": 120, "hinweis": "Alternativ Kreuzheben mit 3 × 3 bis 5 Wdh und 180 s Pause."},
+            {"uebung": "beinpresse", "saetze": 3, "wdh": "10-12", "pauseSek": 120},
+            {"uebung": "beinbeuger", "saetze": 3, "wdh": "10-15", "pauseSek": 90},
+            {"uebung": "wadenheben-stehend", "saetze": 3, "wdh": "10-15", "pauseSek": 90},
+            {"uebung": "haengendes-beinheben", "saetze": 3, "wdh": "8-15", "pauseSek": 60}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ober-unterkoerper",
+      "name": "Ober-/Unterkörper",
+      "beschreibung": "Vier Einheiten pro Woche, jede Muskelgruppe zweimal. Die A-Tage legen den Schwerpunkt auf schwere Grundübungen, die B-Tage auf mehr Wiederholungen.",
+      "erfahrung": ["fortgeschritten"],
+      "ziel": ["kraft", "muskelaufbau"],
+      "tageProWoche": [4],
+      "wochenplan": "Mo Oberkörper A, Di Unterkörper A, Do Oberkörper B, Fr Unterkörper B. Die großen Muskelgruppen kommen auf etwa 9 bis 14 direkte Sätze pro Woche.",
+      "aufwaermen": "5 min locker auf Rad, Rudergerät oder mit dem Springseil. Vor der ersten Übung 2 bis 3 Aufwärmsätze mit steigendem Gewicht und wenigen Wdh, etwa mit 50, 70 und 85 % des Arbeitsgewichts.",
+      "intensitaet": "Arbeitssätze mit etwa 2 bis 3 Wdh in Reserve beenden; Muskelversagen ist nicht nötig.",
+      "progression": "Doppelte Progression: das Gewicht halten, bis alle Sätze die obere Wdh-Grenze erreichen, dann um den kleinsten Schritt erhöhen (2,5 kg an der Langhantel, 1 bis 2 kg an Kurzhantel und Kabel) und wieder an der unteren Grenze beginnen.",
+      "einheiten": [
+        {
+          "id": "ober-unterkoerper-oberkoerper-a",
+          "name": "Oberkörper A",
+          "uebungen": [
+            {"uebung": "bankdruecken-langhantel", "saetze": 4, "wdh": "5-8", "pauseSek": 180},
+            {"uebung": "rudern-langhantel", "saetze": 4, "wdh": "6-8", "pauseSek": 180},
+            {"uebung": "schulterdruecken-kurzhantel", "saetze": 3, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "latzug", "saetze": 3, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "dips", "saetze": 2, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "bizepscurls-langhantel", "saetze": 2, "wdh": "10-15", "pauseSek": 90}
+          ]
+        },
+        {
+          "id": "ober-unterkoerper-unterkoerper-a",
+          "name": "Unterkörper A",
+          "uebungen": [
+            {"uebung": "kniebeugen-langhantel", "saetze": 4, "wdh": "5-8", "pauseSek": 180},
+            {"uebung": "rumaenisches-kreuzheben-langhantel", "saetze": 3, "wdh": "8-10", "pauseSek": 120},
+            {"uebung": "ausfallschritte-kurzhantel", "saetze": 2, "wdh": "8-12", "jeSeite": true, "pauseSek": 90},
+            {"uebung": "beinbeuger", "saetze": 3, "wdh": "10-15", "pauseSek": 90},
+            {"uebung": "wadenheben-stehend", "saetze": 3, "wdh": "10-15", "pauseSek": 90},
+            {"uebung": "plank", "saetze": 3, "dauerSek": "30-60", "pauseSek": 60}
+          ]
+        },
+        {
+          "id": "ober-unterkoerper-oberkoerper-b",
+          "name": "Oberkörper B",
+          "uebungen": [
+            {"uebung": "schulterdruecken-langhantel", "saetze": 3, "wdh": "5-8", "pauseSek": 180},
+            {"uebung": "klimmzuege", "saetze": 4, "wdh": "6-10", "pauseSek": 150, "hinweis": "Wer keine 6 Klimmzüge schafft, nimmt den Latzug mit 8 bis 10 Wdh."},
+            {"uebung": "schraegbankdruecken-kurzhantel", "saetze": 3, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "rudern-kabel", "saetze": 3, "wdh": "10-12", "pauseSek": 120},
+            {"uebung": "seitheben-kurzhantel", "saetze": 3, "wdh": "12-15", "pauseSek": 90},
+            {"uebung": "trizepsstrecken-ueberkopf-kabel", "saetze": 2, "wdh": "10-15", "pauseSek": 90},
+            {"uebung": "face-pulls", "saetze": 2, "wdh": "12-15", "pauseSek": 60}
+          ]
+        },
+        {
+          "id": "ober-unterkoerper-unterkoerper-b",
+          "name": "Unterkörper B",
+          "uebungen": [
+            {"uebung": "kreuzheben-langhantel", "saetze": 3, "wdh": "3-5", "pauseSek": 180},
+            {"uebung": "beinpresse", "saetze": 3, "wdh": "10-12", "pauseSek": 120},
+            {"uebung": "bulgarische-split-kniebeugen-kurzhantel", "saetze": 2, "wdh": "8-12", "jeSeite": true, "pauseSek": 90},
+            {"uebung": "hip-thrust-langhantel", "saetze": 3, "wdh": "8-12", "pauseSek": 90},
+            {"uebung": "wadenheben-stehend", "saetze": 3, "wdh": "10-15", "pauseSek": 90},
+            {"uebung": "pallof-press-kabel", "saetze": 3, "wdh": "10-12", "jeSeite": true, "pauseSek": 60}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ganzkoerper-3-tage",
+      "name": "Ganzkörper an 3 Tagen",
+      "beschreibung": "Drei verschiedene Ganzkörper-Einheiten mit je einer Bein- oder Hüftübung, einer Drück- und einer Zugübung vorn. Für den Einstieg ins Krafttraining oder wenn neben Laufen und Padel nur drei Krafttage bleiben.",
+      "erfahrung": ["einsteiger", "fortgeschritten"],
+      "ziel": ["fitness", "muskelaufbau", "kraft"],
+      "tageProWoche": [3],
+      "wochenplan": "Mo A, Mi B, Fr C mit mindestens einem Ruhetag zwischen zwei Einheiten. Beine, Brust und Rücken kommen in jeder Einheit dran.",
+      "aufwaermen": "5 min locker, dann vor der ersten Übung 2 Aufwärmsätze mit leichtem Gewicht.",
+      "intensitaet": "In den ersten Wochen geht Technik vor Gewicht: Sätze mit 3 bis 4 Wdh in Reserve beenden, danach mit etwa 2 bis 3.",
+      "progression": "Doppelte Progression: das Gewicht halten, bis alle Sätze die obere Wdh-Grenze erreichen, dann um den kleinsten Schritt erhöhen. Einsteiger können anfangs oft jede Woche steigern.",
+      "einheiten": [
+        {
+          "id": "ganzkoerper-3-tage-a",
+          "name": "Ganzkörper A",
+          "uebungen": [
+            {"uebung": "kniebeugen-langhantel", "saetze": 3, "wdh": "8-12", "pauseSek": 120, "hinweis": "Anfangs Goblet Squat, bis die Technik sitzt."},
+            {"uebung": "bankdruecken-langhantel", "saetze": 3, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "latzug", "saetze": 3, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "beinbeuger", "saetze": 2, "wdh": "10-15", "pauseSek": 90},
+            {"uebung": "seitheben-kurzhantel", "saetze": 2, "wdh": "12-15", "pauseSek": 90},
+            {"uebung": "plank", "saetze": 3, "dauerSek": "20-45", "pauseSek": 60}
+          ]
+        },
+        {
+          "id": "ganzkoerper-3-tage-b",
+          "name": "Ganzkörper B",
+          "uebungen": [
+            {"uebung": "rumaenisches-kreuzheben-langhantel", "saetze": 3, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "schulterdruecken-kurzhantel", "saetze": 3, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "rudern-kabel", "saetze": 3, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "ausfallschritte-kurzhantel", "saetze": 2, "wdh": "8-12", "jeSeite": true, "pauseSek": 90},
+            {"uebung": "face-pulls", "saetze": 2, "wdh": "12-15", "pauseSek": 60},
+            {"uebung": "dead-bug", "saetze": 3, "wdh": "6-10", "jeSeite": true, "pauseSek": 60}
+          ]
+        },
+        {
+          "id": "ganzkoerper-3-tage-c",
+          "name": "Ganzkörper C",
+          "uebungen": [
+            {"uebung": "beinpresse", "saetze": 3, "wdh": "10-12", "pauseSek": 120},
+            {"uebung": "schraegbankdruecken-kurzhantel", "saetze": 3, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "rudern-kurzhantel-einarmig", "saetze": 3, "wdh": "8-12", "jeSeite": true, "pauseSek": 90},
+            {"uebung": "hip-thrust-langhantel", "saetze": 3, "wdh": "8-12", "pauseSek": 90},
+            {"uebung": "bizepscurls-kurzhantel", "saetze": 2, "wdh": "10-15", "pauseSek": 90},
+            {"uebung": "trizepsdruecken-kabel", "saetze": 2, "wdh": "10-15", "pauseSek": 90}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kraft-5x5",
+      "name": "5×5",
+      "beschreibung": "Langhantel-Kraftprogramm mit zwei abwechselnden Einheiten aus wenigen Grundübungen, nach dem Muster von StrongLifts 5×5. Ein verbreitetes Praxisprogramm; als Ganzes ist es nicht in Studien geprüft.",
+      "erfahrung": ["einsteiger", "fortgeschritten"],
+      "ziel": ["kraft"],
+      "tageProWoche": [3],
+      "wochenplan": "Mo A, Mi B, Fr A; in der nächsten Woche B, A, B.",
+      "aufwaermen": "Kniebeugen, Bank- und Schulterdrücken: 2 × 5 mit der leeren Stange, dann in 2 bis 3 Schritten zum Arbeitsgewicht. Kreuzheben und Rudern mit 30 bis 60 kg beginnen und in Schritten von 10 bis 20 kg steigern.",
+      "intensitaet": "Deutlich unter dem Maximum beginnen, mit der leeren Stange oder dem Gewicht, das man etwa 10-mal schafft. Anfangs bleiben viele Wdh in Reserve, nach einigen Wochen wird es hart.",
+      "progression": "Alle Sätze mit 5 Wdh geschafft: beim nächsten Mal 2,5 kg mehr, beim Kreuzheben anfangs 5 kg. Nicht geschafft: dasselbe Gewicht wiederholen. Klappt es dreimal hintereinander nicht, das Gewicht um etwa 10 % senken und neu aufbauen (übliche Praxis).",
+      "einheiten": [
+        {
+          "id": "kraft-5x5-a",
+          "name": "5×5 A",
+          "hinweis": "Nach sehr harten Sätzen die Pause auf bis zu 5 min verlängern.",
+          "uebungen": [
+            {"uebung": "kniebeugen-langhantel", "saetze": 5, "wdh": "5", "pauseSek": 180},
+            {"uebung": "bankdruecken-langhantel", "saetze": 5, "wdh": "5", "pauseSek": 180},
+            {"uebung": "rudern-langhantel", "saetze": 5, "wdh": "5", "pauseSek": 180}
+          ]
+        },
+        {
+          "id": "kraft-5x5-b",
+          "name": "5×5 B",
+          "hinweis": "Nach sehr harten Sätzen die Pause auf bis zu 5 min verlängern.",
+          "uebungen": [
+            {"uebung": "kniebeugen-langhantel", "saetze": 5, "wdh": "5", "pauseSek": 180},
+            {"uebung": "schulterdruecken-langhantel", "saetze": 5, "wdh": "5", "pauseSek": 180},
+            {"uebung": "kreuzheben-langhantel", "saetze": 1, "wdh": "5"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lauf-einsteiger",
+      "name": "Laufen für Einsteiger: in 9 Wochen zu 30 Minuten",
+      "beschreibung": "Vom Wechsel aus Laufen und Gehen zu 30 Minuten lockerem Laufen am Stück. Der Aufbau lehnt sich an den Plan Couch to 5K des britischen NHS an.",
+      "erfahrung": ["einsteiger"],
+      "ziel": ["ausdauer", "fitness"],
+      "tageProWoche": [3],
+      "dauerWochen": 9,
+      "wochenplan": "3 Läufe pro Woche mit mindestens einem Ruhetag dazwischen. Jede Woche hat eine Einheit, die dreimal gelaufen wird. Fühlt sich eine Woche zu schwer an, wird sie wiederholt.",
+      "aufwaermen": "5 min zügig gehen; nach dem Lauf 5 min gehen.",
+      "intensitaet": "Locker: Sprechen in ganzen Sätzen muss möglich sein. Das Tempo ist egal, die Zeit zählt. Die Pause zwischen den Laufabschnitten wird zügig gegangen.",
+      "progression": "Die Laufabschnitte werden von Woche zu Woche länger, ab Woche 7 läuft man durch. Danach geht es mit dem Plan „Laufen an 3 Tagen“ weiter.",
+      "einheiten": [
+        {
+          "id": "lauf-einsteiger-woche-1",
+          "name": "Laufen Woche 1",
+          "uebungen": [
+            {"uebung": "lauf-geh-wechsel", "saetze": 8, "dauerMin": "1", "pauseSek": 90}
+          ]
+        },
+        {
+          "id": "lauf-einsteiger-woche-2",
+          "name": "Laufen Woche 2",
+          "uebungen": [
+            {"uebung": "lauf-geh-wechsel", "saetze": 6, "dauerMin": "1,5", "pauseSek": 120}
+          ]
+        },
+        {
+          "id": "lauf-einsteiger-woche-3",
+          "name": "Laufen Woche 3",
+          "uebungen": [
+            {"uebung": "lauf-geh-wechsel", "saetze": 4, "dauerMin": "3", "pauseSek": 90}
+          ]
+        },
+        {
+          "id": "lauf-einsteiger-woche-4",
+          "name": "Laufen Woche 4",
+          "uebungen": [
+            {"uebung": "lauf-geh-wechsel", "saetze": 4, "dauerMin": "4", "pauseSek": 120}
+          ]
+        },
+        {
+          "id": "lauf-einsteiger-woche-5",
+          "name": "Laufen Woche 5",
+          "uebungen": [
+            {"uebung": "lauf-geh-wechsel", "saetze": 3, "dauerMin": "6", "pauseSek": 120}
+          ]
+        },
+        {
+          "id": "lauf-einsteiger-woche-6",
+          "name": "Laufen Woche 6",
+          "uebungen": [
+            {"uebung": "lauf-geh-wechsel", "saetze": 2, "dauerMin": "10", "pauseSek": 120}
+          ]
+        },
+        {
+          "id": "lauf-einsteiger-woche-7",
+          "name": "Laufen Woche 7",
+          "uebungen": [
+            {"uebung": "dauerlauf-locker", "saetze": 1, "dauerMin": "20"}
+          ]
+        },
+        {
+          "id": "lauf-einsteiger-woche-8",
+          "name": "Laufen Woche 8",
+          "uebungen": [
+            {"uebung": "dauerlauf-locker", "saetze": 1, "dauerMin": "25"}
+          ]
+        },
+        {
+          "id": "lauf-einsteiger-woche-9",
+          "name": "Laufen Woche 9",
+          "uebungen": [
+            {"uebung": "dauerlauf-locker", "saetze": 1, "dauerMin": "30"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lauf-3-tage",
+      "name": "Laufen an 3 Tagen",
+      "beschreibung": "Für alle, die 30 Minuten locker am Stück laufen können: pro Woche ein Intervalltraining, ein lockerer Dauerlauf und ein langer Lauf. Alle zwei bis drei Wochen ersetzt ein Tempolauf die Intervalle.",
+      "erfahrung": ["fortgeschritten"],
+      "ziel": ["ausdauer"],
+      "tageProWoche": [3],
+      "wochenplan": "Zum Beispiel Di Intervalle, Do lockerer Dauerlauf, So langer Lauf. Zwei von drei Läufen sind locker. Harte Einheiten nicht auf aufeinanderfolgende Tage und nicht direkt vor ein Padel-Match legen.",
+      "aufwaermen": "Vor Intervallen und Tempolauf 10 bis 15 min einlaufen, danach 5 bis 10 min auslaufen.",
+      "intensitaet": "Locker heißt: Sprechen in ganzen Sätzen ist möglich. Hart heißt bei den Intervallen: etwa 90 bis 95 % der maximalen Herzfrequenz, Sprechen ist kaum möglich.",
+      "progression": "Zuerst die Dauer der lockeren und langen Läufe steigern, erst danach das Tempo. Der lange Lauf wächst etwa alle ein bis zwei Wochen um 5 bis 10 min (übliche Praxis).",
+      "einheiten": [
+        {
+          "id": "lauf-3-tage-intervalle",
+          "name": "Intervalle 4 × 4",
+          "hinweis": "Vorher 10 bis 15 min einlaufen. Die Pause wird locker getrabt, nicht gegangen.",
+          "uebungen": [
+            {"uebung": "intervalllauf", "saetze": 4, "dauerMin": "4", "pauseSek": 180, "intensitaet": "90 bis 95 % der maximalen Herzfrequenz; Trabpause bei etwa 70 %."}
+          ]
+        },
+        {
+          "id": "lauf-3-tage-dauerlauf",
+          "name": "Lockerer Dauerlauf",
+          "uebungen": [
+            {"uebung": "dauerlauf-locker", "saetze": 1, "dauerMin": "30-45", "hinweis": "Wer mag, hängt 4 bis 6 Steigerungsläufe über je etwa 20 s an."}
+          ]
+        },
+        {
+          "id": "lauf-3-tage-langer-lauf",
+          "name": "Langer Lauf",
+          "uebungen": [
+            {"uebung": "langer-lauf", "saetze": 1, "dauerMin": "45-75"}
+          ]
+        },
+        {
+          "id": "lauf-3-tage-tempolauf",
+          "name": "Tempolauf",
+          "hinweis": "Ersetzt alle zwei bis drei Wochen die Intervalle. Vorher 10 bis 15 min einlaufen.",
+          "uebungen": [
+            {"uebung": "tempolauf", "saetze": 1, "dauerMin": "15-25", "intensitaet": "Angenehm hart: Sprechen geht nur noch in kurzen Sätzen."}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "padel-athletik",
+      "name": "Padel: Athletik und Platztraining",
+      "beschreibung": "Ergänzung für Padel-Spieler: Beine für Antritte und Richtungswechsel, Rumpf für Drehung und Stabilität, Schulter und Schulterblatt für Überkopfschläge, dazu eine Technik-Einheit auf dem Platz. Padel-spezifische Trainingsstudien gibt es kaum; die Auswahl richtet sich nach den häufigsten Belastungsorten im Padel und nach Programmen aus Handball und Fußball (Quellen im README).",
+      "erfahrung": ["einsteiger", "fortgeschritten"],
+      "ziel": ["padel", "kraft", "fitness"],
+      "tageProWoche": [2, 3],
+      "wochenplan": "Athletik A und B je einmal pro Woche, nicht am Tag vor einem Match; dazu Platztraining oder Matches. Wer schon nach einem anderen Kraftplan trainiert, übernimmt daraus nur die Schulter-, Rumpf- und Adduktorenübungen als Ergänzung.",
+      "aufwaermen": "Vor Matches und Platztraining etwa 10 min: Seilspringen, Außenrotation und Y-T-W mit Band, Split-Steps und Seitschritte, dann lockere Ballwechsel.",
+      "intensitaet": "Kraftübungen mit etwa 2 bis 3 Wdh in Reserve. Sprünge und Würfe mit voller Geschwindigkeit; aufhören, sobald die Ausführung nachlässt.",
+      "progression": "Kraftübungen nach doppelter Progression. Bei Sprüngen und Würfen steigen Weite und Tempo, nicht die Menge. Copenhagen-Adduktoren und Nordic Hamstring Curls über mehrere Wochen langsam aufbauen.",
+      "einheiten": [
+        {
+          "id": "padel-athletik-a",
+          "name": "Padel-Athletik A",
+          "uebungen": [
+            {"uebung": "bulgarische-split-kniebeugen-kurzhantel", "saetze": 3, "wdh": "6-10", "jeSeite": true, "pauseSek": 90},
+            {"uebung": "rumaenisches-kreuzheben-langhantel", "saetze": 3, "wdh": "6-10", "pauseSek": 150},
+            {"uebung": "rudern-kurzhantel-einarmig", "saetze": 3, "wdh": "8-12", "jeSeite": true, "pauseSek": 90},
+            {"uebung": "schulterdruecken-kurzhantel", "saetze": 3, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "aussenrotation-kabel", "saetze": 3, "wdh": "12-15", "jeSeite": true, "pauseSek": 60},
+            {"uebung": "copenhagen-adduktoren", "saetze": 2, "wdh": "6-10", "jeSeite": true, "pauseSek": 60},
+            {"uebung": "pallof-press-kabel", "saetze": 3, "wdh": "10-12", "jeSeite": true, "pauseSek": 60}
+          ]
+        },
+        {
+          "id": "padel-athletik-b",
+          "name": "Padel-Athletik B",
+          "uebungen": [
+            {"uebung": "skater-spruenge", "saetze": 3, "wdh": "5-8", "jeSeite": true, "pauseSek": 90},
+            {"uebung": "medizinball-rotationswurf", "saetze": 3, "wdh": "6-8", "jeSeite": true, "pauseSek": 90},
+            {"uebung": "seitliche-ausfallschritte", "saetze": 3, "wdh": "8-10", "jeSeite": true, "pauseSek": 90},
+            {"uebung": "nordic-hamstring-curls", "saetze": 2, "wdh": "4-6", "pauseSek": 120},
+            {"uebung": "face-pulls", "saetze": 3, "wdh": "12-15", "pauseSek": 60},
+            {"uebung": "ytw-heben", "saetze": 2, "wdh": "8-10", "pauseSek": 60},
+            {"uebung": "seitstuetz", "saetze": 3, "dauerSek": "20-40", "jeSeite": true, "pauseSek": 45}
+          ]
+        },
+        {
+          "id": "padel-athletik-platz",
+          "name": "Padel-Platztraining",
+          "hinweis": "Am besten zu zweit oder mit Trainer; die Zeiten sind Richtwerte.",
+          "uebungen": [
+            {"uebung": "seilspringen", "saetze": 3, "dauerMin": "1", "pauseSek": 60},
+            {"uebung": "padel-beinarbeit", "saetze": 1, "dauerMin": "10"},
+            {"uebung": "padel-volley", "saetze": 1, "dauerMin": "15"},
+            {"uebung": "padel-bandeja-vibora", "saetze": 1, "dauerMin": "15"},
+            {"uebung": "padel-wandspiel", "saetze": 1, "dauerMin": "15"},
+            {"uebung": "padel-aufschlag-return", "saetze": 1, "dauerMin": "10"}
+          ]
+        }
+      ]
+    }
+  ]
+}

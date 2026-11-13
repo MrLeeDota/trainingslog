@@ -1,0 +1,850 @@
+{
+  "v": 1,
+  "uebungen": [
+    {
+      "id": "bankdruecken-langhantel",
+      "name": "Bankdrücken",
+      "cat": "Brust",
+      "type": "kraft",
+      "geraet": ["Langhantel", "Bank"],
+      "muskeln": ["Brust", "vordere Schulter", "Trizeps"],
+      "grunduebung": true,
+      "hinweise": [
+        "Schulterblätter zurück und nach unten ziehen, Füße fest am Boden, das Gesäß bleibt auf der Bank.",
+        "Stange kontrolliert zur unteren Brust absenken, die Unterarme stehen dabei etwa senkrecht."
+      ]
+    },
+    {
+      "id": "bankdruecken-kurzhantel",
+      "name": "Kurzhantel-Bankdrücken",
+      "cat": "Brust",
+      "type": "kraft",
+      "geraet": ["Kurzhantel", "Bank"],
+      "muskeln": ["Brust", "vordere Schulter", "Trizeps"],
+      "grunduebung": true,
+      "hinweise": [
+        "Hanteln bis auf Brusthöhe absenken, die Ellbogen etwa 45 Grad vom Körper.",
+        "Hanteln über die Knie aufnehmen und ablegen statt sie seitlich fallen zu lassen."
+      ]
+    },
+    {
+      "id": "schraegbankdruecken-langhantel",
+      "name": "Schrägbankdrücken",
+      "cat": "Brust",
+      "type": "kraft",
+      "geraet": ["Langhantel", "Bank"],
+      "muskeln": ["Brust", "vordere Schulter", "Trizeps"],
+      "grunduebung": true,
+      "hinweise": [
+        "Bank auf etwa 30 Grad stellen; steiler verlagert die Arbeit auf die Schultern.",
+        "Stange zur oberen Brust knapp unter das Schlüsselbein führen."
+      ]
+    },
+    {
+      "id": "schraegbankdruecken-kurzhantel",
+      "name": "Kurzhantel-Schrägbankdrücken",
+      "cat": "Brust",
+      "type": "kraft",
+      "geraet": ["Kurzhantel", "Bank"],
+      "muskeln": ["Brust", "vordere Schulter", "Trizeps"],
+      "grunduebung": true,
+      "hinweise": [
+        "Bank auf etwa 30 Grad, die Hanteln über der oberen Brust zusammenführen.",
+        "Unten tief absenken, ohne die Schultern nach vorn rollen zu lassen."
+      ]
+    },
+    {
+      "id": "liegestuetze",
+      "name": "Liegestütze",
+      "cat": "Brust",
+      "type": "kraft",
+      "geraet": ["Körpergewicht"],
+      "muskeln": ["Brust", "vordere Schulter", "Trizeps"],
+      "grunduebung": true,
+      "hinweise": [
+        "Körper vom Kopf bis zu den Fersen in einer Linie, Bauch und Gesäß fest.",
+        "Leichter mit den Händen auf einer Bank, schwerer mit den Füßen erhöht."
+      ]
+    },
+    {
+      "id": "butterfly",
+      "name": "Butterfly",
+      "cat": "Brust",
+      "type": "kraft",
+      "geraet": ["Maschine"],
+      "muskeln": ["Brust"],
+      "grunduebung": false,
+      "hinweise": [
+        "Sitz so einstellen, dass die Griffe auf Brusthöhe liegen.",
+        "Ellbogen leicht gebeugt lassen und die Arme kontrolliert öffnen, bis die Brust gedehnt ist."
+      ]
+    },
+    {
+      "id": "schulterdruecken-langhantel",
+      "name": "Schulterdrücken",
+      "cat": "Schultern",
+      "type": "kraft",
+      "geraet": ["Langhantel"],
+      "muskeln": ["vordere Schulter", "seitliche Schulter", "Trizeps"],
+      "grunduebung": true,
+      "hinweise": [
+        "Stehend, Gesäß und Bauch fest anspannen, kein Hohlkreuz.",
+        "Stange dicht am Gesicht vorbei nach oben drücken und oben den Kopf unter die Stange bringen."
+      ]
+    },
+    {
+      "id": "schulterdruecken-kurzhantel",
+      "name": "Kurzhantel-Schulterdrücken",
+      "cat": "Schultern",
+      "type": "kraft",
+      "geraet": ["Kurzhantel", "Bank"],
+      "muskeln": ["vordere Schulter", "seitliche Schulter", "Trizeps"],
+      "grunduebung": true,
+      "hinweise": [
+        "Sitzend mit Rückenlehne, die Hanteln von Ohrhöhe nach oben drücken.",
+        "Ellbogen etwas vor dem Körper halten, nicht ganz zur Seite."
+      ]
+    },
+    {
+      "id": "seitheben-kurzhantel",
+      "name": "Seitheben",
+      "cat": "Schultern",
+      "type": "kraft",
+      "geraet": ["Kurzhantel"],
+      "muskeln": ["seitliche Schulter"],
+      "grunduebung": false,
+      "hinweise": [
+        "Arme seitlich bis etwa Schulterhöhe heben, die leicht gebeugten Ellbogen führen.",
+        "Leichtes Gewicht und kein Schwung aus dem Oberkörper."
+      ]
+    },
+    {
+      "id": "face-pulls",
+      "name": "Face Pulls",
+      "cat": "Schultern",
+      "type": "kraft",
+      "geraet": ["Kabel"],
+      "muskeln": ["hintere Schulter", "oberer Rücken", "Rotatorenmanschette"],
+      "grunduebung": false,
+      "hinweise": [
+        "Seil auf Augenhöhe zum Gesicht ziehen, die Hände enden neben den Ohren.",
+        "Am Ende die Arme nach außen drehen und die Schulterblätter zusammenführen."
+      ]
+    },
+    {
+      "id": "reverse-butterfly",
+      "name": "Reverse Butterfly",
+      "cat": "Schultern",
+      "type": "kraft",
+      "geraet": ["Maschine"],
+      "muskeln": ["hintere Schulter", "oberer Rücken"],
+      "grunduebung": false,
+      "hinweise": [
+        "Brust ans Polster, die fast gestreckten Arme nach hinten öffnen.",
+        "Die Bewegung kommt aus den Schultern, nicht vom Zurücklehnen."
+      ]
+    },
+    {
+      "id": "aussenrotation-kabel",
+      "name": "Außenrotation am Kabel",
+      "cat": "Schultern",
+      "type": "kraft",
+      "geraet": ["Kabel"],
+      "muskeln": ["Rotatorenmanschette"],
+      "grunduebung": false,
+      "hinweise": [
+        "Ellbogen 90 Grad gebeugt am Körper (ein kleines Handtuch dazwischen hilft), den Unterarm nach außen drehen.",
+        "Leicht und langsam, der Oberkörper dreht nicht mit; mit Widerstandsband auch als Aufwärmen auf dem Padelplatz."
+      ]
+    },
+    {
+      "id": "ytw-heben",
+      "name": "Y-T-W-Heben",
+      "cat": "Schultern",
+      "type": "kraft",
+      "geraet": ["Kurzhantel", "Bank"],
+      "muskeln": ["hintere Schulter", "oberer Rücken", "Rotatorenmanschette"],
+      "grunduebung": false,
+      "hinweise": [
+        "Bauchlage auf der Schrägbank, die Arme nacheinander als Y, T und W heben; eine Runde ist eine Wiederholung.",
+        "Sehr leicht oder ohne Gewicht, Daumen nach oben, Schulterblätter nach hinten unten."
+      ]
+    },
+    {
+      "id": "dips",
+      "name": "Dips",
+      "cat": "Trizeps",
+      "type": "kraft",
+      "geraet": ["Dipbarren", "Körpergewicht"],
+      "muskeln": ["Trizeps", "Brust", "vordere Schulter"],
+      "grunduebung": true,
+      "hinweise": [
+        "Schultern tief halten, nicht zu den Ohren ziehen; absenken, bis die Oberarme etwa waagerecht sind.",
+        "Wer noch keine schafft, beginnt an der Dip-Maschine mit Gegengewicht; Zusatzgewicht als kg eintragen."
+      ]
+    },
+    {
+      "id": "enges-bankdruecken",
+      "name": "Enges Bankdrücken",
+      "cat": "Trizeps",
+      "type": "kraft",
+      "geraet": ["Langhantel", "Bank"],
+      "muskeln": ["Trizeps", "Brust", "vordere Schulter"],
+      "grunduebung": true,
+      "hinweise": [
+        "Griff etwa schulterbreit, nicht enger; die Ellbogen bleiben nah am Körper.",
+        "Stange zur unteren Brust absenken."
+      ]
+    },
+    {
+      "id": "trizepsdruecken-kabel",
+      "name": "Trizepsdrücken am Kabel",
+      "cat": "Trizeps",
+      "type": "kraft",
+      "geraet": ["Kabel"],
+      "muskeln": ["Trizeps"],
+      "grunduebung": false,
+      "hinweise": [
+        "Ellbogen bleiben seitlich am Körper, nur die Unterarme bewegen sich.",
+        "Unten ganz strecken und ohne Schwung zurückführen."
+      ]
+    },
+    {
+      "id": "trizepsstrecken-ueberkopf-kabel",
+      "name": "Überkopf-Trizepsstrecken am Kabel",
+      "cat": "Trizeps",
+      "type": "kraft",
+      "geraet": ["Kabel"],
+      "muskeln": ["Trizeps"],
+      "grunduebung": false,
+      "hinweise": [
+        "Mit dem Rücken zum Kabel, das Seil hinter dem Kopf, die Ellbogen zeigen nach vorn oben.",
+        "Unten tief in die Dehnung gehen, oben ganz strecken; die Oberarme bleiben ruhig."
+      ]
+    },
+    {
+      "id": "klimmzuege",
+      "name": "Klimmzüge",
+      "cat": "Rücken",
+      "type": "kraft",
+      "geraet": ["Klimmzugstange", "Körpergewicht"],
+      "muskeln": ["Latissimus", "oberer Rücken", "Bizeps"],
+      "grunduebung": true,
+      "hinweise": [
+        "Aus dem gestreckten Hang die Brust zur Stange ziehen, ohne Schwung.",
+        "Wer noch keine schafft, nimmt den Latzug oder die Klimmzugmaschine mit Gegengewicht; Zusatzgewicht als kg eintragen."
+      ]
+    },
+    {
+      "id": "rudern-langhantel",
+      "name": "Langhantelrudern",
+      "cat": "Rücken",
+      "type": "kraft",
+      "geraet": ["Langhantel"],
+      "muskeln": ["Latissimus", "oberer Rücken", "hintere Schulter", "Bizeps"],
+      "grunduebung": true,
+      "hinweise": [
+        "Oberkörper etwa 45 Grad vorgebeugt, Rücken gerade, Knie leicht gebeugt.",
+        "Stange zum Bauchnabel ziehen, ohne den Oberkörper dabei aufzurichten."
+      ]
+    },
+    {
+      "id": "latzug",
+      "name": "Latzug",
+      "cat": "Rücken",
+      "type": "kraft",
+      "geraet": ["Kabel"],
+      "muskeln": ["Latissimus", "oberer Rücken", "Bizeps"],
+      "grunduebung": true,
+      "hinweise": [
+        "Stange zur oberen Brust ziehen, der Oberkörper ist nur leicht zurückgelehnt.",
+        "Oben die Arme ganz strecken, unten die Ellbogen Richtung Hüfte führen."
+      ]
+    },
+    {
+      "id": "rudern-kabel",
+      "name": "Kabelrudern",
+      "cat": "Rücken",
+      "type": "kraft",
+      "geraet": ["Kabel"],
+      "muskeln": ["oberer Rücken", "Latissimus", "hintere Schulter", "Bizeps"],
+      "grunduebung": true,
+      "hinweise": [
+        "Aufrecht sitzen, den Griff zum Bauch ziehen und die Schulterblätter zusammenführen.",
+        "Nicht mit dem Oberkörper nach hinten schwingen."
+      ]
+    },
+    {
+      "id": "rudern-kurzhantel-einarmig",
+      "name": "Einarmiges Kurzhantelrudern",
+      "cat": "Rücken",
+      "type": "kraft",
+      "geraet": ["Kurzhantel", "Bank"],
+      "muskeln": ["Latissimus", "oberer Rücken", "Bizeps"],
+      "grunduebung": true,
+      "hinweise": [
+        "Eine Hand und ein Knie auf der Bank, der Rücken waagerecht und gerade.",
+        "Hantel zur Hüfte ziehen, der Ellbogen bleibt nah am Körper; Wdh je Seite zählen."
+      ]
+    },
+    {
+      "id": "hyperextensions",
+      "name": "Hyperextensions",
+      "cat": "Rücken",
+      "type": "kraft",
+      "geraet": ["Hyperextension-Bank", "Körpergewicht"],
+      "muskeln": ["unterer Rücken", "Gesäß", "Beinbeuger"],
+      "grunduebung": false,
+      "hinweise": [
+        "Polster knapp unter dem Hüftknochen, aus der Hüfte beugen und bis zur geraden Linie aufrichten.",
+        "Oben nicht ins Hohlkreuz überstrecken; Zusatzgewicht als Scheibe vor der Brust halten."
+      ]
+    },
+    {
+      "id": "bizepscurls-langhantel",
+      "name": "Bizepscurls",
+      "cat": "Bizeps",
+      "type": "kraft",
+      "geraet": ["Langhantel"],
+      "muskeln": ["Bizeps", "Unterarme"],
+      "grunduebung": false,
+      "hinweise": [
+        "Ellbogen bleiben seitlich am Körper, kein Schwung aus dem Rücken.",
+        "Mit der SZ-Stange ist der Griff für die Handgelenke oft angenehmer."
+      ]
+    },
+    {
+      "id": "bizepscurls-kurzhantel",
+      "name": "Kurzhantel-Curls",
+      "cat": "Bizeps",
+      "type": "kraft",
+      "geraet": ["Kurzhantel"],
+      "muskeln": ["Bizeps", "Unterarme"],
+      "grunduebung": false,
+      "hinweise": [
+        "Die Handflächen beim Hochführen nach oben drehen.",
+        "Abwechselnd oder gleichzeitig; unten die Arme ganz strecken."
+      ]
+    },
+    {
+      "id": "hammercurls-kurzhantel",
+      "name": "Hammercurls",
+      "cat": "Bizeps",
+      "type": "kraft",
+      "geraet": ["Kurzhantel"],
+      "muskeln": ["Bizeps", "Unterarme"],
+      "grunduebung": false,
+      "hinweise": [
+        "Neutraler Griff, die Daumen zeigen nach oben.",
+        "Trainiert zusätzlich den Oberarmspeichenmuskel am Unterarm."
+      ]
+    },
+    {
+      "id": "kniebeugen-langhantel",
+      "name": "Kniebeugen",
+      "cat": "Beine",
+      "type": "kraft",
+      "geraet": ["Langhantel"],
+      "muskeln": ["Quadrizeps", "Gesäß", "Adduktoren", "unterer Rücken"],
+      "grunduebung": true,
+      "hinweise": [
+        "Stange auf dem oberen Rücken, Füße etwa schulterbreit, die Knie zeigen in Richtung der Fußspitzen.",
+        "Rumpf vor dem Absenken anspannen und so tief gehen, wie es mit geradem Rücken und ganzer Fußsohle am Boden geht."
+      ]
+    },
+    {
+      "id": "kreuzheben-langhantel",
+      "name": "Kreuzheben",
+      "cat": "Beine",
+      "type": "kraft",
+      "geraet": ["Langhantel"],
+      "muskeln": ["Gesäß", "Beinbeuger", "unterer Rücken", "oberer Rücken", "Quadrizeps"],
+      "grunduebung": true,
+      "hinweise": [
+        "Stange über der Fußmitte und nah am Schienbein, Rücken gerade, Brust raus.",
+        "Aus Beinen und Hüfte hochdrücken, die Stange bleibt am Körper; oben nicht nach hinten lehnen."
+      ]
+    },
+    {
+      "id": "beinpresse",
+      "name": "Beinpresse",
+      "cat": "Beine",
+      "type": "kraft",
+      "geraet": ["Maschine"],
+      "muskeln": ["Quadrizeps", "Gesäß"],
+      "grunduebung": true,
+      "hinweise": [
+        "Füße schulterbreit auf der Platte, die Knie folgen den Fußspitzen.",
+        "Nur so tief absenken, wie das Becken am Polster bleibt; oben die Knie nicht durchdrücken."
+      ]
+    },
+    {
+      "id": "rumaenisches-kreuzheben-langhantel",
+      "name": "Rumänisches Kreuzheben",
+      "cat": "Beine",
+      "type": "kraft",
+      "geraet": ["Langhantel"],
+      "muskeln": ["Beinbeuger", "Gesäß", "unterer Rücken"],
+      "grunduebung": true,
+      "hinweise": [
+        "Knie leicht gebeugt, die Hüfte nach hinten schieben, die Stange gleitet an den Oberschenkeln entlang.",
+        "Nur so tief, wie der Rücken gerade bleibt, meist bis knapp unter das Knie."
+      ]
+    },
+    {
+      "id": "goblet-squat",
+      "name": "Goblet Squat",
+      "cat": "Beine",
+      "type": "kraft",
+      "geraet": ["Kurzhantel"],
+      "muskeln": ["Quadrizeps", "Gesäß", "Adduktoren"],
+      "grunduebung": true,
+      "hinweise": [
+        "Kurzhantel oder Kettlebell senkrecht vor der Brust halten, die Ellbogen sinken zwischen die Knie.",
+        "Gute Einstiegsübung, um die Kniebeuge zu lernen."
+      ]
+    },
+    {
+      "id": "ausfallschritte-kurzhantel",
+      "name": "Ausfallschritte",
+      "cat": "Beine",
+      "type": "kraft",
+      "geraet": ["Kurzhantel"],
+      "muskeln": ["Quadrizeps", "Gesäß", "Adduktoren"],
+      "grunduebung": true,
+      "hinweise": [
+        "Großer Schritt, das hintere Knie sinkt Richtung Boden, der Oberkörper bleibt aufrecht.",
+        "Das vordere Knie bleibt über dem Fuß und knickt nicht nach innen; Wdh je Seite zählen."
+      ]
+    },
+    {
+      "id": "bulgarische-split-kniebeugen-kurzhantel",
+      "name": "Bulgarische Split-Kniebeugen",
+      "cat": "Beine",
+      "type": "kraft",
+      "geraet": ["Kurzhantel", "Bank"],
+      "muskeln": ["Quadrizeps", "Gesäß", "Adduktoren"],
+      "grunduebung": true,
+      "hinweise": [
+        "Hinterer Fuß auf der Bank, der vordere so weit vorn, dass die Ferse beim Absenken am Boden bleibt.",
+        "Erst das Gleichgewicht, dann das Gewicht: anfangs ohne Hanteln; Wdh je Seite zählen."
+      ]
+    },
+    {
+      "id": "seitliche-ausfallschritte",
+      "name": "Seitliche Ausfallschritte",
+      "cat": "Beine",
+      "type": "kraft",
+      "geraet": ["Kurzhantel"],
+      "muskeln": ["Adduktoren", "Gesäß", "Quadrizeps"],
+      "grunduebung": true,
+      "hinweise": [
+        "Breiter Schritt zur Seite, die Hüfte nach hinten, das gestreckte Bein bleibt mit der ganzen Sohle am Boden.",
+        "Ähnelt dem seitlichen Abstoppen beim Padel; anfangs ohne Gewicht, Wdh je Seite zählen."
+      ]
+    },
+    {
+      "id": "hip-thrust-langhantel",
+      "name": "Hip Thrust",
+      "cat": "Beine",
+      "type": "kraft",
+      "geraet": ["Langhantel", "Bank"],
+      "muskeln": ["Gesäß", "Beinbeuger"],
+      "grunduebung": false,
+      "hinweise": [
+        "Oberer Rücken an der Bank, die Stange gepolstert über der Hüfte, Füße hüftbreit.",
+        "Hüfte strecken, bis Oberkörper und Oberschenkel eine Linie bilden; Kinn zur Brust, kein Hohlkreuz."
+      ]
+    },
+    {
+      "id": "beinstrecker",
+      "name": "Beinstrecker",
+      "cat": "Beine",
+      "type": "kraft",
+      "geraet": ["Maschine"],
+      "muskeln": ["Quadrizeps"],
+      "grunduebung": false,
+      "hinweise": [
+        "Drehachse der Maschine auf Höhe des Kniegelenks einstellen.",
+        "Oben kurz halten und langsam absenken."
+      ]
+    },
+    {
+      "id": "beinbeuger",
+      "name": "Beinbeuger",
+      "cat": "Beine",
+      "type": "kraft",
+      "geraet": ["Maschine"],
+      "muskeln": ["Beinbeuger"],
+      "grunduebung": false,
+      "hinweise": [
+        "Drehachse auf Kniehöhe, das Polster liegt knapp über der Ferse.",
+        "Sitzend oder liegend; die Hüfte bleibt am Polster."
+      ]
+    },
+    {
+      "id": "wadenheben-stehend",
+      "name": "Wadenheben",
+      "cat": "Beine",
+      "type": "kraft",
+      "geraet": ["Maschine"],
+      "muskeln": ["Waden"],
+      "grunduebung": false,
+      "hinweise": [
+        "Volle Bewegung: unten die Fersen tief sinken lassen, oben ganz auf die Fußballen.",
+        "Geht auch an der Beinpresse oder mit einer Kurzhantel auf einer Stufe."
+      ]
+    },
+    {
+      "id": "nordic-hamstring-curls",
+      "name": "Nordic Hamstring Curls",
+      "cat": "Beine",
+      "type": "kraft",
+      "geraet": ["Körpergewicht"],
+      "muskeln": ["Beinbeuger"],
+      "grunduebung": false,
+      "hinweise": [
+        "Kniend, ein Partner oder eine Fixierung hält die Fersen; den geraden Körper langsam nach vorn sinken lassen.",
+        "Mit den Händen abfangen und abdrücken; mit wenigen Wdh beginnen, die Übung macht anfangs starken Muskelkater."
+      ]
+    },
+    {
+      "id": "copenhagen-adduktoren",
+      "name": "Copenhagen-Adduktoren",
+      "cat": "Beine",
+      "type": "kraft",
+      "geraet": ["Bank", "Körpergewicht"],
+      "muskeln": ["Adduktoren", "seitliche Bauchmuskeln"],
+      "grunduebung": false,
+      "hinweise": [
+        "Seitstütz, das obere Bein liegt auf der Bank; die Hüfte heben und senken.",
+        "Leichter mit dem Knie statt dem Fuß auf der Bank; Wdh je Seite zählen."
+      ]
+    },
+    {
+      "id": "skater-spruenge",
+      "name": "Skater-Sprünge",
+      "cat": "Beine",
+      "type": "kraft",
+      "geraet": ["Körpergewicht"],
+      "muskeln": ["Gesäß", "Quadrizeps", "Adduktoren"],
+      "grunduebung": false,
+      "hinweise": [
+        "Seitlich von einem Bein auf das andere springen und die Landung kurz halten.",
+        "Weich und leise landen, das Knie zeigt über den Fuß; erst Kontrolle, dann Weite. Wdh je Seite zählen."
+      ]
+    },
+    {
+      "id": "plank",
+      "name": "Plank",
+      "cat": "Rumpf",
+      "type": "zeit",
+      "geraet": ["Körpergewicht"],
+      "muskeln": ["Bauch", "seitliche Bauchmuskeln"],
+      "grunduebung": false,
+      "hinweise": [
+        "Unterarmstütz, der Körper in einer Linie, Gesäß und Bauch fest angespannt.",
+        "Lieber kürzer mit sauberer Haltung; die App erfasst Minuten, 45 s sind 0,75."
+      ]
+    },
+    {
+      "id": "seitstuetz",
+      "name": "Seitstütz",
+      "cat": "Rumpf",
+      "type": "zeit",
+      "geraet": ["Körpergewicht"],
+      "muskeln": ["seitliche Bauchmuskeln", "Gesäß"],
+      "grunduebung": false,
+      "hinweise": [
+        "Ellbogen unter der Schulter, die Hüfte hoch, der Körper in einer Linie.",
+        "Leichter mit gebeugten Knien; beide Seiten gleich lang halten."
+      ]
+    },
+    {
+      "id": "dead-bug",
+      "name": "Dead Bug",
+      "cat": "Rumpf",
+      "type": "kraft",
+      "geraet": ["Körpergewicht"],
+      "muskeln": ["Bauch"],
+      "grunduebung": false,
+      "hinweise": [
+        "Rückenlage, Arme und Beine in der Luft; gegengleich einen Arm und ein Bein langsam strecken.",
+        "Der untere Rücken bleibt am Boden, beim Strecken ausatmen; Wdh je Seite zählen."
+      ]
+    },
+    {
+      "id": "pallof-press-kabel",
+      "name": "Pallof-Press",
+      "cat": "Rumpf",
+      "type": "kraft",
+      "geraet": ["Kabel"],
+      "muskeln": ["seitliche Bauchmuskeln", "Bauch"],
+      "grunduebung": false,
+      "hinweise": [
+        "Seitlich zum Kabel stehen, den Griff vor der Brust nach vorn drücken und dem Zug zur Seite widerstehen.",
+        "Hüfte und Schultern bleiben gerade ausgerichtet; Wdh je Seite zählen."
+      ]
+    },
+    {
+      "id": "holzhacker-kabel",
+      "name": "Holzhacker am Kabel",
+      "cat": "Rumpf",
+      "type": "kraft",
+      "geraet": ["Kabel"],
+      "muskeln": ["seitliche Bauchmuskeln", "Bauch"],
+      "grunduebung": false,
+      "hinweise": [
+        "Griff diagonal von hoch nach tief oder umgekehrt ziehen, die Drehung kommt aus Hüfte und Brustwirbelsäule.",
+        "Die Arme bleiben fast gestreckt; Wdh je Seite zählen."
+      ]
+    },
+    {
+      "id": "haengendes-beinheben",
+      "name": "Hängendes Beinheben",
+      "cat": "Rumpf",
+      "type": "kraft",
+      "geraet": ["Klimmzugstange", "Körpergewicht"],
+      "muskeln": ["Bauch", "Hüftbeuger"],
+      "grunduebung": false,
+      "hinweise": [
+        "Im Hang die Beine ohne Schwung heben und am Ende das Becken leicht einrollen.",
+        "Leichter mit angewinkelten Knien."
+      ]
+    },
+    {
+      "id": "crunch-kabel",
+      "name": "Kabelcrunch",
+      "cat": "Rumpf",
+      "type": "kraft",
+      "geraet": ["Kabel"],
+      "muskeln": ["Bauch"],
+      "grunduebung": false,
+      "hinweise": [
+        "Kniend, das Seil neben dem Kopf; den Oberkörper einrollen, die Hüfte bleibt ruhig.",
+        "Die Bewegung kommt aus dem Bauch, nicht aus den Armen."
+      ]
+    },
+    {
+      "id": "medizinball-rotationswurf",
+      "name": "Medizinball-Rotationswurf",
+      "cat": "Rumpf",
+      "type": "kraft",
+      "geraet": ["Medizinball"],
+      "muskeln": ["seitliche Bauchmuskeln", "Gesäß"],
+      "grunduebung": false,
+      "hinweise": [
+        "Seitlich zur Wand stehen, aus Beinen und Hüfte drehen und den Ball explosiv gegen die Wand werfen.",
+        "Leichter Ball (2 bis 4 kg), jeder Wurf mit voller Geschwindigkeit; als kg das Ballgewicht eintragen, Wdh je Seite zählen."
+      ]
+    },
+    {
+      "id": "laufen",
+      "name": "Laufen",
+      "cat": "Ausdauer",
+      "type": "ausdauer",
+      "geraet": ["Laufstrecke"],
+      "muskeln": [],
+      "grunduebung": false,
+      "hinweise": [
+        "Allgemeiner Eintrag für jeden Lauf; für gezieltes Training die einzelnen Laufarten nutzen.",
+        "Die ersten Minuten locker als Aufwärmen laufen."
+      ]
+    },
+    {
+      "id": "lauf-geh-wechsel",
+      "name": "Lauf-Geh-Wechsel",
+      "cat": "Ausdauer",
+      "type": "ausdauer",
+      "geraet": ["Laufstrecke"],
+      "muskeln": [],
+      "grunduebung": false,
+      "hinweise": [
+        "Für den Einstieg: kurze Laufabschnitte im Wechsel mit zügigem Gehen.",
+        "So locker laufen, dass Sprechen in ganzen Sätzen möglich ist; das Tempo ist egal, die Zeit zählt."
+      ]
+    },
+    {
+      "id": "dauerlauf-locker",
+      "name": "Lockerer Dauerlauf",
+      "cat": "Ausdauer",
+      "type": "ausdauer",
+      "geraet": ["Laufstrecke"],
+      "muskeln": [],
+      "grunduebung": false,
+      "hinweise": [
+        "Gleichmäßig und so locker, dass Sprechen in ganzen Sätzen möglich ist.",
+        "In den meisten Laufplänen der größte Teil der Woche."
+      ]
+    },
+    {
+      "id": "langer-lauf",
+      "name": "Langer Lauf",
+      "cat": "Ausdauer",
+      "type": "ausdauer",
+      "geraet": ["Laufstrecke"],
+      "muskeln": [],
+      "grunduebung": false,
+      "hinweise": [
+        "Der längste Lauf der Woche, im lockeren Tempo.",
+        "Die Dauer langsam steigern und nicht gleichzeitig das Tempo."
+      ]
+    },
+    {
+      "id": "tempolauf",
+      "name": "Tempolauf",
+      "cat": "Ausdauer",
+      "type": "ausdauer",
+      "geraet": ["Laufstrecke"],
+      "muskeln": [],
+      "grunduebung": false,
+      "hinweise": [
+        "Nach dem Einlaufen gleichmäßig zügig, angenehm hart: Sprechen geht nur noch in kurzen Sätzen.",
+        "Nicht schneller werden; danach locker auslaufen."
+      ]
+    },
+    {
+      "id": "intervalllauf",
+      "name": "Intervalllauf",
+      "cat": "Ausdauer",
+      "type": "ausdauer",
+      "geraet": ["Laufstrecke"],
+      "muskeln": [],
+      "grunduebung": false,
+      "hinweise": [
+        "Schnelle Abschnitte mit lockeren Trabpausen, vorher 10 bis 15 min einlaufen; jeder schnelle Abschnitt ist ein Satz.",
+        "Alle Abschnitte im gleichen Tempo; der letzte sollte nicht deutlich langsamer sein als der erste."
+      ]
+    },
+    {
+      "id": "fahrradergometer",
+      "name": "Fahrradergometer",
+      "cat": "Ausdauer",
+      "type": "ausdauer",
+      "geraet": ["Fahrradergometer"],
+      "muskeln": [],
+      "grunduebung": false,
+      "hinweise": [
+        "Sattel so hoch, dass das Bein unten fast gestreckt ist.",
+        "Ohne die Stoßbelastung des Laufens; als lockere Einheit oder für Intervalle."
+      ]
+    },
+    {
+      "id": "rudergeraet",
+      "name": "Rudergerät",
+      "cat": "Ausdauer",
+      "type": "ausdauer",
+      "geraet": ["Rudergerät"],
+      "muskeln": [],
+      "grunduebung": false,
+      "hinweise": [
+        "Beim Zug erst die Beine, dann der Oberkörper, dann die Arme; zurück in umgekehrter Reihenfolge.",
+        "Die meiste Kraft kommt aus den Beinen, der Rücken bleibt gerade."
+      ]
+    },
+    {
+      "id": "seilspringen",
+      "name": "Seilspringen",
+      "cat": "Ausdauer",
+      "type": "zeit",
+      "geraet": ["Springseil"],
+      "muskeln": [],
+      "grunduebung": false,
+      "hinweise": [
+        "Klein und federnd auf den Fußballen springen, die Drehung kommt aus den Handgelenken.",
+        "Gutes Aufwärmen vor Padel und Laufen, zum Beispiel 3 × 1 min."
+      ]
+    },
+    {
+      "id": "padel-match",
+      "name": "Padel-Match",
+      "cat": "Padel",
+      "type": "zeit",
+      "geraet": ["Padelschläger", "Padelplatz"],
+      "muskeln": [],
+      "grunduebung": false,
+      "hinweise": [
+        "Vorher etwa 10 min aufwärmen: locker bewegen, Schulter mit Band, Split-Steps, ein paar Ballwechsel.",
+        "Die gesamte Spielzeit in Minuten eintragen."
+      ]
+    },
+    {
+      "id": "padel-drills",
+      "name": "Padel-Drills",
+      "cat": "Padel",
+      "type": "zeit",
+      "geraet": ["Padelschläger", "Padelplatz"],
+      "muskeln": [],
+      "grunduebung": false,
+      "hinweise": [
+        "Sammeleintrag für Technikübungen; die wichtigsten Schläge haben eigene Einträge.",
+        "Lieber wenige Schläge pro Einheit gezielt üben als alles ein bisschen."
+      ]
+    },
+    {
+      "id": "padel-volley",
+      "name": "Volley-Training",
+      "cat": "Padel",
+      "type": "zeit",
+      "geraet": ["Padelschläger", "Padelplatz"],
+      "muskeln": [],
+      "grunduebung": false,
+      "hinweise": [
+        "Kurzer Ausholweg, der Schläger bleibt vor dem Körper, Treffpunkt vor dem Körper.",
+        "Vor jedem Schlag des Gegners ein Split-Step."
+      ]
+    },
+    {
+      "id": "padel-bandeja-vibora",
+      "name": "Bandeja und Víbora",
+      "cat": "Padel",
+      "type": "zeit",
+      "geraet": ["Padelschläger", "Padelplatz"],
+      "muskeln": [],
+      "grunduebung": false,
+      "hinweise": [
+        "Seitlich zum Netz stellen, der freie Arm zeigt zum Ball.",
+        "Bandeja kontrolliert mit Unterschnitt, um die Netzposition zu halten; Víbora mit mehr Seitenschnitt und Tempo."
+      ]
+    },
+    {
+      "id": "padel-wandspiel",
+      "name": "Spiel aus der Wand",
+      "cat": "Padel",
+      "type": "zeit",
+      "geraet": ["Padelschläger", "Padelplatz"],
+      "muskeln": [],
+      "grunduebung": false,
+      "hinweise": [
+        "Den Abprall von Rück- und Seitenwand abwarten und seitlich mitgehen.",
+        "Früh eindrehen und Abstand zur Wand halten, damit Platz zum Schlagen bleibt."
+      ]
+    },
+    {
+      "id": "padel-aufschlag-return",
+      "name": "Aufschlag und Return",
+      "cat": "Padel",
+      "type": "zeit",
+      "geraet": ["Padelschläger", "Padelplatz"],
+      "muskeln": [],
+      "grunduebung": false,
+      "hinweise": [
+        "Aufschlag nach einmaligem Aufprall unterhalb der Hüfte treffen, sicher und platziert statt hart.",
+        "Den Return tief oder als Lob spielen, um selbst ans Netz zu kommen."
+      ]
+    },
+    {
+      "id": "padel-beinarbeit",
+      "name": "Padel-Beinarbeit",
+      "cat": "Padel",
+      "type": "zeit",
+      "geraet": ["Körpergewicht"],
+      "muskeln": [],
+      "grunduebung": false,
+      "hinweise": [
+        "Split-Step, Seitschritte und Kreuzschritte in kurzen Abschnitten, zum Beispiel 20 s Belastung und 40 s Pause.",
+        "Schnell, aber sauber: tiefer Schwerpunkt, kurze Schritte."
+      ]
+    }
+  ]
+}

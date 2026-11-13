@@ -6,6 +6,33 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 Erste Runde vom 13.11.2026. NOTIZEN.md war noch leer, die Ideen stammen aus der Recherche zu Strong, Hevy, JEFIT, Fitbod, Apple Fitness, Strava und Runna und aus dem Blick auf `index.html`. Sortiert nach Nutzen im Verhältnis zum Aufwand.
 
+Aus dem Funktionsvergleich „Satz-Erfassung“ vom 14.11.2026 (Agent `funktions-tester`, Befund in `VERGLEICH.md`):
+
+### 12. Geänderte Werte in die folgenden Sätze übernehmen (aus Funktionsvergleich: Satz-Erfassung)
+- Nutzen: hoch · Aufwand: S · Datenformat: nein
+
+Vorbild ist Hevy: Ein Tipp auf den Vorwert übernimmt den ganzen Satz, statt jeden Satz neu einzutippen. Heute kostet ein neues Gewicht in drei Sätzen 24 Tipps und eine neue Übung mit drei gleichen Sätzen 21 Tipps, weil die übrigen Sätze leer bzw. beim alten Wert bleiben. Skizze: Der `input`-Handler setzt den neuen Wert auch in den folgenden offenen Sätzen derselben Übung, sofern dort noch der alte Wert oder nichts steht; abgehakte und abweichende Sätze bleiben, wie sie sind, und es wird nur das Feld gesetzt, ohne `render()`, damit die Tastatur offen bleibt. Ein leerer Satz übernimmt beim Abhaken die Werte des Satzes darüber, statt leer gespeichert zu werden. Danach kosten drei Sätze mit neuem Gewicht 10 Tipps statt 24.
+
+### 13. Feldinhalt beim Antippen markieren (aus Funktionsvergleich: Satz-Erfassung)
+- Nutzen: hoch · Aufwand: S · Datenformat: nein
+
+Vorbild sind Strong und Hevy: Dort ersetzt eine Eingabe den grauen Vorschlagswert direkt (allgemeines Wissen, nicht nachgelesen). Bei uns muss „52,5“ erst gelöscht werden, „52,5 → 55“ kostet deshalb 8 Tipps statt 4. Skizze: Beim Fokus auf ein Satzfeld (`data-f`) den Inhalt mit `setSelectionRange(0, value.length)` markieren (auf iOS leicht verzögert, nach dem Fokus), dann ersetzt die erste Ziffer den alten Wert. Auf dem iPhone prüfen, ob die Markierung in der installierten App hält und ob das Kopieren-Menü dabei stört.
+
+### 14. Aufwärmsätze markieren (aus Funktionsvergleich: Satz-Erfassung)
+- Nutzen: mittel · Aufwand: M · Datenformat: ja (optionales Feld am Satz, mit Migration)
+
+Vorbild ist Strong: Ein Tipp auf die Satznummer öffnet Aufwärmen, Drop und Versagen, und Aufwärmsätze zählen nicht in Diagramme und Kennzahlen; Hevy und JEFIT machen es ähnlich. Heute verfälschen Aufwärmsätze Rekorde, Kampfkraft und Fortschrittskurve, und sie verhindern den Steigerungsvorschlag, weil der in allen Sätzen dasselbe Gewicht verlangt. Skizze: Ein Tipp auf die Satznummer (Fläche auf 44 × 48 px vergrößern) schaltet ein goldenes „A“ um, gespeichert als `w:1` am Satz. `finish()` und `newEntry()` übernehmen das Feld, ab dem zweiten Training kostet es also keinen Tipp mehr. `stepUp`, `exSeries`, `progress()`, die Rekord-Meldung und „Letztes Mal“ überspringen bzw. kennzeichnen A-Sätze, und die CSV bekommt eine Spalte. Migration: Ein Satz ohne das Feld gilt als Arbeitssatz; alte Daten und Backups bleiben gültig, alte Spielwerte bleiben unverändert.
+
+### 15. Rückgängig nach „− Satz“ (aus Funktionsvergleich: Satz-Erfassung)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Vorbild sind Strong, Hevy und Fitbod: Dort löscht man einen Satz gezielt per Wischen auf der Zeile. Bei uns entfernt „− Satz“, nur 8 px neben „+ Satz“, immer den letzten Satz, auch einen abgehakten, und zwar ohne Rückfrage; im Test ging so ein abgehakter Satz mit 52,5 kg × 7 verloren. Skizze: Nach dem Entfernen erscheint `toast("Satz 3 entfernt", "undo-set")`, der Satz wird solange in `ui` gemerkt, und ein Tipp auf den Hinweis setzt ihn an seiner Stelle wieder ein. Solange nichts schiefgeht, kostet das keinen Tipp mehr als heute.
+
+### 16. Versehentlichen Haken samt Timer zurücknehmen (aus Funktionsvergleich: Satz-Erfassung)
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Herkunft ist der eigene Test, Anlehnung an Hevy, das den Timer an den Satz koppelt (vor einem Drop-Satz startet er nicht). Heute startet ein versehentlicher Haken den Timer neu mit voller Dauer; löst man den Haken wieder, läuft der Timer weiter, und die Restzeit der Pause davor ist verloren. Skizze: `startTimer` merkt sich im Speicher den vorherigen Stand (`end`, `total`) und den auslösenden Satz. Wird genau dieser Satz wieder gelöst, solange der Timer noch läuft, stellt `check` den vorherigen Timer wieder her oder stoppt ihn.
+
 ## Angenommen
 
 Noch nichts.

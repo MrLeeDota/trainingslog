@@ -386,17 +386,26 @@ function bestLabel(e){
 /* Steigerungsvorschlag: Wurden in den letzten zwei Einheiten einer Kraftübung alle Sätze mit demselben Gewicht
    und mindestens STEP_REPS Wiederholungen geschafft, schlägt die App STEP_KG mehr vor. Ergebnis: neues Gewicht oder null. */
 const STEP_REPS = 10, STEP_KG = 2.5;
-function stepUp(exId){
+// plan (optional): Richtwert aus einem Bibliotheks-Programm. Dann gilt als Schwelle das obere Ende seines
+// Wiederholungsbereichs (z. B. 8 bei „6-8“, 5 bei „5“), sonst STEP_REPS.
+const planTop = plan => { const m = String(plan && plan.wdh || "").match(/(\d+)\s*$/); return m && +m[1] > 0 ? +m[1] : 0; };
+// Mit Programm außerdem (fachlich geprüft vom trainings-experte): Ein festes Ziel ohne Bereich wie „5“ bei 5×5 ist
+// lineare Progression, dort reicht eine geschaffte Einheit; bei Bereichen wie „6-8“ braucht es zwei. Und die Satzzahl
+// des Programms muss erreicht sein.
+function stepUp(exId, plan){
   if (exType(exId) !== "kraft") return null;
+  const reps = planTop(plan) || STEP_REPS;
+  const need = plan && /^\s*\d+\s*$/.test(String(plan.wdh || "")) ? 1 : 2;
+  const minSets = parseInt(plan && plan.saetze) || 1;
   const runs = [];
-  for (let k = S.workouts.length - 1; k >= 0 && runs.length < 2; k--){
+  for (let k = S.workouts.length - 1; k >= 0 && runs.length < need; k--){
     const en = S.workouts[k].entries.find(e => e.exId === exId);
     if (en && en.sets.length) runs.push(en.sets);
   }
-  if (runs.length < 2) return null;
+  if (runs.length < need) return null;
   const kg = num(runs[0][0].a);
   if (!(kg > 0)) return null;
-  return runs.every(sets => sets.every(s => num(s.a) === kg && num(s.b) >= STEP_REPS)) ? kg + STEP_KG : null;
+  return runs.every(sets => sets.length >= minSets && sets.every(s => num(s.a) === kg && num(s.b) >= reps)) ? kg + STEP_KG : null;
 }
 
 /* Fortschrittskurve einer Übung: ein Wert pro Einheit.
@@ -881,8 +890,8 @@ function vEntry(en, i){
   const last = lastFor(en.exId);
   const cols = `grid-template-columns:26px repeat(${T.f.length},1fr) 52px`;
   // Steigerungsknopf nur, solange noch ein offener Satz unter dem vorgeschlagenen Gewicht liegt
-  const up = stepUp(en.exId), showUp = up && en.sets.some(s => !s.done && num(s.a) < up);
   const plan = planFor(en.exId);   // Richtwert, wenn die Vorlage aus einem Bibliotheks-Programm stammt
+  const up = stepUp(en.exId, plan), showUp = up && en.sets.some(s => !s.done && num(s.a) < up);
   return `<div class="card">
     <div class="row between" style="align-items:flex-start">
       <div class="grow"><div class="ex-name">${esc(ex.name)}</div>${ex.note ? `<div class="ex-note">${esc(ex.note)}</div>` : ""}
@@ -1249,7 +1258,7 @@ const actions = {
     }
   },
   "step-up": el => {
-    const en = S.active.entries[+el.dataset.i], up = stepUp(en.exId);
+    const en = S.active.entries[+el.dataset.i], up = stepUp(en.exId, planFor(en.exId));
     if (!up) return;
     en.sets.forEach(s => { if (!s.done) s.a = fmtNum(up); });
     save(); render();

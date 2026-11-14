@@ -33,7 +33,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
     radial-gradient(120% 55% at 50% -8%,rgba(78,112,255,.6),rgba(78,112,255,0) 70%),
     repeating-conic-gradient(from 0deg at 50% -18%,rgba(255,255,255,.04) 0deg 1.5deg,transparent 1.5deg 6deg);
   -webkit-mask-image:linear-gradient(#000,transparent 72%);mask-image:linear-gradient(#000,transparent 72%)}
-main{padding:12px 16px calc(170px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto}
+main{padding:12px 16px calc(200px + env(safe-area-inset-bottom));   /* Platz für Tab-Leiste und Pausen-Timer, damit der letzte Knopf frei bleibt */max-width:560px;margin:0 auto}
 h1,h2,.ex-name,.ttime,.num,.tpl .t,.tpl .go,.sheet-head b,.hero-text b,.lvl b,.stat b,.gain b,.levelup,button.primary{font-family:var(--display);font-stretch:condensed;font-style:italic;font-weight:900}
 h1{width:fit-content;max-width:100%;font-size:44px;line-height:.98;margin:6px 0 16px;padding:.12em .14em 0 0; /* Platz für Umlautpunkte und schräge Buchstaben */text-transform:uppercase;letter-spacing:.01em;
   color:var(--ki);background:linear-gradient(180deg,#fff3a6 0%,var(--ki) 36%,var(--accent) 72%,var(--accent-deep) 100%);
@@ -1210,7 +1210,13 @@ const actions = {
       const prev = en.sets[+el.dataset.j - 1];
       if (!isFilled(s) && prev && isFilled(prev) && !(s.a || s.b)){ s.a = prev.a; s.b = prev.b; }
       const filled = isFilled(s);
-      if (!filled){ toast(type === "kraft" ? "Erst die Wiederholungen eintragen" : type === "ausdauer" ? "Erst Minuten oder km eintragen" : "Erst die Minuten eintragen"); return; }
+      if (!filled){
+        toast(type === "kraft" ? "Erst die Wiederholungen eintragen" : type === "ausdauer" ? "Erst Minuten oder km eintragen" : "Erst die Minuten eintragen");
+        // gleich ins fehlende Feld springen (spart einen Tipp)
+        const miss = document.querySelector(`input[data-i="${el.dataset.i}"][data-j="${el.dataset.j}"][data-f="${type === "kraft" ? "b" : "a"}"]`);
+        if (miss) miss.focus();
+        return;
+      }
     }
     s.done = !s.done; save();
     if (s.done && exType(en.exId) === "kraft") startTimer(S.settings.rest);
@@ -1346,7 +1352,8 @@ let saveT = null;
    - Was man in einem Satz einträgt, übernehmen die folgenden offenen Sätze derselben Übung, solange dort noch
      derselbe alte Wert oder nichts stand (link). Abgehakte und abweichende Sätze bleiben unverändert.
    Beides ändert nur Feldwerte, ohne render(), damit die Tastatur offen bleibt. */
-let link = null, selFix = null;
+let link = null, selFix = null, fresh = null;
+const selectAll = t => { try { t.setSelectionRange(0, t.value.length); } catch(_){ t.select(); } };
 document.addEventListener("focusin", e => {
   const t = e.target;
   if (!t.dataset || !t.dataset.f || !S || !S.active) return;
@@ -1354,10 +1361,26 @@ document.addEventListener("focusin", e => {
   if (!en || !en.sets[j]) return;
   const orig = en.sets[j][f] ?? "";
   link = {en, j, f, ks:en.sets.map((s, k) => k > j && !s.done && ((s[f] ?? "") === orig || (s[f] ?? "") === "") ? k : -1).filter(k => k >= 0)};
-  selFix = t;
-  setTimeout(() => { if (document.activeElement === t){ try { t.setSelectionRange(0, t.value.length); } catch(_){ t.select(); } } }, 0);
+  selFix = t; fresh = t;
+  selectAll(t);   // sofort und noch einmal nach dem Antippen, weil manche Browser die Markierung beim Loslassen aufheben
+  setTimeout(() => { if (document.activeElement === t && fresh === t) selectAll(t); }, 0);
 });
-document.addEventListener("focusout", e => { if (e.target.dataset && e.target.dataset.f) link = null; });
+document.addEventListener("focusout", e => { if (e.target.dataset && e.target.dataset.f){ link = null; fresh = null; } });
+// Tippt man ein schon aktives Feld erneut an, will man den Cursor setzen: dann nichts mehr ersetzen
+document.addEventListener("pointerdown", e => { if (fresh && e.target === fresh && document.activeElement === fresh) fresh = null; }, true);
+// Sicherheitsnetz: Die erste Ziffer nach dem Antippen ersetzt den alten Wert immer, auch wenn die Markierung
+// zu spät kam oder iOS sie aufgehoben hat (sonst würde z. B. aus „10“ unbemerkt „190“).
+document.addEventListener("beforeinput", e => {
+  const t = e.target;
+  if (t !== fresh) return;
+  fresh = null;
+  const all = t.selectionStart === 0 && t.selectionEnd === t.value.length;
+  if (e.inputType === "insertText" && e.data != null && t.value && !all){
+    e.preventDefault();
+    t.value = e.data; t.setSelectionRange(t.value.length, t.value.length);
+    t.dispatchEvent(new Event("input", {bubbles:true}));
+  }
+});
 // Das Loslassen nach dem Antippen würde die Markierung wieder aufheben: einmalig verhindern
 document.addEventListener("mouseup", e => { if (selFix && e.target === selFix) e.preventDefault(); selFix = null; }, true);
 document.addEventListener("input", e => {

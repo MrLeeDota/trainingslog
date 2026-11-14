@@ -4,12 +4,7 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 ## Vorschläge
 
-Aus dem Funktionsvergleich „Letztes Mal“ vom 14.11.2026 (Agent `funktions-tester`, Befund in `VERGLEICH.md`):
-
-### 18. Satzzahl aus dem Programm übernehmen (aus Funktionsvergleich: „Letztes Mal“)
-- Nutzen: niedrig · Aufwand: S · Datenformat: nein
-
-Herkunft ist der eigene Test: Bei Vorlagen aus der Bibliothek zeigt „Programm: 2 × 8–12“ eine andere Satzzahl, als die Felder vom letzten Mal vorgeben (nach einem Satz bleibt es bei einem). Skizze: `newEntry(exId, plan)` hängt Sätze mit den Werten des letzten Satzes an, bis `plan.saetze` erreicht ist (höchstens 10); es wird nie gekürzt. Wer weniger trainiert, entfernt einen Satz wie bisher (Tipp mehr), wer dem Programm folgt, spart den Tipp auf „+ Satz“.
+Noch keine offenen Vorschläge.
 
 ## Angenommen
 
@@ -39,6 +34,11 @@ Vorbild ist Strong: Ein Tipp auf die Satznummer öffnet Aufwärmen, Drop und Ver
 ## Erledigt
 
 Umgesetzt am 14.11.2026:
+
+### 18. Satzzahl aus dem Programm übernehmen (aus Funktionsvergleich: „Letztes Mal“)
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Herkunft ist der eigene Test: Bei Vorlagen aus der Bibliothek zeigt „Programm: 2 × 8–12“ eine andere Satzzahl, als die Felder vom letzten Mal vorgeben (nach einem Satz bleibt es bei einem). Skizze: `newEntry(exId, plan)` hängt Sätze mit den Werten des letzten Satzes an, bis `plan.saetze` erreicht ist (höchstens 10); es wird nie gekürzt. Wer weniger trainiert, entfernt einen Satz wie bisher (Tipp mehr), wer dem Programm folgt, spart den Tipp auf „+ Satz“.
 
 ### 19. Gewichtsschritt beim Steigern nach Übung staffeln (aus Fachprüfung: Steigerungsvorschlag)
 - Nutzen: mittel · Aufwand: S · Datenformat: nein

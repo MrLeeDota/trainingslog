@@ -362,11 +362,14 @@ function fmtSets(type, sets){
   if (sets.length > 1 && weights.size === 1) return `${w(sets[0])} × ${sets.map(s => s.b || "–").join(", ")}`;
   return sets.map(s => `${w(s)} × ${s.b || "–"}`).join(", ");
 }
-// plan (optional): Richtwert aus einem Bibliotheks-Programm; gibt beim ersten Mal die Zahl der leeren Sätze vor
+// plan (optional): Richtwert aus einem Bibliotheks-Programm. Er gibt beim ersten Mal die Zahl der leeren Sätze vor;
+// hatte die letzte Einheit weniger Sätze, werden Sätze mit den Werten des letzten Satzes ergänzt (nie gekürzt, höchstens 10).
 function newEntry(exId, plan){
-  const last = lastFor(exId), first = plan && plan.saetze > 0 ? Math.min(10, plan.saetze) : exType(exId) === "kraft" ? 3 : 1;
+  const last = lastFor(exId), want = plan && parseInt(plan.saetze) > 0 ? Math.min(10, parseInt(plan.saetze)) : 0;
+  const first = want || (exType(exId) === "kraft" ? 3 : 1);
   const sets = last ? last.sets.map(s => ({a:s.a ?? "", b:s.b ?? "", done:false}))
                     : Array.from({length:first}, () => ({a:"", b:"", done:false}));
+  while (last && sets.length < want){ const p = sets[sets.length - 1]; sets.push({a:p.a, b:p.b, done:false}); }
   return {exId, sets};
 }
 function groupByCat(list){

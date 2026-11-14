@@ -4,21 +4,52 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 ## Vorschläge
 
-### 42. Nach Neuladen und Tab-Wechsel zum nächsten Satz springen (aus Funktionsvergleich: Pausen-Timer)
-- Nutzen: mittel · Aufwand: S · Datenformat: nein
-
-Nach einem Neuladen mitten in der Pause und nach einem Abstecher in den Verlauf zeigte die App im Test den Anfang des Trainings (die Aktion `tab` ruft immer `scrollTo(0, 0)` auf), der markierte Satz lag außerhalb des Bildschirms (z. B. y 888 von 844). Vorbild ist Hevy, das mit „Smart Superset Scrolling“ selbst zur nächsten Übung springt; ein UX-Vergleich von ScreensDesign rät ausdrücklich, die Rückkehr zum nächsten Satz zu prüfen. Skizze: Bei laufendem Training ruft die Aktion `tab` beim Wechsel ins Training statt `scrollTo(0, 0)` nach dem Rendern `revealNext(true)` für den markierten Satz auf (ohne Markierung für den ersten offenen Satz), ebenso `boot()` nach `restoreRest()`, jeweils ohne Animation; das spart 1 bis 3 Wischer und kostet keinen Tipp.
-
 ### 43. Ton nach dem Neuladen mit jedem Tipp freigeben und fehlenden Ton anzeigen (aus Funktionsvergleich: Pausen-Timer)
 - Nutzen: mittel · Aufwand: S · Datenformat: nein
 
+**Zurückgestellt (14.11.2026):** Der Nutzer entscheidet, wenn er die App öfter benutzt hat. Bis dahin stehen lassen, nicht umsetzen.
+
 Nach einem Neuladen läuft die Pause weiter, den Piepton plant die App aber erst nach einem Tipp auf einen Knopf (`unlockAudio()` hängt am Klick-Handler für `data-act`); ein Tipp ins Wdh-Feld reichte im Test nicht, und wer nur wartet, bekommt unbemerkt gar keinen Ton. Hevy, Strong und Fitbod melden das Pausenende nativ per Mitteilung, Live Activity oder Uhr, das kann eine PWA nicht; sie kann aber zeigen, ob ihr Ton kommt. Skizze: `unlockAudio()` zusätzlich einmal bei `pointerup` irgendwo auf der Seite aufrufen, und solange eine Pause läuft und `actx` fehlt oder nicht `running` ist (auch nach der Rückkehr aus dem Hintergrund), steht neben der Restzeit ein durchgestrichener Lautsprecher, ein Tipp auf die Timer-Karte gibt den Ton frei; auf dem iPhone prüfen, ob ein Tipp nach dem Wischen als Berührung zählt.
+
+Aus der Ideenrunde Vorlagen (14.11.2026):
+
+### 44. „Dran“ folgt der Reihenfolge des Programms
+- Nutzen: hoch · Aufwand: S · Datenformat: nein
+
+Herkunft ist ein eigener Befund im Code. Vorbilder sind Hevy Trainer, das oben „Next Workout“ und darunter das ganze Programm zeigt, und Boostcamp, das laut einem Nutzer einfach die nächste Einheit der Reihe vorschlägt statt nach Kalender (nur Suche). Der Wochenplan des Arnold-Splits verspricht: „Fällt ein Tag aus, mit der nächsten Einheit weitermachen (in der App „Dran“)“. `templateDays()` nimmt aber über alle Vorlagen hinweg die am längsten nicht trainierte und lässt nie trainierte weg. Ohne andere Vorlagen zeigt „Dran“ in der ersten Programmwoche deshalb dienstags nichts und mittwochs, freitags und samstags „Brust & Rücken A“ statt Beine, Brust & Rücken B und Schultern & Arme B (aus dem Code nachgerechnet). Mit alten Vorlagen wie Push oder einer selten genutzten wie Ausdauer landet „Dran“ bei jeder, die länger als eine Woche zurückliegt, im Fünf-Tage-Rhythmus also fast immer dort. Skizze: Vorlagen mit `lib` über `lib.progs` ihrem Programm zuordnen. Je Programm ist zuerst die erste nie trainierte Einheit in Programm-Reihenfolge dran, sonst die am längsten nicht trainierte; bei fester Reihenfolge ist das immer die nächste, und eine übersprungene Einheit wird nachgeholt. Eigene Vorlagen ohne Programm bekommen „Dran“ nur noch nach der alten Regel, wenn es keine Programm-Vorlagen gibt. Programme mit `dauerWochen` (Laufen für Einsteiger, jede Woche dreimal) bleiben außen vor. Solange die Bibliothek nicht geladen ist, gilt die alte Regel, und `loadLib()` zeichnet danach auch den Startbildschirm neu (bisher nur bei laufendem Training). Kein zusätzlicher Tipp.
+
+### 45. Nächste Einheit oben, Vorlagen nach Programm geordnet (MCI)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Herkunft: MCI zeigt auf dem Startbildschirm einen Wochenstreifen mit den geplanten Trainings als Karten, an freien Tagen „kein Training geplant“. Hevy Trainer setzt „Next Workout“ über das ganze Programm, und Hevy legt ein Programm aus der Bibliothek als eigenen Ordner an (alles gelesen). Bei uns stehen die Vorlagen in der Reihenfolge, in der sie angelegt wurden, die Arnold-Einheiten also hinter Push, Pull, Legs, Ausdauer und Padel. Aus dem CSS geschätzt (nicht gemessen) beginnt die erste Arnold-Karte bei 390 × 844 unterhalb des Bildschirms, „Schultern & Arme B“ liegt rund 1.600 px tief. Skizze: Unter „Vorlage starten“ steht zuerst die „Dran“-Karte aus Idee 44, bei mehreren Programmen die des zuletzt trainierten. Darunter folgt je Programm eine kleine Überschrift wie „Arnold-Split · diese Woche 3 von 5“ mit den übrigen Einheiten in Programm-Reihenfolge, zuletzt „Eigene Vorlagen“ in der bisherigen Reihenfolge. Ohne geladene Bibliothek bleibt die Liste flach. Die nächste Einheit startet weiter mit 1 Tipp, aber ohne Wischen. Setzt Idee 44 voraus.
+
+### 46. Übung in der Vorlage tauschen, die Programmwerte bleiben (MCI)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Herkunft: MCI tauscht Übungen gegen Alternativen und fragt danach, ob ausgetauschte, hinzugefügte und entfernte Übungen in den Plan übernommen werden. Bewertungen von 2024 vermissten, Übungen herausnehmen oder hinzufügen zu können, und Hevy ersetzt Übungen auch in Routinen (alles gelesen). Bei uns behält eine Ersatzübung den Programmplatz nur im laufenden Training (Idee 22). Wer im Arnold-Split dauerhaft Kurzhantel-Schulterdrücken statt Schulterdrücken mit der Langhantel machen will, braucht im Vorlagen-Sheet rund 12 bis 16 Tipps (Tab, Vorlage, ✕, „+ Übung hinzufügen“, Suchen und Wählen, fünfmal ↑, „Sichern“; aus dem Code gezählt). Danach fehlt der Richtwert: keine Programm-Zeile, keine Satzzahl aus dem Programm, 1:30 statt 3:00 Pause, „Steigern“ erst bei 10 statt 8 Wdh. Skizze: Jede Zeile im Vorlagen-Sheet bekommt ein ⇄. Es zeigt die passenden Alternativen (`swapAlternatives()`, auf die Übungsliste der Vorlage verallgemeinert) und ersetzt die Übung an derselben Stelle; das kostet 5 Tipps samt Tab und „Sichern“. `planOf(t, exId)` gibt einer Übung, die in der Einheit nicht vorkommt, den Richtwert eines frei gewordenen Programmplatzes mit gleichem Hauptmuskel (`muskeln[0]`), bei mehreren den an derselben Position. Das wirkt auch für Vorlagen, die schon von Hand umgebaut wurden. Im Sheet steht darunter grau „Programmplatz Schulterdrücken · 4 × 6-8 Wdh“. Nach dem Training kommt keine Rückfrage, es ist also nicht die abgelehnte Idee 7; die Regel entspricht der von Idee 22.
+
+### 47. Ganzes Programm mit einem Tipp übernehmen, Wochenplan im Programm-Sheet
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Herkunft: Hevy speichert ein Programm aus der Bibliothek mit „Save Program“ als Ganzes, als Ordner mit allen Routinen; bei JEFIT wird ein neuer Plan sofort der aktive (gelesen). Bei uns kostet der Arnold-Split 8 Tipps plus Scrollen, weil jede Einheit einzeln „Als Vorlage übernehmen“ braucht (Funktionsvergleich „Letztes Mal“). Der `wochenplan` des Programms steht nirgends (laut `bibliothek/README.md` nicht angezeigt), obwohl er Ruhetage und den Umgang mit ausgefallenen Tagen erklärt. Skizze: Im aufgeklappten Programm steht über den Einheiten ein Knopf „Alle 5 Einheiten übernehmen“, solange eine fehlt. Er führt „prog-take“ für jede fehlende Einheit in Programm-Reihenfolge aus und meldet „5 Vorlagen angelegt“; darunter steht der Wochenplan als graue Zeile. Danach 4 Tipps statt 8. Das kommt nur einmal vor, deshalb ist der Nutzen niedrig.
+
+### 48. Vorlage vom Startbildschirm nehmen, ohne sie zu löschen
+- Nutzen: niedrig · Aufwand: S · Datenformat: ja (optionales Feld an der Vorlage, mit Migration)
+
+Herkunft: Strong verschiebt unbenutzte Vorlagen in einen Ordner „Archived“ und klappt Ordner per Tipp zu. MCI führt mehrere Pläne, von denen einer aktiv ist; gewechselt wird mit „Switch“ (gelesen). Wer zum Arnold-Split wechselt, behält Push, Pull und Legs auf dem Startbildschirm oder löscht sie und legt sie später neu an. Skizze: Im Vorlagen-Sheet gibt es einen Schalter „Auf dem Startbildschirm zeigen“. Ausgeblendete Vorlagen fehlen auf dem Startbildschirm und bei „Dran“ und stehen im Tab Vorlagen gedämpft am Ende. Gespeichert wird `hidden:true` an der Vorlage. Migration: Fehlt das Feld, ist die Vorlage sichtbar, und nur der Wert `true` gilt, weil `normalize()` Vorlagen beim Import ungeprüft übernimmt; `save-tpl` behält das Feld schon. Alte Backups bleiben gültig, ältere App-Stände zeigen die Vorlage einfach wieder an. Mit Idee 45 rücken alte Vorlagen ohnehin nach unten, deshalb ist der Nutzen niedrig. Den `daten-waechter` prüfen lassen.
 
 ## Angenommen
 
 Noch nichts.
 
 ## Abgelehnt
+
+Vorerst nicht gebraucht (14.11.2026, aus dem Funktionsvergleich Pausen-Timer):
+
+### 42. Nach Neuladen und Tab-Wechsel zum nächsten Satz springen (aus Funktionsvergleich: Pausen-Timer)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Nach einem Neuladen mitten in der Pause und nach einem Abstecher in den Verlauf zeigte die App im Test den Anfang des Trainings (die Aktion `tab` ruft immer `scrollTo(0, 0)` auf), der markierte Satz lag außerhalb des Bildschirms (z. B. y 888 von 844). Vorbild ist Hevy, das mit „Smart Superset Scrolling“ selbst zur nächsten Übung springt; ein UX-Vergleich von ScreensDesign rät ausdrücklich, die Rückkehr zum nächsten Satz zu prüfen. Skizze: Bei laufendem Training ruft die Aktion `tab` beim Wechsel ins Training statt `scrollTo(0, 0)` nach dem Rendern `revealNext(true)` für den markierten Satz auf (ohne Markierung für den ersten offenen Satz), ebenso `boot()` nach `restoreRest()`, jeweils ohne Animation; das spart 1 bis 3 Wischer und kostet keinen Tipp.
 
 Vorerst nicht gebraucht (14.11.2026, aus der Runde Pausen-Timer):
 

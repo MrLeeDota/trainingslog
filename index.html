@@ -1245,7 +1245,7 @@ function vTemplates(){
   return `<h1>Vorlagen</h1>
   ${S.templates.map(t => `<button class="tpl" data-act="edit-tpl" data-id="${t.id}">
     <span class="t">${esc(t.name)}</span>
-    <span class="muted">${t.ex.length} ${t.ex.length === 1 ? "Übung" : "Übungen"} ·${t.ex.map(exName).map(esc).join(", ") || "leer"}</span></button>`).join("")}
+    <span class="muted">${t.ex.length} ${t.ex.length === 1 ? "Übung" : "Übungen"} · ${t.ex.map(exName).map(esc).join(", ") || "leer"}</span></button>`).join("")}
   <button class="block" data-act="new-tpl">+ Neue Vorlage</button>
   <button class="block" style="margin-top:8px" data-act="programs">+ Programm aus der Bibliothek</button>`;
 }

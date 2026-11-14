@@ -123,8 +123,6 @@ button.hero{display:block;width:100%;text-align:left}
 .ex-name{font-size:22px;line-height:1.1;letter-spacing:.01em}
 .last{font-size:13px;color:var(--scan);margin-top:4px}
 .ex-note{font-size:13px;color:var(--muted);margin-top:2px}
-.goal{font-size:13px;color:var(--muted);margin-top:3px}
-.goal b{color:var(--ki)}
 
 /* Übungsbibliothek und Programme */
 .lib-title{margin-top:30px;padding-top:16px;border-top:2px solid var(--line);font-size:20px;scroll-margin-top:64px}
@@ -179,7 +177,17 @@ button.hero{display:block;width:100%;text-align:left}
 button.step-up{margin-top:8px;padding:6px 14px 7px 12px;min-height:44px;font-size:14px;font-weight:800;color:var(--accent-ink);border-radius:3px;transform:skewX(-10deg);
   background:linear-gradient(180deg,#fff3a6,var(--ki) 55%,var(--accent));box-shadow:2px 2px 0 var(--ink),0 0 12px rgba(255,212,59,.4)}
 button.step-up:active{transform:skewX(-10deg) translateY(2px);box-shadow:0 0 0 var(--ink)}
+/* Übungskopf: ⇄ und ✕ ragen in den Kartenrand, damit die Namenszeile nicht 44 px hoch wird (Tap-Fläche bleibt 44 × 44) */
+.ex-head{align-items:flex-start}
+.ex-tools{gap:0;flex:none;margin:-10px -8px -8px 0}
 .ex-tools button{font-size:20px;color:var(--text);opacity:.75}
+/* Ziel eintragen: goldene Umrandung, zwischen „Steigern“ (gefüllt) und „Entlasten“ (orange umrandet) */
+.goal-btn{display:block;width:fit-content;margin-top:8px;padding:6px 14px 7px 12px;min-height:44px;font-size:14px;font-weight:700;color:var(--text);
+  background:rgba(255,212,59,.08);border:2px solid var(--ki);border-radius:3px;transform:skewX(-10deg);box-shadow:none;text-align:left}
+.goal-btn b{color:var(--ki)}
+button.goal-btn:active{transform:skewX(-10deg) translateY(2px)}
+/* Ziel ist eingetragen: gleich hoch wie der Knopf, damit die Sätze darunter beim Wechsel nicht springen */
+.goal-text{display:flex;align-items:center;gap:.3em;background:none;border-color:transparent;color:var(--muted);font-weight:600;padding-left:0;transform:none}
 /* Entlasten: ruhiger als „Steigern“, nur umrandet */
 .step-down-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
 .step-down-row .muted{font-size:13px}
@@ -753,15 +761,17 @@ let ui = {tab:"training", sheet:null, open:null};
 let bootErr = null;   // gesetzt, wenn die Daten beim Start nicht geladen werden konnten
 const timer = {end:0, total:0, rang:false, by:null, prev:null};
 let undoSet = null;   // zuletzt mit „− Satz“ entfernter Satz, solange er sich zurückholen lässt
-let undoWeight = null;   // Gewichte vor „Steigern“ oder „Entlasten“, solange sie sich zurückholen lassen
-// Gewicht in allen offenen Sätzen setzen (Steigern, Entlasten); der Hinweis bietet 10 s lang „Rückgängig“ an
-function setWeight(en, kg, msg){
-  const u = undoWeight = {en, prev:en.sets.map(s => s.a)};
-  en.sets.forEach(s => { if (!s.done) s.a = fmtNum(kg); });
+let undoVals = null;   // Werte vor „Steigern“, „Entlasten“ oder „Ziel eintragen“, solange sie sich zurückholen lassen
+// Ein Feld (f: "a" = kg, "b" = Wdh) in allen offenen Sätzen setzen, val(j) liefert den Wert für Satz j;
+// der Hinweis bietet 10 s lang „Rückgängig“ an
+function setValues(en, f, val, msg){
+  const u = undoVals = {en, f, prev:en.sets.map(s => s[f])};
+  en.sets.forEach((s, j) => { if (!s.done) s[f] = String(val(j)); });
   save(); render();
-  toast(`${msg} · Rückgängig`, "undo-weight", true);
-  setTimeout(() => { if (undoWeight === u) undoWeight = null; }, 10500);
+  toast(`${msg} · Rückgängig`, "undo-vals", true);
+  setTimeout(() => { if (undoVals === u) undoVals = null; }, 10500);
 }
+const setWeight = (en, kg, msg) => setValues(en, "a", () => fmtNum(kg), msg);
 
 /* ---------- Audio (beep at end of rest) ---------- */
 let actx = null, beeps = [];
@@ -1060,17 +1070,20 @@ function vEntry(en, i){
   const up = stepUp(en.exId, plan), showUp = up && en.sets.some(s => !s.done && num(s.a) < up);
   const down = up ? null : stepDown(en.exId, plan), showDown = down && en.sets.some(s => !s.done && num(s.a) > down);
   const goal = up || showDown ? null : repGoal(en, plan);   // Ziel nur zwischen zwei Gewichtsstufen, nicht neben „Steigern“ oder „Entlasten“
+  // Ziel als Knopf, solange ein offener Satz noch andere Wdh hat; danach nur noch als Text
+  const goalOpen = goal && en.sets.some((s, j) => !s.done && num(s.b) !== goal[j]);
+  // Kopf: Nur der Name teilt sich die Zeile mit ⇄ und ✕, alles darunter nutzt die volle Kartenbreite
   return `<div class="card">
-    <div class="row between" style="align-items:flex-start">
-      <div class="grow"><div class="ex-name">${esc(ex.name)}</div>${ex.note ? `<div class="ex-note">${esc(ex.note)}</div>` : ""}
-      <div class="last">${last ? `Letztes Mal (${fmtDate(last.date)}): ${esc(fmtSets(ex.type, last.sets))}` : `<span class="muted">Erstes Mal – leg los!</span>`}</div>
-      ${plan ? `<div class="plan">Programm${en.planEx ? ` wie ${esc(exName(en.planEx))}` : ""}: ${esc(libDose(plan))}</div>` : ""}
-      ${goal ? `<div class="goal">Ziel heute: <b>${esc(fmtGoal(goal))}</b></div>` : ""}
-      ${showUp ? `<button class="step-up" data-act="step-up" data-i="${i}" aria-label="Gewicht in den offenen Sätzen auf ${fmtNum(up)} kg erhöhen">Steigern: ${fmtNum(up)} kg</button>` : ""}
-      ${showDown ? `<div class="step-down-row"><button class="step-down" data-act="step-down" data-i="${i}" aria-label="Gewicht in den offenen Sätzen auf ${fmtNum(down)} kg senken">Entlasten: ${fmtNum(down)} kg</button><span class="muted">3 Einheiten ohne Fortschritt</span></div>` : ""}</div>
-      <span class="row ex-tools" style="gap:0;flex:none"><button class="ghost" data-act="swap" data-i="${i}" aria-label="${esc(ex.name)} gegen eine andere Übung tauschen">⇄</button>
-      <button class="ghost" data-act="del-entry" data-i="${i}" aria-label="Übung entfernen">✕</button></span>
-    </div>
+    <div class="row between ex-head"><div class="ex-name grow">${esc(ex.name)}</div>
+      <span class="row ex-tools"><button class="ghost" data-act="swap" data-i="${i}" aria-label="${esc(ex.name)} gegen eine andere Übung tauschen">⇄</button>
+      <button class="ghost" data-act="del-entry" data-i="${i}" aria-label="Übung entfernen">✕</button></span></div>
+    ${ex.note ? `<div class="ex-note">${esc(ex.note)}</div>` : ""}
+    <div class="last">${last ? `Letztes Mal (${fmtDate(last.date)}): ${esc(fmtSets(ex.type, last.sets))}` : `<span class="muted">Erstes Mal – leg los!</span>`}</div>
+    ${plan ? `<div class="plan">Programm${en.planEx ? ` wie ${esc(exName(en.planEx))}` : ""}: ${esc(libDose(plan))}</div>` : ""}
+    ${goalOpen ? (g => `<button class="goal-btn" data-act="goal" data-i="${i}" aria-label="${esc(g)} in die offenen Sätze eintragen">Ziel eintragen: <b>${esc(g)}</b></button>`)(fmtGoal(goal.filter((_, j) => !en.sets[j].done)))
+      : goal ? `<div class="goal-btn goal-text">Ziel heute: <b>${esc(fmtGoal(goal))}</b></div>` : ""}
+    ${showUp ? `<button class="step-up" data-act="step-up" data-i="${i}" aria-label="Gewicht in den offenen Sätzen auf ${fmtNum(up)} kg erhöhen">Steigern: ${fmtNum(up)} kg</button>` : ""}
+    ${showDown ? `<div class="step-down-row"><button class="step-down" data-act="step-down" data-i="${i}" aria-label="Gewicht in den offenen Sätzen auf ${fmtNum(down)} kg senken">Entlasten: ${fmtNum(down)} kg</button><span class="muted">3 Einheiten ohne Fortschritt</span></div>` : ""}
     <div class="set head" style="${cols}"><span>#</span>${T.f.map(f => `<span>${f[1]}</span>`).join("")}<span></span></div>
     ${en.sets.map((s, j) => `<div class="set ${s.done ? "done" : ""}" style="${cols}">
       <span class="num">${j + 1}</span>
@@ -1467,11 +1480,15 @@ const actions = {
     const en = S.active.entries[+el.dataset.i], down = stepDown(en.exId, entryPlan(en));
     if (down) setWeight(en, down, `Gewicht auf ${fmtNum(down)} kg gesenkt`);
   },
-  "undo-weight": () => {
-    const u = undoWeight; undoWeight = null;
+  goal: el => {
+    const en = S.active.entries[+el.dataset.i], g = repGoal(en, entryPlan(en));
+    if (g) setValues(en, "b", j => g[j], `Ziel eingetragen: ${fmtGoal(g)}`);
+  },
+  "undo-vals": () => {
+    const u = undoVals; undoVals = null;
     if (!u || !S.active || !S.active.entries.includes(u.en)){ toast("Nichts mehr rückgängig zu machen", null, true); return; }
-    u.en.sets.forEach((s, j) => { if (!s.done && j < u.prev.length) s.a = u.prev[j]; });
-    save(); render(); toast("Gewicht zurückgesetzt", null, true);
+    u.en.sets.forEach((s, j) => { if (!s.done && j < u.prev.length) s[u.f] = u.prev[j]; });
+    save(); render(); toast(u.f === "a" ? "Gewicht zurückgesetzt" : "Wiederholungen zurückgesetzt", null, true);
   },
   "add-set": el => { const en = S.active.entries[+el.dataset.i], p = en.sets[en.sets.length - 1] || {a:"", b:""}; en.sets.push({a:p.a, b:p.b, done:false}); save(); render(); },
   "del-set": async el => {

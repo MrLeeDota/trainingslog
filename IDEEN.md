@@ -6,11 +6,6 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 Aus dem Funktionsvergleich „Letztes Mal“ vom 14.11.2026 (zweite Prüfung, mit dem Arnold-Split; Befund in `VERGLEICH.md`). Die MCI-Runde vom selben Tag ist ganz einsortiert; was über MCI und die anderen Apps bekannt ist, steht mit Quellen in `APPS.md`.
 
-### 31. „Ziel heute“ mit einem Tipp übernehmen (aus Funktionsvergleich: „Letztes Mal“)
-- Nutzen: hoch · Aufwand: S · Datenformat: nein
-
-Vorbild ist Hevy: Dort übernimmt ein Tipp auf den Vorwert in der Spalte „Previous“ den Satz, und Hevy Trainer zeigt das letzte Mal als Ziel, das man übertreffen soll. Bei uns behalten die Felder die alten Werte. Wer „Ziel heute: 11, 10, 9 Wdh“ bei Kurzhantel-Schrägbankdrücken schafft, braucht im Test 11 Tipps statt 4, bei Bankdrücken (8, 9, 8, 7) sind es 8 statt 5 und bei Reverse Butterfly 9 statt 4 (gerechnet). Skizze: Die Zeile wird ein Knopf im Stil von „Steigern“ (44 px hoch). Ein Tipp setzt die Wdh der offenen Sätze auf das Ziel, und der Hinweis bietet wie bei `setWeight()` „Rückgängig“ an. Wer nicht tippt, trainiert mit den Vorwerten wie bisher, so rutscht kein Zielwert unbemerkt ins Training (die offene Frage aus Idee 21).
-
 ### 32. Zusatzgewicht vorschlagen, wenn Körpergewicht ausgereizt ist (aus Funktionsvergleich: „Letztes Mal“)
 - Nutzen: mittel · Aufwand: S · Datenformat: nein
 
@@ -20,11 +15,6 @@ Der Arnold-Split sieht bei Klimmzügen nach allen Sätzen mit 10 Wdh Zusatzgewic
 - Nutzen: mittel · Aufwand: S · Datenformat: nein
 
 Vorbild ist Fitbod: Es senkt nach einer Trainingspause die vorgeschlagenen Gewichte von selbst, um den Wiedereinstieg zu erleichtern (laut Suchergebnissen aus Fitbods Hilfe). Im Test lag Stirndrücken 53 Tage zurück. Die App zeigte „Letztes Mal (Di., 22.09.)“ ohne Hinweis darauf, wie lange das her ist, und „Ziel heute: 11, 11, 10“, verlangte also mehr als vor der Pause. Skizze: Liegt die letzte Einheit einer Kraftübung länger als eine Schwelle zurück (z. B. 4 Wochen; Schwelle und Abzug vorher vom `trainings-experte` festlegen lassen), zeigt die Zeile zusätzlich „vor 7 Wochen“, und „Ziel heute“ und „Steigern“ entfallen. An ihrer Stelle steht „Wiedereinstieg: 27,5 kg“, abgezogen in ganzen Schritten von `stepSize()` wie bei `stepDown()`; ein Tipp setzt die offenen Sätze, mit Rückgängig. Wer ihn übergeht, trainiert wie bisher.
-
-### 34. Übungskopf über die ganze Kartenbreite (aus Funktionsvergleich: „Letztes Mal“)
-- Nutzen: niedrig · Aufwand: S · Datenformat: nein
-
-Herkunft ist der eigene Test: ⇄ und ✕ stehen rechts neben dem ganzen Kopf der Karte. Deshalb haben „Letztes Mal“ und „Programm“ nur 215 der 311 px und brechen in jeder Karte auf zwei Zeilen um, obwohl sie mit 221–294 px in eine Zeile passen. Vom Kartenrand bis zur Satztabelle sind es 150–209 px, und keine zwei Übungen passen auf den Bildschirm. Vorbild ist Hevy, das die Vorwerte in einer eigenen Spalte der Satztabelle zeigt statt im Kopf. Skizze: ⇄ und ✕ stehen nur noch in der Zeile des Übungsnamens, darunter laufen Notiz, „Letztes Mal“, Programm, Ziel und die Knöpfe über die volle Breite. Das spart rund 34 px pro Übung, bei „Schultern & Arme B“ mit 7 Übungen etwa 240 px Scrollweg, ohne einen Tipp mehr. Auf dem iPhone mit der Systemschrift nachmessen; bei 375 px Breite wird es knapper.
 
 ### 35. „Besser als letztes Mal“ nach dem Training (aus Funktionsvergleich: „Letztes Mal“)
 - Nutzen: mittel · Aufwand: S · Datenformat: nein
@@ -86,6 +76,20 @@ Vorbild ist Strong: Ein Tipp auf die Satznummer öffnet Aufwärmen, Drop und Ver
 ## Erledigt
 
 Umgesetzt am 14.11.2026:
+
+### 31. „Ziel heute“ mit einem Tipp übernehmen (aus Funktionsvergleich: „Letztes Mal“)
+- Nutzen: hoch · Aufwand: S · Datenformat: nein
+
+Vorbild ist Hevy: Dort übernimmt ein Tipp auf den Vorwert in der Spalte „Previous“ den Satz, und Hevy Trainer zeigt das letzte Mal als Ziel, das man übertreffen soll. Bei uns behalten die Felder die alten Werte. Wer „Ziel heute: 11, 10, 9 Wdh“ bei Kurzhantel-Schrägbankdrücken schafft, braucht im Test 11 Tipps statt 4, bei Bankdrücken (8, 9, 8, 7) sind es 8 statt 5 und bei Reverse Butterfly 9 statt 4 (gerechnet). Skizze: Die Zeile wird ein Knopf im Stil von „Steigern“ (44 px hoch). Ein Tipp setzt die Wdh der offenen Sätze auf das Ziel, und der Hinweis bietet wie bei `setWeight()` „Rückgängig“ an. Wer nicht tippt, trainiert mit den Vorwerten wie bisher, so rutscht kein Zielwert unbemerkt ins Training (die offene Frage aus Idee 21).
+
+Umgesetzt: Solange ein offener Satz andere Wdh hat, ist „Ziel heute“ ein gold umrandeter Knopf „Ziel eintragen: …“, der nur die Werte der offenen Sätze nennt und einträgt (Aktion „goal“, `setValues()` mit Rückgängig). Danach steht das Ziel als Text da, gleich hoch wie der Knopf, damit die Sätze darunter nicht springen (Befund des `gym-tester`).
+
+### 34. Übungskopf über die ganze Kartenbreite (aus Funktionsvergleich: „Letztes Mal“)
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Herkunft ist der eigene Test: ⇄ und ✕ stehen rechts neben dem ganzen Kopf der Karte. Deshalb haben „Letztes Mal“ und „Programm“ nur 215 der 311 px und brechen in jeder Karte auf zwei Zeilen um, obwohl sie mit 221–294 px in eine Zeile passen. Vom Kartenrand bis zur Satztabelle sind es 150–209 px, und keine zwei Übungen passen auf den Bildschirm. Vorbild ist Hevy, das die Vorwerte in einer eigenen Spalte der Satztabelle zeigt statt im Kopf. Skizze: ⇄ und ✕ stehen nur noch in der Zeile des Übungsnamens, darunter laufen Notiz, „Letztes Mal“, Programm, Ziel und die Knöpfe über die volle Breite. Das spart rund 34 px pro Übung, bei „Schultern & Arme B“ mit 7 Übungen etwa 240 px Scrollweg, ohne einen Tipp mehr. Auf dem iPhone mit der Systemschrift nachmessen; bei 375 px Breite wird es knapper.
+
+Umgesetzt: ⇄ und ✕ stehen nur noch in der Namenszeile und ragen in den Kartenrand (Tap-Fläche bleibt 44 × 44). „Letztes Mal“ und „Programm“ passen bei 375 px in je eine Zeile; sehr lange Übungsnamen brechen weiter um, ohne die Knöpfe zu überlappen.
 
 ### 22. Übung im Training tauschen
 - Nutzen: mittel · Aufwand: S · Datenformat: nein

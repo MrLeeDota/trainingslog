@@ -1,2 +1,5 @@
 # Persönliche Claude-Code-Einstellungen dieses Rechners
 .claude/settings.local.json
+
+# Sperrdateien von Microsoft Office (entstehen, solange eine Datei in Word offen ist)
+~$*

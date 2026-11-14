@@ -123,6 +123,8 @@ button.hero{display:block;width:100%;text-align:left}
 .ex-name{font-size:22px;line-height:1.1;letter-spacing:.01em}
 .last{font-size:13px;color:var(--scan);margin-top:4px}
 .ex-note{font-size:13px;color:var(--muted);margin-top:2px}
+.goal{font-size:13px;color:var(--muted);margin-top:3px}
+.goal b{color:var(--ki)}
 
 /* Übungsbibliothek und Programme */
 .lib-title{margin-top:30px;padding-top:16px;border-top:2px solid var(--line);font-size:20px;scroll-margin-top:64px}
@@ -191,6 +193,8 @@ button.step-up:active{transform:skewX(-10deg) translateY(2px);box-shadow:0 0 0 v
 button.li{background:none;border-radius:0;width:100%;text-align:left;padding:14px 0}
 button.li:active{transform:none;opacity:.6}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ew-when{display:grid;grid-template-columns:1fr 104px;gap:8px;margin-bottom:6px}
+.ew-when input{min-width:0}
 
 /* Timer: die Pause lädt wie eine Energieleiste auf */
 .timer{position:fixed;left:12px;right:12px;bottom:calc(74px + env(safe-area-inset-bottom));max-width:536px;margin:0 auto;
@@ -372,6 +376,10 @@ function newEntry(exId, plan){
   while (last && sets.length < want){ const p = sets[sets.length - 1]; sets.push({a:p.a, b:p.b, done:false}); }
   return {exId, sets};
 }
+// Ist ein Satz ausgefüllt? Kraft braucht Wdh (das Gewicht darf bei Körpergewicht fehlen), Ausdauer Minuten oder km, „nur Zeit“ Minuten.
+const filledSet = (type, s) => type === "kraft" ? num(s.b) > 0 : type === "ausdauer" ? num(s.a) > 0 || num(s.b) > 0 : num(s.a) > 0;
+// Zeitpunkt als Wert für <input type="datetime-local"> in Ortszeit, z. B. "2026-11-14T18:30"
+const toLocalInput = t => { const d = new Date(t); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
 function groupByCat(list){
   const m = new Map();
   [...list].sort((a,b) => a.name.localeCompare(b.name, "de")).forEach(e => {
@@ -420,6 +428,22 @@ function stepSize(exId, linear){
   if (linear && l.grunduebung && l.cat === "Beine" && g.includes("Langhantel")) return 5;
   return STEP_KG;
 }
+/* Wiederholungsziel für heute (doppelte Progression, siehe bibliothek/README.md): pro Satz eine Wdh mehr als
+   letztes Mal, höchstens bis zum oberen Ende des Programmbereichs bzw. STEP_REPS; wer schon darüber lag, hält.
+   Ohne Gewicht gibt es nach oben keine Grenze. Gilt nur bei gleichem Gewicht: Weicht ein Satz im Gewicht vom
+   letzten Mal ab (z. B. nach „Steigern“), gibt es kein Ziel. Nur Anzeige, nichts wird gespeichert. */
+function repGoal(en, plan){
+  const last = exType(en.exId) === "kraft" && lastFor(en.exId);
+  if (!last || !en.sets.length) return null;
+  const prev = j => last.sets[Math.min(j, last.sets.length - 1)];
+  if (en.sets.some((s, j) => num(s.a) !== num(prev(j).a))) return null;
+  const goal = en.sets.map((s, j) => {
+    const r = num(prev(j).b), top = planTop(plan) || (num(prev(j).a) > 0 ? STEP_REPS : Infinity);
+    return r > 0 ? Math.max(r, Math.min(top, r + 1)) : 0;
+  });
+  return goal.every(g => g > 0) ? goal : null;
+}
+const fmtGoal = g => g.length > 1 && g.every(x => x === g[0]) ? `${g.length} × ${g[0]} Wdh` : `${g.join(", ")} Wdh`;
 
 /* Fortschrittskurve einer Übung: ein Wert pro Einheit.
    Kraft: geschätztes Maximum für 1 Wdh nach Epley (kg × (1 + Wdh/30)), ohne Gewicht die meisten Wiederholungen;
@@ -706,10 +730,10 @@ function shiftTimer(delta){
 
 /* ---------- Dialog + toast ---------- */
 let dlgResolve = null;
-function ask(text, ok = "OK", danger = false){
+function ask(text, ok = "OK", danger = false, no = "Abbrechen"){
   return new Promise(res => {
     dlgResolve = res;
-    $("#dlg").innerHTML = `<div class="backdrop"></div><div class="dlg-box"><p>${esc(text)}</p><div class="grid2"><button data-act="dlg-no">Abbrechen</button><button class="${danger ? "dangerbtn" : "primary"}" data-act="dlg-yes">${esc(ok)}</button></div></div>`;
+    $("#dlg").innerHTML = `<div class="backdrop"></div><div class="dlg-box"><p>${esc(text)}</p><div class="grid2"><button data-act="dlg-no">${esc(no)}</button><button class="${danger ? "dangerbtn" : "primary"}" data-act="dlg-yes">${esc(ok)}</button></div></div>`;
     $("#dlg").classList.add("open");
   });
 }
@@ -906,11 +930,13 @@ function vEntry(en, i){
   // Steigerungsknopf nur, solange noch ein offener Satz unter dem vorgeschlagenen Gewicht liegt
   const plan = planFor(en.exId);   // Richtwert, wenn die Vorlage aus einem Bibliotheks-Programm stammt
   const up = stepUp(en.exId, plan), showUp = up && en.sets.some(s => !s.done && num(s.a) < up);
+  const goal = up ? null : repGoal(en, plan);   // Ziel nur zwischen zwei Gewichtsstufen, nicht neben „Steigern“
   return `<div class="card">
     <div class="row between" style="align-items:flex-start">
       <div class="grow"><div class="ex-name">${esc(ex.name)}</div>${ex.note ? `<div class="ex-note">${esc(ex.note)}</div>` : ""}
       <div class="last">${last ? `Letztes Mal (${fmtDate(last.date)}): ${esc(fmtSets(ex.type, last.sets))}` : `<span class="muted">Erstes Mal – leg los!</span>`}</div>
       ${plan ? `<div class="plan">Programm: ${esc(libDose(plan))}</div>` : ""}
+      ${goal ? `<div class="goal">Ziel heute: <b>${esc(fmtGoal(goal))}</b></div>` : ""}
       ${showUp ? `<button class="step-up" data-act="step-up" data-i="${i}" aria-label="Gewicht in den offenen Sätzen auf ${fmtNum(up)} kg erhöhen">Steigern: ${fmtNum(up)} kg</button>` : ""}</div>
       <button class="ghost" data-act="del-entry" data-i="${i}" aria-label="Übung entfernen">✕</button>
     </div>
@@ -924,6 +950,23 @@ function vEntry(en, i){
       <button class="small" data-act="add-set" data-i="${i}">+ Satz</button>
       ${en.sets.length > 1 ? `<button class="small ghost" data-act="del-set" data-i="${i}">− Satz</button>` : ""}
     </div>
+  </div>`;
+}
+// Eine Übung im Bearbeiten-Sheet: Satzzeilen wie im Tracker, statt des Hakens ein ✕ zum Entfernen
+function vEditEntry(en, i){
+  // Bei einer gelöschten Übung ist die Erfassungsart unbekannt: beide Werte neutral beschriftet zeigen
+  const known = exById(en.exId), ex = known || {name:"Gelöschte Übung"};
+  const T = known ? TYPES[ex.type] || TYPES.kraft : {f:[["a","Wert 1","decimal"],["b","Wert 2","decimal"]]};
+  const cols = `grid-template-columns:26px repeat(${T.f.length},1fr) 52px`;
+  return `<div class="card">
+    <div class="row between"><div class="ex-name grow">${esc(ex.name)}</div>
+      <button class="ghost danger" data-act="ew-rm-entry" data-i="${i}" aria-label="${esc(ex.name)} aus dem Training entfernen">✕</button></div>
+    ${en.sets.length ? `<div class="set head" style="${cols}"><span>#</span>${T.f.map(f => `<span>${f[1]}</span>`).join("")}<span></span></div>
+    ${en.sets.map((s, j) => `<div class="set" style="${cols}"><span class="num">${j + 1}</span>
+      ${T.f.map(f => `<input inputmode="${f[2]}" autocomplete="off" data-ei="${i}" data-ej="${j}" data-ef="${f[0]}" value="${esc(s[f[0]])}" placeholder="–">`).join("")}
+      <button class="ghost danger" data-act="ew-rm-set" data-i="${i}" data-j="${j}" aria-label="Satz ${j + 1} entfernen">✕</button></div>`).join("")}`
+    : `<p class="muted">Keine Sätze mehr – die Übung fällt beim Sichern weg.</p>`}
+    <div class="row" style="margin-top:10px"><button class="small" data-act="ew-add-set" data-i="${i}">+ Satz</button></div>
   </div>`;
 }
 function vTemplates(){
@@ -963,7 +1006,8 @@ function vHistory(){
         <span class="muted">${fmtDateLong(w.date)}${mins ? ` · ${mins} min` : ""} · ${n} ${n === 1 ? "Satz" : "Sätze"}</span></span>
         <span class="muted">${open ? "▾" : "▸"}</span></button>
       ${open ? `<div style="margin-top:8px">${w.entries.map(e => `<div class="li"><b>${esc(exName(e.exId))}</b><div class="muted">${esc(fmtSets(exType(e.exId), e.sets))}</div></div>`).join("")}
-        <button class="small ghost danger" style="margin-top:6px;padding-left:0" data-act="del-w" data-id="${w.id}">Training löschen</button></div>` : ""}
+        <div class="row between" style="margin-top:6px"><button class="small" data-act="edit-w" data-id="${w.id}">Bearbeiten</button>
+        <button class="small ghost danger" data-act="del-w" data-id="${w.id}">Training löschen</button></div></div>` : ""}
     </div>`;
   }).join("") : `<div class="card muted">Noch keine Trainings gespeichert. Starte eins im Tab „Training“.</div>`}
   <h2>Einstellungen</h2>
@@ -982,7 +1026,8 @@ function vSheet(s){
   if (s.kind === "picker"){
     // target "lib": nur Bibliothek, um Übungen in die eigene Liste zu holen (Tab Übungen)
     const onlyLib = s.target === "lib";
-    const inWorkout = new Set(s.target === "active" && S.active ? S.active.entries.map(e => e.exId) : (s.back?.draft?.ex || []));
+    const inWorkout = new Set(s.target === "active" && S.active ? S.active.entries.map(e => e.exId)
+      : s.target === "edit-w" ? s.back.draft.entries.map(e => e.exId) : (s.back?.draft?.ex || []));
     return `<div class="sheet-head"><button class="ghost" data-act="close">${onlyLib ? "Fertig" : "Zurück"}</button><b>${onlyLib ? "Übungsbibliothek" : "Übung wählen"}</b>${onlyLib ? `<span style="width:60px"></span>` : `<button class="ghost accent" data-act="new-ex-inline">Neu</button>`}</div>
     <input id="pick-q" placeholder="Suchen …" autocomplete="off">
     ${onlyLib ? "" : `<button class="small ghost accent" style="margin-top:6px;padding-left:0" data-act="to-lib">↓ Zur Übungsbibliothek</button>`}
@@ -1028,6 +1073,17 @@ function vSheet(s){
         <span class="grow"><span class="ex-name" style="display:block">${esc(p.name)}</span><span class="muted">${days ? `${days} Tage pro Woche · ` : ""}${esc((p.erfahrung || []).join(", "))}</span></span>
         <span class="muted">${open ? "▾" : "▸"}</span></button>
         ${open ? `<p class="muted prog-desc">${esc(p.beschreibung || "")}</p>${p.einheiten.map(u => vUnit(p, u)).join("")}` : ""}</div>`; }).join("")}`;
+  }
+  if (s.kind === "edit-w"){
+    // Gespeichertes Training nachträglich korrigieren; geändert wird erst mit „Sichern“ (Entwurf in s.draft)
+    const d = s.draft;
+    return `<div class="sheet-head"><button class="ghost" data-act="close">Abbrechen</button><b>Bearbeiten</b><button class="ghost accent" data-act="save-w">Sichern</button></div>
+    <label class="lbl">Name</label><input data-draft="name" value="${esc(d.name)}" autocomplete="off">
+    <div class="ew-when"><div><label class="lbl">Beginn</label><input type="datetime-local" data-draft="when" value="${esc(d.when)}" max="${toLocalInput(Date.now())}"></div>
+      <div><label class="lbl">Dauer (min)</label><input inputmode="numeric" data-draft="mins" data-sel="1" value="${esc(d.mins)}" placeholder="–" autocomplete="off"></div></div>
+    ${d.entries.map(vEditEntry).join("")}
+    <button class="block" style="margin-top:12px" data-act="pick" data-target="edit-w">+ Übung hinzufügen</button>
+    <p class="muted">Leere Sätze fallen beim Sichern weg. Rekorde, Kampfkraft und Kurven rechnen sich danach neu.</p>`;
   }
   if (s.kind === "text"){
     return `<div class="sheet-head"><button class="ghost" data-act="close">Fertig</button><b>${esc(s.title)}</b><button class="ghost accent" data-act="copy-text">Kopieren</button></div>
@@ -1247,7 +1303,7 @@ const actions = {
     // Ein leerer Satz wird nicht abgehakt (sonst startet der Timer und ein leerer Satz landet im Training).
     // Kraft braucht Wdh (das Gewicht darf bei Körpergewicht fehlen), Ausdauer Minuten oder km, „nur Zeit“ Minuten.
     if (!s.done){
-      const type = exType(en.exId), isFilled = x => type === "kraft" ? num(x.b) > 0 : type === "ausdauer" ? num(x.a) > 0 || num(x.b) > 0 : num(x.a) > 0;
+      const type = exType(en.exId), isFilled = x => filledSet(type, x);
       // Leerer Satz: die Werte des Satzes darüber übernehmen (ein Tipp für „noch einmal dasselbe“)
       const prev = en.sets[+el.dataset.j - 1];
       if (!isFilled(s) && prev && isFilled(prev) && !(s.a || s.b)){ s.a = prev.a; s.b = prev.b; }
@@ -1301,6 +1357,12 @@ const actions = {
   picked: el => {
     const s = ui.sheet, id = el.dataset.id;
     if (s.target === "active"){ S.active.entries.push(newEntry(id)); save(); ui.sheet = null; render(); setTimeout(() => window.scrollTo({top:document.body.scrollHeight, behavior:"smooth"}), 30); }
+    else if (s.target === "edit-w"){
+      const d = s.back.draft;
+      if (d.entries.some(e => e.exId === id)){ toast(`„${exName(id)}“ ist schon in diesem Training`); return; }
+      d.entries.push({exId:id, sets:[{a:"", b:""}]}); ui.sheet = s.back; render();
+      setTimeout(() => { const p = $("#sheet .panel"); if (p) p.scrollTop = p.scrollHeight; }, 30);
+    }
     else if (s.back.draft.ex.includes(id)) toast(`„${exName(id)}“ ist schon in der Vorlage`);   // in Vorlagen keine Doppelten
     else { s.back.draft.ex.push(id); ui.sheet = s.back; render(); }
   },
@@ -1324,7 +1386,13 @@ const actions = {
     save(); render(); toast(`Vorlage „${name}“ angelegt`);
   },
   "new-ex-inline": () => { ui.sheet = {kind:"exercise", draft:{isNew:true, id:uid(), name:"", cat:"", type:"kraft"}, back:ui.sheet}; render(); },
-  close: () => { ui.sheet = ui.sheet && ui.sheet.back || null; render(); },
+  close: async () => {
+    const s = ui.sheet;
+    // Geänderten Entwurf eines gespeicherten Trainings nicht aus Versehen (z. B. Tipp neben das Sheet) verwerfen
+    if (s && s.kind === "edit-w" && JSON.stringify(s.draft) !== s.orig && !(await ask("Änderungen an diesem Training verwerfen?", "Verwerfen", true, "Weiter bearbeiten"))) return;
+    if (ui.sheet !== s) return;
+    ui.sheet = s && s.back || null; render();
+  },
   "new-tpl": () => { ui.sheet = {kind:"template", draft:{isNew:true, id:uid(), name:"", ex:[]}}; render(); },
   "edit-tpl": el => { const t = S.templates.find(x => x.id === el.dataset.id); ui.sheet = {kind:"template", draft:{...t, ex:[...t.ex]}}; render(); },
   "tpl-move": el => { const ex = ui.sheet.draft.ex, k = +el.dataset.k, j = k + +el.dataset.d; [ex[k], ex[j]] = [ex[j], ex[k]]; render(); },
@@ -1350,12 +1418,9 @@ const actions = {
     if (note) e.note = note; else delete e.note;
     if (k >= 0) S.exercises[k] = e; else S.exercises.push(e);
     save();
-    const back = s.back;
-    if (back && back.kind === "picker"){
-      if (back.target === "active"){ S.active.entries.push(newEntry(e.id)); save(); ui.sheet = null; }
-      else { back.back.draft.ex.push(e.id); ui.sheet = back.back; }
-    } else ui.sheet = null;
-    render();
+    // Neu aus dem Auswahl-Sheet angelegt: gleich dort übernehmen, wohin ausgewählt wurde (Training, Vorlage, Bearbeiten)
+    if (s.back && s.back.kind === "picker"){ ui.sheet = s.back; actions.picked({dataset:{id:e.id}}); return; }
+    ui.sheet = null; render();
   },
   "del-ex": async () => {
     const d = ui.sheet.draft;
@@ -1365,6 +1430,45 @@ const actions = {
     save(); ui.sheet = null; render();
   },
   "toggle-w": el => { ui.open = ui.open === el.dataset.id ? null : el.dataset.id; render(); },
+  "edit-w": el => {
+    const w = S.workouts.find(x => x.id === el.dataset.id);
+    if (!w) return;
+    // Entwurf als tiefe Kopie, damit „Abbrechen“ nichts verändert; unbekannte Felder reisen unverändert mit
+    const draft = JSON.parse(JSON.stringify(w));
+    draft.when = toLocalInput(w.date);
+    draft.mins = w.end > w.date ? String(Math.max(1, Math.round((w.end - w.date) / 60000))) : "";
+    ui.sheet = {kind:"edit-w", draft, when0:draft.when, mins0:draft.mins, orig:JSON.stringify(draft)};
+    render();
+  },
+  "ew-add-set": el => { const en = ui.sheet.draft.entries[+el.dataset.i], p = en.sets[en.sets.length - 1] || {}; en.sets.push({a:p.a ?? "", b:p.b ?? ""}); render(); },
+  "ew-rm-set": el => { ui.sheet.draft.entries[+el.dataset.i].sets.splice(+el.dataset.j, 1); render(); },
+  "ew-rm-entry": el => { ui.sheet.draft.entries.splice(+el.dataset.i, 1); render(); },
+  "save-w": () => {
+    const s = ui.sheet, d = s.draft, k = S.workouts.findIndex(w => w.id === d.id);
+    if (k < 0){ ui.sheet = null; render(); toast("Dieses Training gibt es nicht mehr"); return; }
+    const old = S.workouts[k], name = String(d.name || "").trim();
+    if (!name){ toast("Bitte einen Namen eingeben"); return; }
+    // Datum und Dauer nur übernehmen, wenn sie geändert wurden (das Eingabefeld kennt keine Sekunden)
+    const date = d.when === s.when0 ? old.date : new Date(d.when).getTime();
+    if (!(date > 0)){ toast("Bitte Beginn mit Datum und Uhrzeit angeben"); return; }
+    if (date > Date.now()){ toast("Der Beginn liegt in der Zukunft"); return; }
+    const mins = num(d.mins);
+    if (String(d.mins).trim() && !(mins > 0 && mins <= 1440)){ toast("Dauer bitte in Minuten (1 bis 1440) oder leer lassen"); return; }
+    // Nur ganz leere Sätze fallen weg. Nicht nach Erfassungsart filtern: Bei gelöschten Übungen ist die Art unbekannt,
+    // und alte oder importierte Sätze (z. B. Gewicht ohne Wdh) sollen nicht verschwinden, nur weil man den Namen ändert.
+    const blank = v => String(v ?? "").trim() === "";
+    const entries = d.entries.map(e => ({...e, sets:e.sets.filter(x => !(blank(x.a) && blank(x.b)))})).filter(e => e.sets.length);
+    if (!entries.length){ toast("Kein Satz mehr übrig. Zum Löschen „Training löschen“ nutzen."); return; }
+    const w = {...old, name, date, entries};
+    if (d.mins !== s.mins0) { if (mins > 0) w.end = date + Math.round(mins * 60000); else delete w.end; }
+    else if (old.end) w.end = old.end + (date - old.date);   // Beginn verschoben: Ende rückt mit, Dauer bleibt
+    S.workouts[k] = w;
+    S.workouts.sort((x, y) => x.date - y.date);   // „Letztes Mal“, Rekorde und Serie lesen die Trainings nach Datum
+    save({put:w.id}); ui.sheet = null; ui.open = w.id; render(); toast("Training geändert");
+    // Hat sich die Position im Verlauf durch ein neues Datum verschoben: das Training wieder in den Blick holen
+    const card = document.querySelector(`[data-act="toggle-w"][data-id="${CSS.escape(w.id)}"]`);
+    if (card) card.closest(".card").scrollIntoView({block:"center"});
+  },
   "del-w": async el => {
     if (!(await ask("Dieses Training endgültig löschen?", "Löschen", true))) return;
     const id = el.dataset.id;
@@ -1411,6 +1515,11 @@ let link = null, selFix = null, fresh = null;
 const selectAll = t => { try { t.setSelectionRange(0, t.value.length); } catch(_){ t.select(); } };
 document.addEventListener("focusin", e => {
   const t = e.target;
+  if (t.dataset && (t.dataset.ef || t.dataset.sel)){   // Zahlenfelder beim Bearbeiten eines gespeicherten Trainings: markieren, aber nichts verknüpfen
+    selFix = t; fresh = t; selectAll(t);
+    setTimeout(() => { if (document.activeElement === t && fresh === t) selectAll(t); }, 0);
+    return;
+  }
   if (!t.dataset || !t.dataset.f || !S || !S.active) return;
   const i = +t.dataset.i, j = +t.dataset.j, f = t.dataset.f, en = S.active.entries[i];
   if (!en || !en.sets[j]) return;
@@ -1420,7 +1529,7 @@ document.addEventListener("focusin", e => {
   selectAll(t);   // sofort und noch einmal nach dem Antippen, weil manche Browser die Markierung beim Loslassen aufheben
   setTimeout(() => { if (document.activeElement === t && fresh === t) selectAll(t); }, 0);
 });
-document.addEventListener("focusout", e => { if (e.target.dataset && e.target.dataset.f){ link = null; fresh = null; } });
+document.addEventListener("focusout", e => { if (e.target.dataset && (e.target.dataset.f || e.target.dataset.ef || e.target.dataset.sel)){ link = null; fresh = null; } });
 // Tippt man ein schon aktives Feld erneut an, will man den Cursor setzen: dann nichts mehr ersetzen
 document.addEventListener("pointerdown", e => { if (fresh && e.target === fresh && document.activeElement === fresh) fresh = null; }, true);
 // Sicherheitsnetz: Die erste Ziffer nach dem Antippen ersetzt den alten Wert immer, auch wenn die Markierung
@@ -1453,6 +1562,9 @@ document.addEventListener("input", e => {
       });
       clearTimeout(saveT); saveT = setTimeout(() => { saveT = null; save(); }, 400);
     }
+  } else if (t.dataset.ef && ui.sheet?.kind === "edit-w"){
+    const s = ui.sheet.draft.entries[+t.dataset.ei]?.sets[+t.dataset.ej];
+    if (s) s[t.dataset.ef] = t.value;
   } else if (t.dataset.draft && ui.sheet?.draft){ ui.sheet.draft[t.dataset.draft] = t.value; }
   else if (t.id === "pick-q"){ if (ui.sheet) ui.sheet.q = t.value; filterPick(t.value); }
 });

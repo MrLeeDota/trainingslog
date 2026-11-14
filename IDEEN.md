@@ -6,16 +6,6 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 Runde vom 14.11.2026 (`produkt-scout`), Schwerpunkt MCI. In `NOTIZEN.md` standen keine Notizen. Was über MCI und die anderen Apps bekannt ist, steht mit Quellen in `APPS.md`.
 
-### 20. Gespeichertes Training im Verlauf korrigieren
-- Nutzen: hoch · Aufwand: M · Datenformat: nein
-
-Herkunft: MCI hat „Gewichte nachträglich ändern können“ auf Nutzerwunsch umgesetzt (Roadmap, 225 Stimmen), Strong bietet im Verlauf „Edit Workout“ samt Start- und Endzeit. Bei uns lässt sich ein gespeichertes Training nur ganz löschen: Ein Tippfehler wie 190 statt 10 Wdh bleibt in Rekorden, Kampfkraft und Fortschrittskurve stehen und landet beim nächsten Mal sogar als Vorwert in den Feldern. Skizze: Im aufgeklappten Training neben „Training löschen“ ein Knopf „Bearbeiten“, der ein Sheet mit denselben Satzzeilen wie im Tracker öffnet (Werte ändern, einzelnen Satz oder Übung entfernen, Datum und Uhrzeit per `datetime-local`, `end` rückt mit); „Sichern“ ersetzt den Eintrag, sortiert `S.workouts` nach Datum und ruft `save({put:id})` auf, die Spielwerte rechnen sich von selbst neu, und der `daten-waechter` prüft den Diff.
-
-### 21. Wiederholungsziel für heute anzeigen
-- Nutzen: mittel · Aufwand: S · Datenformat: nein
-
-Herkunft: MCI gibt pro Satz Gewicht und Wdh nach der tatsächlichen Leistung vor; Bewertungen loben, dass der Algorithmus beim Steigern hilft, eine kritisiert aber unpassende Vorgaben. Bei uns sagt der Tracker zwischen zwei Gewichtsstufen nicht, was heute dran ist; „Steigern“ erscheint erst, wenn alle Sätze das obere Ende geschafft haben. Skizze: Bei Kraftübungen ohne Steigerungsvorschlag zeigt die Programm- bzw. „Letztes Mal“-Zeile „Ziel: 9, 9, 8“, also pro Satz eine Wdh mehr als letztes Mal, höchstens bis zum oberen Ende von `plan.wdh` bzw. `STEP_REPS` (doppelte Progression wie in `bibliothek/README.md`); die Felder behalten die Vorwerte, ob sie gleich das Ziel bekommen sollen, erst nach einem Test entscheiden (spart Tipps, birgt aber das Risiko unbemerkt falscher Werte).
-
 ### 22. Übung im Training tauschen
 - Nutzen: mittel · Aufwand: S · Datenformat: nein
 
@@ -56,6 +46,11 @@ Herkunft: MCI hat laut Roadmap einen „Zeitsparmodus für kurze, effektive Trai
 
 Herkunft: MCI zeigt nach dem Training eine Zusammenfassung mit „Share my progress“, Stickern und Foto; Hevy erzeugt nach jedem Training Bilder mit Rekorden, Volumen und Muskelverteilung (hell, dunkel oder transparent), Strong teilt nur einen Link zum Import. Skizze: In „Training geschafft“ und im Verlauf ein Knopf „Als Bild teilen“, der per Canvas ein Hochformat-PNG im App-Look zeichnet (Trainingsname, Datum, Dauer, bester Satz pro Übung, Kampfkraft, Rekorde, Stufe, Sternkugeln der Woche; keine Originalfiguren, -namen oder Logos) und es wie das Backup über `navigator.share({files})` anbietet, sonst als Download. Im Training kostet das keinen Tipp, danach nur, wenn man teilen will.
 
+### 30. Gewichtsschritt bei schweren Kurzhanteln (aus Fachprüfung: Arnold-Split)
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Herkunft: `trainings-experte` beim Anlegen des Arnold-Splits am 14.11.2026. `stepSize()` schlägt bei Kurzhantel-Isolationsübungen immer +1 kg vor. Beim Kurzhantel-Pullover (eine schwere Hantel, oft 20 bis 30 kg) ist der kleinste Schritt im Studio aber meist 2 kg, oft schon ab etwa 10 kg. Skizze: In `stepSize()` das aktuelle Gewicht mitgeben und bei Isolation unter 10 kg 1 kg, ab 10 kg 2 kg vorschlagen; das ist übliche Praxis und hängt vom Studio ab.
+
 ## Angenommen
 
 Noch nichts.
@@ -84,6 +79,20 @@ Vorbild ist Strong: Ein Tipp auf die Satznummer öffnet Aufwärmen, Drop und Ver
 ## Erledigt
 
 Umgesetzt am 14.11.2026:
+
+### 20. Gespeichertes Training im Verlauf korrigieren
+- Nutzen: hoch · Aufwand: M · Datenformat: nein
+
+Herkunft: MCI hat „Gewichte nachträglich ändern können“ auf Nutzerwunsch umgesetzt (Roadmap, 225 Stimmen), Strong bietet im Verlauf „Edit Workout“ samt Start- und Endzeit. Bei uns lässt sich ein gespeichertes Training nur ganz löschen: Ein Tippfehler wie 190 statt 10 Wdh bleibt in Rekorden, Kampfkraft und Fortschrittskurve stehen und landet beim nächsten Mal sogar als Vorwert in den Feldern. Skizze: Im aufgeklappten Training neben „Training löschen“ ein Knopf „Bearbeiten“, der ein Sheet mit denselben Satzzeilen wie im Tracker öffnet (Werte ändern, einzelnen Satz oder Übung entfernen, Datum und Uhrzeit per `datetime-local`, `end` rückt mit); „Sichern“ ersetzt den Eintrag, sortiert `S.workouts` nach Datum und ruft `save({put:id})` auf, die Spielwerte rechnen sich von selbst neu, und der `daten-waechter` prüft den Diff.
+
+Umgesetzt: Sheet „Bearbeiten“ mit Name, Beginn, Dauer, Satzzeilen, „+ Satz“, ✕ für Satz und Übung und „+ Übung hinzufügen“. Nach dem Befund des `daten-waechter` fallen beim Sichern nur ganz leere Sätze weg (sonst wären bei gelöschten Übungen Sätze verschwunden); nach dem `gym-tester` markiert auch das Dauer-Feld beim Antippen, und der Dialog heißt „Weiter bearbeiten“ statt „Abbrechen“.
+
+### 21. Wiederholungsziel für heute anzeigen
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Herkunft: MCI gibt pro Satz Gewicht und Wdh nach der tatsächlichen Leistung vor; Bewertungen loben, dass der Algorithmus beim Steigern hilft, eine kritisiert aber unpassende Vorgaben. Bei uns sagt der Tracker zwischen zwei Gewichtsstufen nicht, was heute dran ist; „Steigern“ erscheint erst, wenn alle Sätze das obere Ende geschafft haben. Skizze: Bei Kraftübungen ohne Steigerungsvorschlag zeigt die Programm- bzw. „Letztes Mal“-Zeile „Ziel: 9, 9, 8“, also pro Satz eine Wdh mehr als letztes Mal, höchstens bis zum oberen Ende von `plan.wdh` bzw. `STEP_REPS` (doppelte Progression wie in `bibliothek/README.md`); die Felder behalten die Vorwerte, ob sie gleich das Ziel bekommen sollen, erst nach einem Test entscheiden (spart Tipps, birgt aber das Risiko unbemerkt falscher Werte).
+
+Umgesetzt: `repGoal()` und `fmtGoal()`; die Zeile „Ziel heute“ steht unter „Letztes Mal“ und dem Programm-Richtwert, nur bei gleichem Gewicht wie letztes Mal und nicht neben „Steigern“. Die Felder behalten die Vorwerte.
 
 ### 18. Satzzahl aus dem Programm übernehmen (aus Funktionsvergleich: „Letztes Mal“)
 - Nutzen: niedrig · Aufwand: S · Datenformat: nein

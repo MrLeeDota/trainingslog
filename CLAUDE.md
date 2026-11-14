@@ -58,8 +58,14 @@ In `.claude/agents/` liegen fünf Subagenten. Sie liefern Ideen oder prüfen; um
 - Übungen, Vorlagen, Trainingslogik → `trainings-experte`. Er pflegt die Übungsbibliothek und Programm-Vorlagen in `bibliothek/` (Format in `bibliothek/README.md`), prüft fachliche Regeln wie Progression, 1RM-Schätzung, Pausen und Kampfkraft und wertet auf Wunsch ein Backup aus.
 - Wie gut ist eine vorhandene Funktion im Vergleich zu anderen Apps → `funktions-tester`. Er prüft pro Durchlauf eine Funktion gründlich im Handy-Rahmen und per Recherche (MCI, Strong, Hevy und eine dritte App), pflegt `VERGLEICH.md` und trägt höchstens 5 Verbesserungen in `IDEEN.md` ein, markiert mit „(aus Funktionsvergleich: …)“. Ein Durchlauf ist teuer (rund 10 Minuten, viele Tokens): Er läuft deshalb nur, wenn ich ihn ausdrücklich anfordere, nicht automatisch nach jeder Änderung.
 - `produkt-scout` und `funktions-tester` teilen sich ihre Recherche in `APPS.md`: pro Funktion, was andere Apps können, mit Quellen und Datum.
-- Ablauf: Idee in `IDEEN.md` nach „Angenommen“ verschieben → umsetzen → passende Agenten prüfen lassen → nach „Erledigt“ verschieben → committen und pushen.
-- Nach einer neuen Funktion: `gym-tester` (Fehler). Den `funktions-tester` (Vergleich und Verbesserungen) erst, wenn ich ihn anfordere, z. B. nachdem sich an einer Funktion mehreres geändert hat.
+- Ablauf für eine Idee: in `IDEEN.md` nach „Angenommen“ verschieben → umsetzen → passende Agenten prüfen lassen → nach „Erledigt“ verschieben → committen und pushen.
+- Nach einer neuen Funktion: `gym-tester` (Fehler). Den `funktions-tester` (Vergleich und Verbesserungen) erst, wenn ich ihn anfordere.
+- Ablauf pro Funktion (die Funktionen stehen in der Tabelle in `VERGLEICH.md`), eine nach der anderen:
+  1. `produkt-scout` macht eine Runde nur für diese Funktion und trägt seine Recherche unter ihrem Abschnitt in `APPS.md` ein.
+  2. Ich wähle aus, umgesetzt wird wie oben (mit `gym-tester`, bei fachlichen Regeln vorher `trainings-experte`).
+  3. Danach läuft der `funktions-tester` einmal über diese Funktion. Er nutzt die Recherche aus `APPS.md` und gibt das Urteil in `VERGLEICH.md` und höchstens 5 Verbesserungen.
+  4. Seine Vorschläge, die ich auswähle, werden umgesetzt und nur noch mit dem `gym-tester` geprüft, ohne zweiten Durchlauf des `funktions-tester`. Danach ist die nächste Funktion dran.
+- Erledigt nach diesem Ablauf: Satz-Erfassung und „Letztes Mal“ (beide noch vor der Einführung des Ablaufs). Als Nächstes: Pausen-Timer.
 
 ## Nächste Schritte
 1. Erledigt: Aus dem Prototyp eine echte PWA machen: `manifest.webmanifest`, App-Icons (inkl. `apple-touch-icon` 180×180), Service Worker für den Offline-Betrieb.

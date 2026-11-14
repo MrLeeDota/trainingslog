@@ -36,6 +36,15 @@ Du startest ohne Gesprächsverlauf. Lies deshalb als Erstes `CLAUDE.md` im Proje
    - Sie passt zum Look, ohne Originalfiguren, -namen oder Logo zu brauchen.
 5. **Bewerten.** Für jede Idee: Nutzen (hoch/mittel/niedrig), Aufwand (S/M/L) und ob das Datenformat geändert werden müsste. Eine Änderung am Datenformat verlangt immer eine Migration für alte Daten und Backups; rechne das in den Aufwand ein. Spielwerte werden bisher in `progress()` aus den gespeicherten Trainings berechnet und nicht gespeichert; Ideen, die so auskommen, sind günstiger.
 
+## Runde für eine Funktion
+
+Meist bekommst du den Auftrag für **eine** Funktion aus der Tabelle in `VERGLEICH.md` (z. B. „Pausen-Timer“). Dann gilt:
+- Lies in `VERGLEICH.md` die Zeile und, falls vorhanden, den Abschnitt dieser Funktion, in `APPS.md` ihren Abschnitt und in `index.html` nur den Code dieser Funktion.
+- Recherchiere nur zu dieser Funktion, zuerst MCI, dann Strong und Hevy, dazu eine weitere passende App. Trag alles Neue unter dem Abschnitt der Funktion in `APPS.md` ein; der `funktions-tester` prüft die Funktion später und baut auf deiner Recherche auf.
+- Notizen aus `NOTIZEN.md` wertest du trotzdem alle aus; Ideen zu anderen Funktionen kommen dann mit in die Liste.
+- Schreib höchstens 6 Ideen zu dieser Funktion. Steht in `IDEEN.md` unter „Vorschläge“ schon etwas, ersetzt du nur deine eigenen Einträge zu dieser Funktion; andere offene Vorschläge bleiben stehen.
+- Im Auftrag kann stehen, dass eine abgelehnte Idee in einer bestimmten Form doch vorgeschlagen werden darf. Das gilt dann nur in dieser Form.
+
 ## Ergebnis
 
 - Schreibe höchstens 10 Ideen unter „Vorschläge“ in `IDEEN.md`, sortiert nach Nutzen im Verhältnis zum Aufwand, die beste zuerst. Ersetze dabei deine bisherigen Vorschläge durch die neue, zusammengeführte Liste. Einträge mit „(aus Funktionsvergleich: …)“ stammen vom Agenten `funktions-tester`: Lass sie stehen, wie sie sind, und zähl sie nicht zu deinen 10 Ideen. Neue Ideen bekommen die nächste freie Nummer (höchste Nummer in der ganzen Datei plus 1).

@@ -188,6 +188,8 @@ button.step-up:active{transform:skewX(-10deg) translateY(2px);box-shadow:0 0 0 v
 button.goal-btn:active{transform:skewX(-10deg) translateY(2px)}
 /* Ziel ist eingetragen: gleich hoch wie der Knopf, damit die Sätze darunter beim Wechsel nicht springen */
 .goal-text{display:flex;align-items:center;gap:.3em;background:none;border-color:transparent;color:var(--muted);font-weight:600;padding-left:0;transform:none}
+.goal-text.hit{color:var(--scan)}
+.better{color:var(--scan);text-align:right}
 /* Entlasten: ruhiger als „Steigern“, nur umrandet */
 .step-down-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
 .step-down-row .muted{font-size:13px}
@@ -483,6 +485,29 @@ function stepDown(exId, plan){
   const down = kg - step * Math.max(1, Math.round(kg * (linear ? .10 : .05) / step));
   return down > 0 ? Math.round(down * 100) / 100 : null;
 }
+/* Wiedereinstieg nach langer Pause (Idee 33, Regel vom trainings-experte, siehe bibliothek/README.md „Progression“,
+   Grundlage Bosquet 2013: bis etwa 4 Wochen kaum Kraftverlust). Liegt die letzte Einheit dieser Übung 35 Tage oder
+   länger zurück, gibt es {days, weeks, kg, cut}: kg = schwerster Satz der letzten Einheit, cut = Abzug (10 % bis 55 Tage,
+   danach 20 %, in ganzen Gewichtsschritten, mindestens einer; 0 ohne Gewicht, bei Ausdauer und „nur Zeit“ oder wenn
+   nichts übrig bliebe). In dieser Einheit entfallen „Steigern“, „Entlasten“ und „Ziel heute“; ab der nächsten gilt alles
+   wieder normal. Wird nur berechnet. */
+const PAUSE_DAYS = 35;
+function comeback(exId){
+  const last = lastFor(exId);
+  if (!last) return null;
+  const days = Math.round((dayStart(Date.now()) - dayStart(last.date)) / 864e5);
+  if (days < PAUSE_DAYS) return null;
+  const r = {days, weeks:Math.floor(days / 7), kg:0, cut:0};
+  if (exType(exId) !== "kraft") return r;
+  const kg = Math.max(0, ...last.sets.map(s => num(s.a)));
+  if (!(kg > 0)) return r;
+  const p = days >= 56 ? .2 : .1, step = Math.min(stepSize(exId, false, kg), stepSize(exId, false, kg * (1 - p)));
+  const cut = step * Math.max(1, Math.round(kg * p / step));
+  if (kg - cut > 0){ r.kg = kg; r.cut = Math.round(cut * 100) / 100; }
+  return r;
+}
+// Neues Gewicht eines Satzes beim Wiedereinstieg: nur Sätze, die noch auf dem alten Niveau liegen, und nie auf 0 oder darunter
+const comebackKg = (s, b) => num(s.a) > b.kg - b.cut && num(s.a) - b.cut > 0 ? num(s.a) - b.cut : null;
 /* Wiederholungsziel für heute (doppelte Progression, siehe bibliothek/README.md): pro Satz eine Wdh mehr als
    letztes Mal, höchstens bis zum oberen Ende des Programmbereichs bzw. STEP_REPS; wer schon darüber lag, hält.
    Ohne Gewicht gibt es nach oben keine Grenze. Gilt nur bei gleichem Gewicht: Weicht ein Satz im Gewicht vom
@@ -499,6 +524,37 @@ function repGoal(en, plan){
   return goal.every(g => g > 0) ? goal : null;
 }
 const fmtGoal = g => g.length > 1 && g.every(x => x === g[0]) ? `${g.length} × ${g[0]} Wdh` : `${g.join(", ")} Wdh`;
+// Ziel geschafft: jeder Satz mit mindestens den Ziel-Wdh (die Gewichte prüft schon repGoal)
+const goalMet = (en, g) => !!g && en.sets.every((s, j) => num(s.b) >= g[j]);
+/* „Besser als letztes Mal“ (Idee 35): vergleicht eine gerade trainierte Übung (en mit den erledigten Sätzen) mit der
+   letzten gespeicherten Einheit, muss also vor dem Speichern aufgerufen werden. Kraft: mehr Gewicht (schwerster Satz),
+   sonst mehr Wdh beim schwersten Gewicht; „Ziel geschafft“, wenn das Ziel von „Ziel heute“ erreicht ist und mehr verlangte
+   als letztes Mal. Ausdauer: mehr km, sonst bei ähnlicher Strecke (mind. 90 %) schnelleres Tempo, ohne km mehr Minuten.
+   Nur Zeit: mehr Minuten. Ergebnis: {name, label, goal} oder null. Wird nur berechnet, nicht gespeichert. */
+function betterThanLast(en, plan){
+  const last = lastFor(en.exId), type = exType(en.exId), name = exName(en.exId);
+  if (!last || !en.sets.length) return null;
+  const sum = (sets, f) => sets.reduce((t, s) => t + num(s[f]), 0);
+  if (type === "kraft"){
+    const heavy = sets => Math.max(0, ...sets.map(s => num(s.a))), kg = heavy(en.sets), kg0 = heavy(last.sets);
+    if (kg > kg0) return {name, label:`+${fmtNum(kg - kg0)} kg`};
+    if (kg < kg0) return null;
+    const reps = sets => sum(sets.filter(s => num(s.a) === kg), "b"), diff = reps(en.sets) - reps(last.sets);
+    const g = comeback(en.exId) ? null : repGoal(en, plan);   // nach langer Pause gab es kein Ziel
+    const more = g && g.some((x, j) => x > num(last.sets[Math.min(j, last.sets.length - 1)].b));
+    // „gesamt“: Summe über alle Sätze, nicht pro Satz (sonst passt es nicht zu „11 Wdh, vorher 8“ bei den Rekorden)
+    if (more && goalMet(en, g)) return {name, label:diff > 0 ? `Ziel geschafft · +${fmtNum(diff)} Wdh gesamt` : "Ziel geschafft", goal:true};
+    return diff > 0 ? {name, label:`+${fmtNum(diff)} Wdh gesamt`} : null;
+  }
+  const min = sum(en.sets, "a"), min0 = sum(last.sets, "a");
+  if (type === "ausdauer"){
+    const km = sum(en.sets, "b"), km0 = sum(last.sets, "b");
+    if (km > km0) return {name, label:`+${fmtNum(km - km0)} km`};
+    if (km > 0 && km0 > 0 && km >= km0 * .9 && min > 0 && min0 > 0 && min / km < min0 / km0) return {name, label:`Tempo ${fmtPace(min / km)} statt ${fmtPace(min0 / km0)} min/km`};
+    if (km || km0) return null;
+  }
+  return min > min0 ? {name, label:`+${fmtNum(min - min0)} min`} : null;
+}
 
 /* Fortschrittskurve einer Übung: ein Wert pro Einheit.
    Kraft: geschätztes Maximum für 1 Wdh nach Epley (kg × (1 + Wdh/30)), ohne Gewicht die meisten Wiederholungen;
@@ -1067,23 +1123,28 @@ function vEntry(en, i){
   const cols = `grid-template-columns:26px repeat(${T.f.length},1fr) 52px`;
   // Steigerungsknopf nur, solange noch ein offener Satz unter dem vorgeschlagenen Gewicht liegt
   const plan = entryPlan(en);   // Richtwert, wenn die Vorlage aus einem Bibliotheks-Programm stammt
-  const up = stepUp(en.exId, plan), showUp = up && en.sets.some(s => !s.done && num(s.a) < up);
-  const down = up ? null : stepDown(en.exId, plan), showDown = down && en.sets.some(s => !s.done && num(s.a) > down);
-  const goal = up || showDown ? null : repGoal(en, plan);   // Ziel nur zwischen zwei Gewichtsstufen, nicht neben „Steigern“ oder „Entlasten“
+  const back = comeback(en.exId);   // lange Pause: Wiedereinstieg statt Steigern, Entlasten und Ziel
+  const showBack = back && back.cut > 0 && en.sets.some(s => !s.done && comebackKg(s, back) !== null);
+  const backTo = showBack && (ks => ks.length && ks.every(k => k === ks[0]) ? `${fmtNum(ks[0])} kg` : `−${fmtNum(back.cut)} kg`)(en.sets.filter(s => !s.done).map(s => comebackKg(s, back) ?? num(s.a)));
+  const up = back ? null : stepUp(en.exId, plan), showUp = up && en.sets.some(s => !s.done && num(s.a) < up);
+  const down = up || back ? null : stepDown(en.exId, plan), showDown = down && en.sets.some(s => !s.done && num(s.a) > down);
+  const goal = up || showDown || back ? null : repGoal(en, plan);   // Ziel nur zwischen zwei Gewichtsstufen, nicht neben „Steigern“ oder „Entlasten“
   // Ziel als Knopf, solange ein offener Satz noch andere Wdh hat; danach nur noch als Text
   const goalOpen = goal && en.sets.some((s, j) => !s.done && num(s.b) !== goal[j]);
+  const goalHit = goal && en.sets.every(s => s.done) && goalMet(en, goal);   // alle Sätze abgehakt und das Ziel erreicht
   // Kopf: Nur der Name teilt sich die Zeile mit ⇄ und ✕, alles darunter nutzt die volle Kartenbreite
   return `<div class="card">
     <div class="row between ex-head"><div class="ex-name grow">${esc(ex.name)}</div>
       <span class="row ex-tools"><button class="ghost" data-act="swap" data-i="${i}" aria-label="${esc(ex.name)} gegen eine andere Übung tauschen">⇄</button>
       <button class="ghost" data-act="del-entry" data-i="${i}" aria-label="Übung entfernen">✕</button></span></div>
     ${ex.note ? `<div class="ex-note">${esc(ex.note)}</div>` : ""}
-    <div class="last">${last ? `Letztes Mal (${fmtDate(last.date)}): ${esc(fmtSets(ex.type, last.sets))}` : `<span class="muted">Erstes Mal – leg los!</span>`}</div>
+    <div class="last">${last ? `Letztes Mal (${fmtDate(last.date)}${back ? `, vor ${weeks(back.weeks)}` : ""}): ${esc(fmtSets(ex.type, last.sets))}` : `<span class="muted">Erstes Mal – leg los!</span>`}</div>
     ${plan ? `<div class="plan">Programm${en.planEx ? ` wie ${esc(exName(en.planEx))}` : ""}: ${esc(libDose(plan))}</div>` : ""}
     ${goalOpen ? (g => `<button class="goal-btn" data-act="goal" data-i="${i}" aria-label="${esc(g)} in die offenen Sätze eintragen">Ziel eintragen: <b>${esc(g)}</b></button>`)(fmtGoal(goal.filter((_, j) => !en.sets[j].done)))
-      : goal ? `<div class="goal-btn goal-text">Ziel heute: <b>${esc(fmtGoal(goal))}</b></div>` : ""}
+      : goal ? `<div class="goal-btn goal-text${goalHit ? " hit" : ""}">${goalHit ? "✓ Ziel geschafft:" : "Ziel heute:"} <b>${esc(fmtGoal(goal))}</b></div>` : ""}
     ${showUp ? `<button class="step-up" data-act="step-up" data-i="${i}" aria-label="Gewicht in den offenen Sätzen auf ${fmtNum(up)} kg erhöhen">Steigern: ${fmtNum(up)} kg</button>` : ""}
     ${showDown ? `<div class="step-down-row"><button class="step-down" data-act="step-down" data-i="${i}" aria-label="Gewicht in den offenen Sätzen auf ${fmtNum(down)} kg senken">Entlasten: ${fmtNum(down)} kg</button><span class="muted">3 Einheiten ohne Fortschritt</span></div>` : ""}
+    ${showBack ? `<div class="step-down-row"><button class="step-down" data-act="comeback" data-i="${i}" aria-label="Gewicht für den Wiedereinstieg in den offenen Sätzen senken: ${backTo}">Wiedereinstieg: ${backTo}</button><span class="muted">${weeks(back.weeks)} Pause</span></div>` : ""}
     <div class="set head" style="${cols}"><span>#</span>${T.f.map(f => `<span>${f[1]}</span>`).join("")}<span></span></div>
     ${en.sets.map((s, j) => `<div class="set ${s.done ? "done" : ""}" style="${cols}">
       <span class="num">${j + 1}</span>
@@ -1257,6 +1318,8 @@ function vSheet(s){
     <div class="lvl-box">${vLevel(progress(S.workouts))}</div>
     ${s.records.length ? `<h2>${s.records.length === 1 ? "Neuer Rekord" : "Neue Rekorde"}</h2>
       <div class="list" style="padding:0">${s.records.map(r => `<div class="li row between"><span>${esc(r.name)}</span><span><b>${fmtNum(r.v)} ${r.unit}</b> <span class="muted">vorher ${fmtNum(r.old)}</span></span></div>`).join("")}</div>` : ""}
+    ${s.better && s.better.length ? `<h2>Besser als letztes Mal</h2>
+      <div class="list" style="padding:0">${s.better.map(b => `<div class="li row between"><span>${esc(b.name)}</span><b class="better">${b.goal ? "✓ " : ""}${esc(b.label)}</b></div>`).join("")}</div>` : ""}
     ${s.earned.length ? `<h2>${s.earned.length === 1 ? "Neuer Erfolg" : "Neue Erfolge"}</h2>
       <div class="list" style="padding:0">${s.earned.map(a => vBadge(a, true)).join("")}</div>` : ""}
     ${vBackupDue()}
@@ -1436,11 +1499,13 @@ const actions = {
     const open = a.entries.reduce((n, e) => n + e.sets.filter(s => !s.done).length, 0);
     if (open && !(await ask(`${open} ${open === 1 ? "Satz ist" : "Sätze sind"} nicht abgehakt und werden nicht gespeichert. Trotzdem beenden?`, "Beenden"))) return;
     const w = {id:a.id, date:a.date, end:Date.now(), name:a.name, entries};
+    // Vergleich mit dem letzten Mal: vor dem Speichern, solange lastFor() noch die vorige Einheit liefert
+    const better = a.entries.map(e => { const sets = e.sets.filter(s => s.done); return sets.length ? betterThanLast({exId:e.exId, sets}, entryPlan(e)) : null; }).filter(Boolean);
     const before = progress(S.workouts);
     S.workouts.push(w); S.active = null; stopTimer(); save({put:w.id});
     // Belohnung: was dieses Training gebracht hat
     const after = progress(S.workouts), gain = workoutGain(w, before.bests);
-    ui.sheet = {kind:"result", power:gain.power, records:gain.records, level:after.level > before.level ? after.level : 0, earned:ACHIEVEMENTS.filter(x => x[2](after) && !x[2](before))};
+    ui.sheet = {kind:"result", power:gain.power, records:gain.records, better, level:after.level > before.level ? after.level : 0, earned:ACHIEVEMENTS.filter(x => x[2](after) && !x[2](before))};
     ui.tab = "verlauf"; ui.open = w.id; render(); window.scrollTo(0, 0); toast(store.status === "off" ? "Training beendet – nicht gespeichert" : "Training gespeichert 💪");
   },
   check: el => {
@@ -1479,6 +1544,11 @@ const actions = {
   "step-down": el => {
     const en = S.active.entries[+el.dataset.i], down = stepDown(en.exId, entryPlan(en));
     if (down) setWeight(en, down, `Gewicht auf ${fmtNum(down)} kg gesenkt`);
+  },
+  comeback: el => {
+    const en = S.active.entries[+el.dataset.i], b = comeback(en.exId);
+    if (!b || !(b.cut > 0)) return;
+    setValues(en, "a", j => { const k = comebackKg(en.sets[j], b); return k === null ? en.sets[j].a : fmtNum(k); }, `Wiedereinstieg: ${fmtNum(b.cut)} kg weniger`);
   },
   goal: el => {
     const en = S.active.entries[+el.dataset.i], g = repGoal(en, entryPlan(en));
@@ -1674,6 +1744,10 @@ const actions = {
 };
 
 document.addEventListener("click", e => {
+  // Ein Hinweis unten mit „Rückgängig“ verschwindet beim nächsten Tipp an anderer Stelle, damit er keine Sätze verdeckt
+  // und ein Tipp darauf nicht versehentlich etwas zurücknimmt
+  const t = $("#toast");
+  if (t.classList.contains("low") && t.classList.contains("show") && !e.target.closest("#toast")) t.classList.remove("show");
   const el = e.target.closest("[data-act]");
   if (!el || el.disabled) return;
   unlockAudio();

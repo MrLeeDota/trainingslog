@@ -4,28 +4,20 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 ## Vorschläge
 
-Aus dem Funktionsvergleich „Letztes Mal“ vom 14.11.2026 (zweite Prüfung, mit dem Arnold-Split; Befund in `VERGLEICH.md`). Die MCI-Runde vom selben Tag ist ganz einsortiert; was über MCI und die anderen Apps bekannt ist, steht mit Quellen in `APPS.md`.
-
-### 32. Zusatzgewicht vorschlagen, wenn Körpergewicht ausgereizt ist (aus Funktionsvergleich: „Letztes Mal“)
-- Nutzen: mittel · Aufwand: S · Datenformat: nein
-
-Der Arnold-Split sieht bei Klimmzügen nach allen Sätzen mit 10 Wdh Zusatzgewicht vor. Im Test zeigte die App nach zweimal 4 × 10 ohne Gewicht aber nur „Ziel heute: 4 × 10 Wdh“, und der Hinweis des Programms an der Übung (`hinweis` in `bibliothek/vorlagen.json`) erscheint nirgends, auch nicht im Programm-Sheet. Vorbild ist Hevy Trainer, das erhöht, sobald alle Sätze das obere Ende des Bereichs erreichen. Skizze: Bei Übungen mit Programm wertet `stepUp()` ein leeres Gewicht als 0 und schlägt dann „Zusatzgewicht: 2,5 kg“ vor. Schritt und Bedingung lässt man vorher vom `trainings-experte` prüfen; ohne Programm bleibt es aus, weil es keine Obergrenze gibt. Ein Tipp setzt die kg der offenen Sätze wie bei „Steigern“, mit Rückgängig. Außerdem zeigt `vUnit()` den `hinweis` jeder Übung als graue Zeile im Programm-Sheet.
-
-### 33. Wiedereinstieg nach langer Pause (aus Funktionsvergleich: „Letztes Mal“)
-- Nutzen: mittel · Aufwand: S · Datenformat: nein
-
-Vorbild ist Fitbod: Es senkt nach einer Trainingspause die vorgeschlagenen Gewichte von selbst, um den Wiedereinstieg zu erleichtern (laut Suchergebnissen aus Fitbods Hilfe). Im Test lag Stirndrücken 53 Tage zurück. Die App zeigte „Letztes Mal (Di., 22.09.)“ ohne Hinweis darauf, wie lange das her ist, und „Ziel heute: 11, 11, 10“, verlangte also mehr als vor der Pause. Skizze: Liegt die letzte Einheit einer Kraftübung länger als eine Schwelle zurück (z. B. 4 Wochen; Schwelle und Abzug vorher vom `trainings-experte` festlegen lassen), zeigt die Zeile zusätzlich „vor 7 Wochen“, und „Ziel heute“ und „Steigern“ entfallen. An ihrer Stelle steht „Wiedereinstieg: 27,5 kg“, abgezogen in ganzen Schritten von `stepSize()` wie bei `stepDown()`; ein Tipp setzt die offenen Sätze, mit Rückgängig. Wer ihn übergeht, trainiert wie bisher.
-
-### 35. „Besser als letztes Mal“ nach dem Training (aus Funktionsvergleich: „Letztes Mal“)
-- Nutzen: mittel · Aufwand: S · Datenformat: nein
-
-Vorbild ist Hevy Trainer, das Übungen mit Fortschritt mit einem kleinen Zeichen markiert, dazu die „Focus Metric“ von Strong, die eine Kennzahl mit der letzten Einheit vergleicht. Im Test schaffte Kurzhantel-Schrägbankdrücken das Ziel (+3 Wdh), und Langhantelrudern kam nach dem Entlasten auf 23 statt 16 Wdh. Weder die Karte noch „Training geschafft“ sagten das; dort stehen nur Kampfkraft, Rekorde und Erfolge, und einen Rekord gibt es erst beim Bestwert. Skizze: `finish()` vergleicht jede Übung vor dem Speichern mit `lastFor()` und gibt der Ansicht nach dem Training eine Liste „Besser als letztes Mal“ mit, z. B. „Kurzhantel-Schrägbankdrücken: Ziel geschafft, +3 Wdh“ oder „Bankdrücken: +2,5 kg“. Im Training zeigt die Zeile „Ziel heute“ „Ziel geschafft“, sobald alle Sätze abgehakt sind und das Ziel erreicht ist. Alles wird nur berechnet und kostet keinen Tipp.
+Noch keine offenen Vorschläge.
 
 ## Angenommen
 
 Noch nichts.
 
 ## Abgelehnt
+
+Vorerst nicht gebraucht (14.11.2026, aus dem Funktionsvergleich „Letztes Mal“):
+
+### 32. Zusatzgewicht vorschlagen, wenn Körpergewicht ausgereizt ist (aus Funktionsvergleich: „Letztes Mal“)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Der Arnold-Split sieht bei Klimmzügen nach allen Sätzen mit 10 Wdh Zusatzgewicht vor. Im Test zeigte die App nach zweimal 4 × 10 ohne Gewicht aber nur „Ziel heute: 4 × 10 Wdh“, und der Hinweis des Programms an der Übung (`hinweis` in `bibliothek/vorlagen.json`) erscheint nirgends, auch nicht im Programm-Sheet. Vorbild ist Hevy Trainer, das erhöht, sobald alle Sätze das obere Ende des Bereichs erreichen. Skizze: Bei Übungen mit Programm wertet `stepUp()` ein leeres Gewicht als 0 und schlägt dann „Zusatzgewicht: 2,5 kg“ vor. Schritt und Bedingung lässt man vorher vom `trainings-experte` prüfen; ohne Programm bleibt es aus, weil es keine Obergrenze gibt. Ein Tipp setzt die kg der offenen Sätze wie bei „Steigern“, mit Rückgängig. Außerdem zeigt `vUnit()` den `hinweis` jeder Übung als graue Zeile im Programm-Sheet.
 
 Vorerst nicht gebraucht (14.11.2026, aus der MCI-Runde):
 
@@ -76,6 +68,20 @@ Vorbild ist Strong: Ein Tipp auf die Satznummer öffnet Aufwärmen, Drop und Ver
 ## Erledigt
 
 Umgesetzt am 14.11.2026:
+
+### 33. Wiedereinstieg nach langer Pause (aus Funktionsvergleich: „Letztes Mal“)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Vorbild ist Fitbod: Es senkt nach einer Trainingspause die vorgeschlagenen Gewichte von selbst, um den Wiedereinstieg zu erleichtern (laut Suchergebnissen aus Fitbods Hilfe). Im Test lag Stirndrücken 53 Tage zurück. Die App zeigte „Letztes Mal (Di., 22.09.)“ ohne Hinweis darauf, wie lange das her ist, und „Ziel heute: 11, 11, 10“, verlangte also mehr als vor der Pause. Skizze: Liegt die letzte Einheit einer Kraftübung länger als eine Schwelle zurück (z. B. 4 Wochen; Schwelle und Abzug vorher vom `trainings-experte` festlegen lassen), zeigt die Zeile zusätzlich „vor 7 Wochen“, und „Ziel heute“ und „Steigern“ entfallen. An ihrer Stelle steht „Wiedereinstieg: 27,5 kg“, abgezogen in ganzen Schritten von `stepSize()` wie bei `stepDown()`; ein Tipp setzt die offenen Sätze, mit Rückgängig. Wer ihn übergeht, trainiert wie bisher.
+
+Umgesetzt nach der Regel des `trainings-experte` (Grundlage Bosquet 2013, Rest Praxis; in `bibliothek/README.md` festgehalten): ab 35 Tagen seit der letzten Einheit der Übung „vor X Wochen“ in „Letztes Mal“, kein Steigern, Entlasten oder Ziel in dieser Einheit, bei Gewicht der Knopf „Wiedereinstieg“ mit 10 % bis 55 Tage und 20 % danach (`comeback()`), mit Rückgängig. Ohne Gewicht und bei Ausdauer nur der Hinweis. Den Vorschlag des Experten, nach einer Pause schneller zum alten Gewicht zurückzusteigern (eine Einheit statt zwei), habe ich noch nicht umgesetzt.
+
+### 35. „Besser als letztes Mal“ nach dem Training (aus Funktionsvergleich: „Letztes Mal“)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Vorbild ist Hevy Trainer, das Übungen mit Fortschritt mit einem kleinen Zeichen markiert, dazu die „Focus Metric“ von Strong, die eine Kennzahl mit der letzten Einheit vergleicht. Im Test schaffte Kurzhantel-Schrägbankdrücken das Ziel (+3 Wdh), und Langhantelrudern kam nach dem Entlasten auf 23 statt 16 Wdh. Weder die Karte noch „Training geschafft“ sagten das; dort stehen nur Kampfkraft, Rekorde und Erfolge, und einen Rekord gibt es erst beim Bestwert. Skizze: `finish()` vergleicht jede Übung vor dem Speichern mit `lastFor()` und gibt der Ansicht nach dem Training eine Liste „Besser als letztes Mal“ mit, z. B. „Kurzhantel-Schrägbankdrücken: Ziel geschafft, +3 Wdh“ oder „Bankdrücken: +2,5 kg“. Im Training zeigt die Zeile „Ziel heute“ „Ziel geschafft“, sobald alle Sätze abgehakt sind und das Ziel erreicht ist. Alles wird nur berechnet und kostet keinen Tipp.
+
+Umgesetzt: Liste „Besser als letztes Mal“ in „Training geschafft“ (`betterThanLast()`) und „✓ Ziel geschafft“ in der Übungskarte. Nach dem `gym-tester`: Wdh als Summe klar benannt („+3 Wdh gesamt“), und Hinweise mit Rückgängig verschwinden beim nächsten Tipp an anderer Stelle, damit sie keine Sätze verdecken.
 
 ### 31. „Ziel heute“ mit einem Tipp übernehmen (aus Funktionsvergleich: „Letztes Mal“)
 - Nutzen: hoch · Aufwand: S · Datenformat: nein

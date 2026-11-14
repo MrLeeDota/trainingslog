@@ -1205,7 +1205,11 @@ const actions = {
     // Ein leerer Satz wird nicht abgehakt (sonst startet der Timer und ein leerer Satz landet im Training).
     // Kraft braucht Wdh (das Gewicht darf bei Körpergewicht fehlen), Ausdauer Minuten oder km, „nur Zeit“ Minuten.
     if (!s.done){
-      const type = exType(en.exId), filled = type === "kraft" ? num(s.b) > 0 : type === "ausdauer" ? num(s.a) > 0 || num(s.b) > 0 : num(s.a) > 0;
+      const type = exType(en.exId), isFilled = x => type === "kraft" ? num(x.b) > 0 : type === "ausdauer" ? num(x.a) > 0 || num(x.b) > 0 : num(x.a) > 0;
+      // Leerer Satz: die Werte des Satzes darüber übernehmen (ein Tipp für „noch einmal dasselbe“)
+      const prev = en.sets[+el.dataset.j - 1];
+      if (!isFilled(s) && prev && isFilled(prev) && !(s.a || s.b)){ s.a = prev.a; s.b = prev.b; }
+      const filled = isFilled(s);
       if (!filled){ toast(type === "kraft" ? "Erst die Wiederholungen eintragen" : type === "ausdauer" ? "Erst Minuten oder km eintragen" : "Erst die Minuten eintragen"); return; }
     }
     s.done = !s.done; save();
@@ -1337,11 +1341,40 @@ document.addEventListener("click", e => {
   if (fn) fn(el, e);
 });
 let saveT = null;
+/* Satzfelder im Training:
+   - Beim Antippen wird der Inhalt markiert, die erste Ziffer ersetzt also den alten Wert (keine Löschtipps).
+   - Was man in einem Satz einträgt, übernehmen die folgenden offenen Sätze derselben Übung, solange dort noch
+     derselbe alte Wert oder nichts stand (link). Abgehakte und abweichende Sätze bleiben unverändert.
+   Beides ändert nur Feldwerte, ohne render(), damit die Tastatur offen bleibt. */
+let link = null, selFix = null;
+document.addEventListener("focusin", e => {
+  const t = e.target;
+  if (!t.dataset || !t.dataset.f || !S || !S.active) return;
+  const i = +t.dataset.i, j = +t.dataset.j, f = t.dataset.f, en = S.active.entries[i];
+  if (!en || !en.sets[j]) return;
+  const orig = en.sets[j][f] ?? "";
+  link = {en, j, f, ks:en.sets.map((s, k) => k > j && !s.done && ((s[f] ?? "") === orig || (s[f] ?? "") === "") ? k : -1).filter(k => k >= 0)};
+  selFix = t;
+  setTimeout(() => { if (document.activeElement === t){ try { t.setSelectionRange(0, t.value.length); } catch(_){ t.select(); } } }, 0);
+});
+document.addEventListener("focusout", e => { if (e.target.dataset && e.target.dataset.f) link = null; });
+// Das Loslassen nach dem Antippen würde die Markierung wieder aufheben: einmalig verhindern
+document.addEventListener("mouseup", e => { if (selFix && e.target === selFix) e.preventDefault(); selFix = null; }, true);
 document.addEventListener("input", e => {
   const t = e.target;
   if (t.dataset.f && S.active){
-    const s = S.active.entries[+t.dataset.i]?.sets[+t.dataset.j];
-    if (s){ s[t.dataset.f] = t.value; clearTimeout(saveT); saveT = setTimeout(() => { saveT = null; save(); }, 400); }
+    const i = +t.dataset.i, j = +t.dataset.j, f = t.dataset.f, en = S.active.entries[i], s = en?.sets[j];
+    if (s){
+      s[f] = t.value;
+      if (link && link.en === en && link.j === j && link.f === f) link.ks.forEach(k => {
+        const o = en.sets[k];
+        if (!o || o.done) return;
+        o[f] = t.value;
+        const inp = document.querySelector(`input[data-i="${i}"][data-j="${k}"][data-f="${f}"]`);
+        if (inp) inp.value = t.value;
+      });
+      clearTimeout(saveT); saveT = setTimeout(() => { saveT = null; save(); }, 400);
+    }
   } else if (t.dataset.draft && ui.sheet?.draft){ ui.sheet.draft[t.dataset.draft] = t.value; }
   else if (t.id === "pick-q"){ if (ui.sheet) ui.sheet.q = t.value; filterPick(t.value); }
 });

@@ -8,16 +8,6 @@ Erste Runde vom 13.11.2026. NOTIZEN.md war noch leer, die Ideen stammen aus der 
 
 Aus dem Funktionsvergleich „Satz-Erfassung“ vom 14.11.2026 (Agent `funktions-tester`, Befund in `VERGLEICH.md`):
 
-### 12. Geänderte Werte in die folgenden Sätze übernehmen (aus Funktionsvergleich: Satz-Erfassung)
-- Nutzen: hoch · Aufwand: S · Datenformat: nein
-
-Vorbild ist Hevy: Ein Tipp auf den Vorwert übernimmt den ganzen Satz, statt jeden Satz neu einzutippen. Heute kostet ein neues Gewicht in drei Sätzen 24 Tipps und eine neue Übung mit drei gleichen Sätzen 21 Tipps, weil die übrigen Sätze leer bzw. beim alten Wert bleiben. Skizze: Der `input`-Handler setzt den neuen Wert auch in den folgenden offenen Sätzen derselben Übung, sofern dort noch der alte Wert oder nichts steht; abgehakte und abweichende Sätze bleiben, wie sie sind, und es wird nur das Feld gesetzt, ohne `render()`, damit die Tastatur offen bleibt. Ein leerer Satz übernimmt beim Abhaken die Werte des Satzes darüber, statt leer gespeichert zu werden. Danach kosten drei Sätze mit neuem Gewicht 10 Tipps statt 24.
-
-### 13. Feldinhalt beim Antippen markieren (aus Funktionsvergleich: Satz-Erfassung)
-- Nutzen: hoch · Aufwand: S · Datenformat: nein
-
-Vorbild sind Strong und Hevy: Dort ersetzt eine Eingabe den grauen Vorschlagswert direkt (allgemeines Wissen, nicht nachgelesen). Bei uns muss „52,5“ erst gelöscht werden, „52,5 → 55“ kostet deshalb 8 Tipps statt 4. Skizze: Beim Fokus auf ein Satzfeld (`data-f`) den Inhalt mit `setSelectionRange(0, value.length)` markieren (auf iOS leicht verzögert, nach dem Fokus), dann ersetzt die erste Ziffer den alten Wert. Auf dem iPhone prüfen, ob die Markierung in der installierten App hält und ob das Kopieren-Menü dabei stört.
-
 ### 14. Aufwärmsätze markieren (aus Funktionsvergleich: Satz-Erfassung)
 - Nutzen: mittel · Aufwand: M · Datenformat: ja (optionales Feld am Satz, mit Migration)
 
@@ -54,6 +44,16 @@ Herkunft: Hevy (Pausen-Timer pro Übung von 5 s bis 5 min oder aus); Strong nenn
 ## Erledigt
 
 Umgesetzt am 14.11.2026:
+
+### 12. Geänderte Werte in die folgenden Sätze übernehmen (aus Funktionsvergleich: Satz-Erfassung)
+- Nutzen: hoch · Aufwand: S · Datenformat: nein
+
+Vorbild ist Hevy: Ein Tipp auf den Vorwert übernimmt den ganzen Satz, statt jeden Satz neu einzutippen. Heute kostet ein neues Gewicht in drei Sätzen 24 Tipps und eine neue Übung mit drei gleichen Sätzen 21 Tipps, weil die übrigen Sätze leer bzw. beim alten Wert bleiben. Skizze: Der `input`-Handler setzt den neuen Wert auch in den folgenden offenen Sätzen derselben Übung, sofern dort noch der alte Wert oder nichts steht; abgehakte und abweichende Sätze bleiben, wie sie sind, und es wird nur das Feld gesetzt, ohne `render()`, damit die Tastatur offen bleibt. Ein leerer Satz übernimmt beim Abhaken die Werte des Satzes darüber, statt leer gespeichert zu werden. Danach kosten drei Sätze mit neuem Gewicht 10 Tipps statt 24.
+
+### 13. Feldinhalt beim Antippen markieren (aus Funktionsvergleich: Satz-Erfassung)
+- Nutzen: hoch · Aufwand: S · Datenformat: nein
+
+Vorbild sind Strong und Hevy: Dort ersetzt eine Eingabe den grauen Vorschlagswert direkt (allgemeines Wissen, nicht nachgelesen). Bei uns muss „52,5“ erst gelöscht werden, „52,5 → 55“ kostet deshalb 8 Tipps statt 4. Skizze: Beim Fokus auf ein Satzfeld (`data-f`) den Inhalt mit `setSelectionRange(0, value.length)` markieren (auf iOS leicht verzögert, nach dem Fokus), dann ersetzt die erste Ziffer den alten Wert. Auf dem iPhone prüfen, ob die Markierung in der installierten App hält und ob das Kopieren-Menü dabei stört.
 
 ### 11. Übungsbibliothek in der App
 - Nutzen: hoch · Aufwand: M · Datenformat: ja (optionales Feld `lib` an Übungen und Vorlagen)

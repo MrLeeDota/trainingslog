@@ -55,7 +55,7 @@ button.primary{background:linear-gradient(180deg,var(--accent-hi),var(--accent) 
 button.primary:active{transform:translateY(3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 0 var(--accent-shade)}
 button.dangerbtn{background:linear-gradient(180deg,#ff8787,#f03e3e);color:#fff;font-weight:800;border:2px solid var(--ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 4px 0 #7d1515}
 button.dangerbtn:active{transform:translateY(3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 1px 0 #7d1515}
-button.ghost{background:transparent;color:var(--muted);padding:8px 10px}
+button.ghost{background:transparent;color:var(--muted);padding:8px 10px;min-height:44px;min-width:44px}   /* Mindestgröße für Tap-Flächen */
 button.danger{color:var(--danger)}
 button.accent{color:var(--accent);font-weight:800}
 button.block{width:100%;display:block}
@@ -158,7 +158,7 @@ button.hero{display:block;width:100%;text-align:left}
 .catbar i{display:block;height:10px;border-radius:2px;transform:skewX(-16deg);background:linear-gradient(90deg,var(--accent-deep),var(--accent) 50%,var(--ki))}
 .catbar b{text-align:right;color:var(--ki)}
 /* Steigerungsvorschlag: schräger Knopf in Gold wie die Energieanzeigen */
-button.step-up{margin-top:8px;padding:6px 14px 7px 12px;font-size:14px;font-weight:800;color:var(--accent-ink);border-radius:3px;transform:skewX(-10deg);
+button.step-up{margin-top:8px;padding:6px 14px 7px 12px;min-height:44px;font-size:14px;font-weight:800;color:var(--accent-ink);border-radius:3px;transform:skewX(-10deg);
   background:linear-gradient(180deg,#fff3a6,var(--ki) 55%,var(--accent));box-shadow:2px 2px 0 var(--ink),0 0 12px rgba(255,212,59,.4)}
 button.step-up:active{transform:skewX(-10deg) translateY(2px);box-shadow:0 0 0 var(--ink)}
 
@@ -203,7 +203,7 @@ button.li:active{transform:none;opacity:.6}
 #tfill{height:100%;width:0;background:linear-gradient(90deg,#3bc9ff,#9af0ff 45%,var(--ki) 88%,#fff3a6)}
 .ttime{font-size:34px;line-height:1;color:var(--ki);font-variant-numeric:tabular-nums}
 .timer.over .ttime{font-size:24px}
-.timer button{padding:9px 11px;font-size:14px}
+.timer button{padding:9px 11px;font-size:14px;min-height:44px;min-width:48px}
 #tlabel{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:2px}
 
 /* Tabs */
@@ -1202,6 +1202,12 @@ const actions = {
   },
   check: el => {
     const en = S.active.entries[+el.dataset.i], s = en.sets[+el.dataset.j];
+    // Ein leerer Satz wird nicht abgehakt (sonst startet der Timer und ein leerer Satz landet im Training).
+    // Kraft braucht Wdh (das Gewicht darf bei Körpergewicht fehlen), Ausdauer Minuten oder km, „nur Zeit“ Minuten.
+    if (!s.done){
+      const type = exType(en.exId), filled = type === "kraft" ? num(s.b) > 0 : type === "ausdauer" ? num(s.a) > 0 || num(s.b) > 0 : num(s.a) > 0;
+      if (!filled){ toast(type === "kraft" ? "Erst die Wiederholungen eintragen" : type === "ausdauer" ? "Erst Minuten oder km eintragen" : "Erst die Minuten eintragen"); return; }
+    }
     s.done = !s.done; save();
     if (s.done && exType(en.exId) === "kraft") startTimer(S.settings.rest);
     render();
@@ -1219,7 +1225,12 @@ const actions = {
     save(); render();
   },
   "add-set": el => { const en = S.active.entries[+el.dataset.i], p = en.sets[en.sets.length - 1] || {a:"", b:""}; en.sets.push({a:p.a, b:p.b, done:false}); save(); render(); },
-  "del-set": el => { S.active.entries[+el.dataset.i].sets.pop(); save(); render(); },
+  "del-set": async el => {
+    const en = S.active.entries[+el.dataset.i], last = en.sets[en.sets.length - 1];
+    // Ein schon abgehakter Satz ist erledigte Arbeit: nur nach Rückfrage entfernen
+    if (last && last.done && !(await ask(`Satz ${en.sets.length} ist schon abgehakt (${fmtSets(exType(en.exId), [last])}). Trotzdem entfernen?`, "Entfernen", true))) return;
+    if (S.active && S.active.entries[+el.dataset.i] === en && en.sets.length > 1){ en.sets.pop(); save(); render(); }
+  },
   "del-entry": async el => { if (await ask("Übung aus diesem Training entfernen?", "Entfernen", true)){ S.active.entries.splice(+el.dataset.i, 1); save(); render(); } },
   pick: el => { retryLib(); ui.sheet = {kind:"picker", target:el.dataset.target, back:ui.sheet}; render(); },
   picked: el => {

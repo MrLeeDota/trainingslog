@@ -6,7 +6,7 @@ Wie gut ist jede Funktion des Trainingslogs im Vergleich zu führenden Fitness-A
 |---|---|---|---|
 | Satz-Erfassung | gleichauf | Keine Aufwärmsätze (Idee 14); ob das Markieren beim Antippen auf dem iPhone hält, ist ungeprüft | 14.11.2026 |
 | „Letztes Mal“ | vorne | „Ziel heute“ ist nur Text: Das Ziel zu schaffen kostet 8–11 Tipps pro Übung, mit Übernahme per Tipp wären es 4–5 (Idee 31) | 14.11.2026 |
-| Pausen-Timer | offen | – | – |
+| Pausen-Timer | gleichauf | Das Pausenende meldet nur ein Piepton (still bei Stummschalter, im Hintergrund abgesagt) und 8 s Gold. Nach Neuladen oder Tab-Wechsel steht das Training oben statt beim markierten Satz (Ideen 42, 43) | 14.11.2026 |
 | Vorlagen | offen | – | – |
 | Übungsverwaltung | offen | – | – |
 | Verlauf | offen | – | – |
@@ -16,6 +16,74 @@ Wie gut ist jede Funktion des Trainingslogs im Vergleich zu führenden Fitness-A
 | Backup & Export | offen | – | – |
 
 ## Befunde
+
+### Pausen-Timer
+
+Erste Prüfung am 14.11.2026, nach den Ideen 36–38. Getestet in Chrome am PC im Handy-Rahmen (390 × 844, Gegenprobe 375 × 667) auf localhost, mit echten Klicks und Tastatureingaben. Über Vorlagen → „+ Programm aus der Bibliothek“ → „Arnold-Split an 5 Tagen“ habe ich „Brust & Rücken A“ und „Schultern & Arme A“ übernommen. Für vorausgefüllte Felder kamen per Skript zwei Trainings dazu (Brust & Rücken A am 10.11.2026, Schultern & Arme A am 11.11.2026, gespeichert mit `save({put:id})`). „Brust & Rücken A“ (mit Tausch des Kurzhantel-Pullovers gegen Schrägbankdrücken) und die eigene Vorlage Push ohne Programm habe ich gestartet und am Ende verworfen. Danach war der alte Stand wiederhergestellt: 23 Trainings, 22 Übungen, 7 Vorlagen und die Einstellungen, nach dem Neuladen identisch. Das Verlassen der App ließ sich im Rahmen nicht echt auslösen; ich habe es per Skript nachgestellt (Sichtbarkeit „hidden“, dann „visible“).
+
+**Tipps pro Ablauf**
+
+| Ablauf | Trainingslog | Strong | Hevy |
+|---|---|---|---|
+| Satz abhaken, Pause startet mit der passenden Dauer (Arnold-Split) | 1, die Pause kommt aus dem Programm (Bankdrücken 3:00, Klimmzüge 2:30) | 1, wenn die Pause der Übung vorher eingestellt ist | 1, ebenso |
+| Dasselbe in einer eigenen Vorlage ohne Programm (Bankdrücken 3:00 statt 1:30) | 1 + 6 (+15) pro Pause | 1 | 1 |
+| Pause um 15 s ändern | 1 | Dauer im Vollbild ändern, erst ein Tipp auf den Timer; ±-Knöpfe nennt die Hilfe nicht | 1 |
+| Pause beenden | 1 („Weiter“) | 2 (Timer antippen, „Skip“) | 1* |
+| Versehentlich abgehakt, Haken lösen | 1, die Pause davor läuft mit Restzeit weiter (getestet: 2:30 statt neuer 3:00) | nicht belegt | nicht belegt |
+| Übung getauscht, Satz abhaken | 1, Pause des Programmplatzes (1:30 vom Pullover) | – | – |
+| Nach Neuladen mitten in der Pause weiter zum nächsten Satz | 0 für den Timer, aber 1–3 Wischer zum markierten Satz; der Ton kommt erst nach einem Tipp auf einen Knopf | Position bleibt* | Position bleibt* |
+| Nach einem Abstecher in den Verlauf zurück ins Training | 1 Tipp auf den Tab und 1 Wischer, weil das Training oben beginnt | – | – |
+
+\* Allgemeines Wissen, nicht nachgelesen.
+
+**Bedienung (Messwerte in App-Pixeln)**
+- Start und Dauer: Nach jedem Kraft-Satz startet der Timer sofort mit „Pause · Programm“ und der Pause aus der Programm-Zeile darüber (Bankdrücken „Pause 3:00 min“ → 3:00, Klimmzüge 2:30, getauschte Übung 1:30). Ohne Programm steht nur „Pause“ und die Einstellung (1:30). Der Satz unter der Einstellung im Verlauf erklärt das: „Bei Vorlagen aus einem Programm gilt die Pause des Programms.“ −15 und +15 ändern Restzeit und Gesamtdauer, der Ton wird jedes Mal neu geplant (3 Töne).
+- Tap-Flächen: −15 und +15 je 48 × 44, „Weiter“ 62 × 44, zwischen −15 und +15 nur 6 px Abstand. Die Auswahl der Pausendauer misst 109 × 47.
+- Daumen: Die Knöpfe liegen bei y 705–749 von 844 (Gegenprobe y 528–572 von 667), also tief im unteren Drittel. Timer (351 × 106 bzw. 336 × 106) und Tab-Leiste (67) belegen zusammen 180 px, das sind 21 % des Bildschirms bzw. 27 % auf dem SE.
+- Lesbarkeit: Die Restzeit steht 34 px groß in Gold, „Pause · Programm“ 13 px blassblau. Gegen das hellere Blau oben in der Karte gerechnet ergibt das einen Kontrast von etwa 7,1 : 1 bzw. 5,0 : 1. „Pause vorbei · Nächster Satz!“ steht 24 px groß mit pulsierendem Goldrand und verschwindet nach 8 s. Nichts bricht um, auch nicht bei 375 px.
+- Nächster Satz (Idee 37): Nach dem Abhaken ist der nächste offene Satz orange markiert. Innerhalb einer Übung scrollt die App nur, wenn der Satz verdeckt ist (einmal 76 px, sonst gar nicht). Nach dem letzten Bankdrücken-Satz rückte die Karte „Klimmzüge“ um 475 px (SE: 399 px) direkt unter die Kopfzeile, „Letztes Mal“, Programm und Ziel waren in der Pause lesbar. Der Hinweis mit „Rückgängig“ sitzt unmittelbar über dem Timer, ohne zu überlappen, und „Training beenden & speichern“ bleibt über dem Timer erreichbar (589–644 gegen 664).
+- Neuladen und App-Wechsel (Idee 38): Nach einem Neuladen standen Restzeit, „Pause · Programm“ und die Markierung richtig da, die Seite aber ganz oben, der markierte Satz außerhalb des Bildschirms. Ein Tipp ins Wdh-Feld gab den Ton nicht frei, erst +15 (danach 3 Töne geplant). Wer nach dem Neuladen nur wartet, bekommt also keinen Ton. Beim nachgestellten Verlassen der App wurden die Töne abgesagt, bei der Rückkehr für die Restzeit neu geplant.
+- Andere Ansichten: Der Timer bleibt in allen Tabs sichtbar. Ein Tab-Wechsel setzt das Training aber an den Anfang zurück (`window.scrollTo(0, 0)` in der Aktion `tab`), der markierte Satz lag danach bei y 888 von 844. Sheets wie „Übung tauschen“ liegen über dem Timer (z-index 60 gegen 40), dort sieht man die Restzeit nicht.
+- Rückmeldung: Haken und Zeile leuchten gold, der Timer fährt sofort ein, Rücknahme und ±15 sind sofort zu sehen. Nach dem Lösen eines Hakens verschwindet allerdings die Markierung des nächsten Satzes ganz (Nebenbefund, siehe unten). Konsole: keine Meldungen. Der Wake Lock war im Chrome während des Trainings aktiv.
+- Supersätze im Arnold-Stil (Programm-Hinweis: Bankdrücken und Klimmzüge im Wechsel, danach etwa 2 min): Jeder Haken startet die volle Pause der Übung neu (3:00, dann 2:30). Wer im Wechsel trainiert, tippt „Weiter“ oder ignoriert den Timer. Das ist die abgelehnte Idee 39.
+
+**Was die anderen besser machen**
+- Das Pausenende kommt auch an, wenn man nicht hinschaut. Hevy zeigt den Timer per Live Activity auf dem Sperrbildschirm, mit ±15 und Überspringen, und schickt am Ende eine Mitteilung. Fitbod schickt eine Mitteilung statt des Tons, wenn man die App verlässt oder der Bildschirm ausgeht (nur Suche). StrongLifts zeigt ein Banner und lässt die Uhr vibrieren. Strong läuft auf der Uhr, dort ändert man die laufende Pause mit der Digital Crown; ein Nutzer berichtet, dass er Strongs Ton über AirPods hörte (nur Suche). Bei uns gibt es nur den Piepton als Web Audio. Den spielt Safari als „ambient“: still bei eingeschaltetem Stummschalter, im Hintergrund abgesagt, ohne Vibration. Dazu kommt das goldene „Pause vorbei“ für 8 s. Auch native Apps sind bei Stummschalter nur per Mitteilung oder Uhr zu spüren (RepCount, Strongsplit, nur Suche).
+- Pause pro Übung auch ohne Programm: Hevy (5 s bis 5 min oder aus) und Strong (getrennt für Aufwärm- und Arbeitssätze) stellt man von Hand ein, MacroFactor gibt Standardwerte nach Übungsart, Fitbod erzeugt sie selbst. Bei uns gilt außerhalb von Programmen eine Pause für alles.
+- Ton-Auswahl und eigene Lautstärke (Hevy, Strong), Supersätze mit Sprung zum Partner (Hevy „Smart Superset Scrolling“, MCI „Group as super set“).
+- Ein UX-Vergleich von ScreensDesign empfiehlt, während der Pause den nächsten Satz zu zeigen, die Rückkehr zum nächsten Satz zu testen und den Ton nicht als einziges Signal zu nutzen. Den ersten Punkt erfüllt die App mit Idee 37, den zweiten nach Neuladen und Tab-Wechsel nicht.
+
+**Was wir besser machen**
+- Die richtige Pause kommt ohne Einstellen aus dem Programm, pro Übungsplatz, auch für getauschte Übungen. Im Arnold-Split weicht sie an 15 von 30 Plätzen von 1:30 ab. Ohne Idee 36 kostete jede dieser Pausen bis zu 6 Tipps, bei Hevy und Strong muss man sie einmal pro Übung von Hand einstellen, Fitbod macht es nur im Abo mit eigenem Plan.
+- −15, +15 und „Weiter“ kosten je 1 Tipp und liegen in der Daumenzone; bei Strong öffnet man laut Hilfe erst das Vollbild.
+- Ein versehentlicher Haken lässt sich mit 1 Tipp samt Pause zurücknehmen, die alte Pause läuft mit Restzeit weiter. Bei Strong und Hevy ist das nicht belegt.
+- Der nächste Satz ist markiert, und die nächste Übung rückt nach dem letzten Satz von selbst nach oben, sodass „Letztes Mal“ und Ziel in der Pause lesbar sind. Die Pause übersteht ein Neuladen, der Bildschirm bleibt an. Alles kostenlos und offline.
+
+**Urteil: gleichauf.** Im Ablauf im Studio (abhaken, passende Pause, anpassen, überspringen, Fehler zurücknehmen) ist die App so schnell wie Strong und Hevy, beim Arnold-Split dank Programm-Pause schneller als jede App, in der man die Pausen erst einstellt. Was ein Pausen-Timer vor allem leisten muss, kann sie als PWA aber nur halb: das Ende melden, wenn man nicht hinschaut oder das iPhone lautlos ist. Strong, Hevy, Fitbod und StrongLifts lösen das mit Mitteilung, Live Activity oder Uhr. Dazu kommt, dass man nach einem Neuladen oder einem Tab-Wechsel den nächsten Satz suchen muss und der Ton nach dem Neuladen erst nach einem Knopf-Tipp kommt; das lässt sich beheben (Ideen 42 und 43). Ob der Piepton im Studio überhaupt zu hören ist, entscheidet sich auf dem iPhone und ist nicht geprüft.
+
+**Lücken, die nicht vorgeschlagen werden:** Mitteilung bei gesperrtem Bildschirm, Live Activity, Uhr und Vibration gehen als PWA ohne Push-Server nicht (Safari kennt `navigator.vibrate` nicht). Eine Pause pro Übung außerhalb von Programmen, auch automatisch nach Übungsart wie bei MacroFactor (die Bibliothek kennt `grunduebung`), berührt die abgelehnte Idee 8; der Nutzer trainiert mit Programm-Vorlagen. Supersätze (39), Überzeit (40) und Vorwarnung (41) sind abgelehnt. Eine Ton-Auswahl bringt wenig, die Lautstärke folgt dem iPhone. Die Restzeit in Sheets anzuzeigen lohnt kaum, weil „Übung tauschen“ selten und nur kurz offen ist. Einen flacheren Timer schlage ich nicht vor: Die 34 px große Zeit ist von der Bank aus lesbar, und Idee 37 scrollt den nächsten Satz ohnehin frei.
+
+**Nebenbefunde für die Hauptsitzung** (Fehlersuche gehört zum `gym-tester`)
+- Beim Lösen eines Hakens verschwindet die Markierung des nächsten Satzes ganz, statt auf den gelösten Satz zurückzugehen: `index.html` Zeile 1596, `ui.next = s.done ? nextOpen(…) : null`.
+- Nach „Weiter“ wird `S.active.rest` gelöscht, die Markierung übersteht dann kein Neuladen mehr (`keepRest()` speichert `next` nur bei laufender Pause). Klein.
+
+**Quellen**
+- Selbst gelesen (diese Prüfung):
+  - ScreensDesign, „Rest timer UX: keep the next set within reach“ (ohne Datum; nennt JEFIT, Zing AI, Boostcamp u. a., nicht Strong und Hevy): https://screensdesign.com/articles/workout-app-rest-timer-controls-ux/
+  - Strong Help Center, Kategorie „Strong for Apple Watch“: https://help.strongapp.io/category/129-apple-watch
+  - Strong Help Center, „Perform a Workout with Strong for Apple Watch (Overview)“: https://help.strongapp.io/article/224-workout-on-apple-watch
+  - JEFIT Blog, „Best Apps to Log Sets and Reps on Smartwatch in 2026“ (16.03.2026; zum Timer von Strong steht dort nichts): https://www.jefit.com/blog/best-apps-to-log-sets-and-reps-on-smartwatch-in-2026-top-7-tested
+- Nur aus Suchergebnissen:
+  - Fitbod Help, Artikel zum Rest Timer (Fehler 403): https://help.fitbod.me/hc/en-us/articles/360006340194
+  - Fitbod Help, „Apple Watch“: https://help.fitbod.me/hc/en-us/articles/360006499194-Apple-Watch
+  - Bevel, Wunsch „Sound when rest period ends“ (Nutzer über Strong und AirPods): https://feedback.bevel.health/feature-requests/p/sound-when-rest-period-ends
+  - Strongsplit, Wunsch „rest period over notification“ (Stummschalter, Critical Alerts): https://strongsplit.userjot.com/board/p/rest-period-over-notification
+  - RepCount Help, „No sound on the timer“: https://intercom.help/repcount/en/articles/11363383-no-sound-on-the-timer-here-is-how-to-fix-it
+  - Arvo, Apple-Watch-Seite (Tabelle eines Wettbewerbers, Strong ohne Live Activity): https://arvo.guru/apple-watch-app
+  - Hevy Help Center, „How to Use Hevy's Live Activity“: https://help.hevyapp.com/hc/en-us/articles/35649846517399-How-to-Use-Hevy-s-Live-Activity-on-iOS-and-Android
+  - Forenstimmen: Echte Reddit-Threads zum Pausen-Timer waren nicht zu finden.
+- Vom `produkt-scout` am selben Tag gelesen (Einzelheiten in `APPS.md`, Abschnitt „Pausen-Timer“): Hevy „Workout Rest Timer“, „Workout Settings“, „Live Activity“, „Supersets“; Strong „About Rest Timer“; MCI-Roadmap und Wunschliste; MacroFactor; MyFitCoach; StrongLifts; WebKit-Fehler 264473; What PWA Can Do Today.
+- Allgemeines Wissen, nicht nachgelesen: „Skip“ in der Hevy-App mit 1 Tipp; native Apps behalten ihre Position nach einem App-Wechsel.
 
 ### „Letztes Mal“
 

@@ -896,12 +896,13 @@ function restFor(en){
 }
 /* Die laufende Pause steht als {end, total, src} in S.active.rest (Idee 38), damit sie einen App-Wechsel und ein
    Neuladen übersteht. Das Feld gibt es nur im laufenden Training: finish() übernimmt es nicht, das Backup setzt active:null. */
-// next: Position [Übung, Satz] des markierten nächsten Satzes (Idee 37), damit die Markierung ein Neuladen übersteht
+// next: Position [Übung, Satz] des markierten nächsten Satzes (Idee 37), damit die Markierung ein Neuladen übersteht,
+// auch ohne laufende Pause (dann end:0)
 function keepRest(){
   if (!S || !S.active) return;
-  if (timer.end){
-    const i = ui.next ? S.active.entries.findIndex(e => e.sets.includes(ui.next)) : -1;
-    S.active.rest = {end:timer.end, total:timer.total, src:timer.src || null};
+  const i = ui.next ? S.active.entries.findIndex(e => e.sets.includes(ui.next)) : -1;
+  if (timer.end || i >= 0){
+    S.active.rest = timer.end ? {end:timer.end, total:timer.total, src:timer.src || null} : {end:0};
     if (i >= 0) S.active.rest.next = [i, S.active.entries[i].sets.indexOf(ui.next)];
   } else delete S.active.rest;
   save();
@@ -909,12 +910,13 @@ function keepRest(){
 function restoreRest(){
   const r = S && S.active && S.active.rest;
   if (!r) return;
+  const n = Array.isArray(r.next) && S.active.entries[r.next[0]] && S.active.entries[r.next[0]].sets[r.next[1]];
+  if (n && !n.done) ui.next = n;
   if (Number.isFinite(r.end) && r.end > Date.now() - 8000 && r.end < Date.now() + 3600e3 && Number.isFinite(r.total) && r.total > 0){
     timer.end = r.end; timer.total = r.total; timer.src = r.src || null; timer.rang = r.end <= Date.now();
     if (!timer.rang) scheduleBeep((r.end - Date.now()) / 1000);   // klappt erst, wenn Audio nach einem Tipp freigegeben ist
-    const n = Array.isArray(r.next) && S.active.entries[r.next[0]] && S.active.entries[r.next[0]].sets[r.next[1]];
-    if (n && !n.done) ui.next = n;
-  } else delete S.active.rest;
+  } else if (ui.next) S.active.rest = {end:0, next:r.next};   // Pause vorbei, Markierung bleibt
+  else delete S.active.rest;
 }
 // by: der Satz, der die Pause ausgelöst hat. Der Stand davor wird gemerkt, damit undoTimer() ihn zurückholen kann.
 // src: woher die Dauer stammt ("Programm" oder null für die allgemeine Einstellung), steht im Timer.
@@ -1593,9 +1595,12 @@ const actions = {
       }
     }
     s.done = !s.done; save();
-    ui.next = s.done ? nextOpen(+el.dataset.i, +el.dataset.j) : null;   // vor dem Timer, damit keepRest() die Markierung mitspeichert
+    // Markierung: nach einem Haken der nächste offene Satz, nach dem Lösen der gelöste Satz selbst.
+    // Vor dem Timer setzen, damit keepRest() sie mitspeichert; keepRest() danach auch ohne Pause (z. B. Ausdauer).
+    ui.next = s.done ? nextOpen(+el.dataset.i, +el.dataset.j) : s;
     if (s.done && exType(en.exId) === "kraft"){ const r = restFor(en); startTimer(r.sec, s, r.src); }
     if (!s.done) undoTimer(s);   // versehentlicher Haken: die Pause davor kommt zurück
+    keepRest();
     render();
     if (ui.next) revealNext(!en.sets.includes(ui.next));
     if (s.done){

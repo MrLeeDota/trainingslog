@@ -4,7 +4,15 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 ## Vorschläge
 
-Noch keine offenen Vorschläge.
+### 42. Nach Neuladen und Tab-Wechsel zum nächsten Satz springen (aus Funktionsvergleich: Pausen-Timer)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Nach einem Neuladen mitten in der Pause und nach einem Abstecher in den Verlauf zeigte die App im Test den Anfang des Trainings (die Aktion `tab` ruft immer `scrollTo(0, 0)` auf), der markierte Satz lag außerhalb des Bildschirms (z. B. y 888 von 844). Vorbild ist Hevy, das mit „Smart Superset Scrolling“ selbst zur nächsten Übung springt; ein UX-Vergleich von ScreensDesign rät ausdrücklich, die Rückkehr zum nächsten Satz zu prüfen. Skizze: Bei laufendem Training ruft die Aktion `tab` beim Wechsel ins Training statt `scrollTo(0, 0)` nach dem Rendern `revealNext(true)` für den markierten Satz auf (ohne Markierung für den ersten offenen Satz), ebenso `boot()` nach `restoreRest()`, jeweils ohne Animation; das spart 1 bis 3 Wischer und kostet keinen Tipp.
+
+### 43. Ton nach dem Neuladen mit jedem Tipp freigeben und fehlenden Ton anzeigen (aus Funktionsvergleich: Pausen-Timer)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Nach einem Neuladen läuft die Pause weiter, den Piepton plant die App aber erst nach einem Tipp auf einen Knopf (`unlockAudio()` hängt am Klick-Handler für `data-act`); ein Tipp ins Wdh-Feld reichte im Test nicht, und wer nur wartet, bekommt unbemerkt gar keinen Ton. Hevy, Strong und Fitbod melden das Pausenende nativ per Mitteilung, Live Activity oder Uhr, das kann eine PWA nicht; sie kann aber zeigen, ob ihr Ton kommt. Skizze: `unlockAudio()` zusätzlich einmal bei `pointerup` irgendwo auf der Seite aufrufen, und solange eine Pause läuft und `actx` fehlt oder nicht `running` ist (auch nach der Rückkehr aus dem Hintergrund), steht neben der Restzeit ein durchgestrichener Lautsprecher, ein Tipp auf die Timer-Karte gibt den Ton frei; auf dem iPhone prüfen, ob ein Tipp nach dem Wischen als Berührung zählt.
 
 ## Angenommen
 

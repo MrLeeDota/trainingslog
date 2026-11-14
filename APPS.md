@@ -39,12 +39,19 @@ Quellen:
 
 ## „Letztes Mal“
 
-- **MCI:** noch nicht recherchiert.
+- **MCI** („MCI - Personal Training AI“ von MCI Solutions GmbH; ob Tim Gabel dahinter steht, ließ sich nicht bestätigen): App-Store-Text nennt keine Vorwerte vom letzten Mal und keine Gewichtsvorschläge, nur „Empfehlungen auf Grundlage deiner tatsächlichen Leistung“ und einen Plan, der sich per Periodisierung anpasst [gelesen]. Ein Showcase lobt den Workout-Player (Übungen tauschen, Supersätze, Volumen anpassen) [Suche]; eine Rezension von 2024 kritisiert den festen KI-Plan, laut Versionshinweisen von 09/2025 ist er nun flexibel [gelesen]. Eigene Erfahrung des Nutzers mit der App ist hier nicht erfasst.
 - **Hevy:** Spalte „Previous“ pro Satz, ein Tipp übernimmt den Wert (siehe Satz-Erfassung) [gelesen].
-- **Strong:** Vorwerte pro Satz (siehe Satz-Erfassung) [gelesen]. „Focus Metric“ vergleicht eine Kennzahl mit der letzten Einheit: https://help.strongapp.io/article/226-focus-metric [gelesen].
-- **Fitbod:** erhöht Gewicht oder Wiederholungen automatisch, wenn die letzte Einheit gut lief [Suche, aus der ersten Ideenrunde].
+- **Strong:** Vorwerte pro Satz (siehe Satz-Erfassung) [gelesen]. „Focus Metric“ vergleicht eine Kennzahl mit der letzten Einheit: https://help.strongapp.io/article/226-focus-metric [gelesen]. Automatische Steigerung gibt es laut Suche nicht; nur die Vorwerte [Suche].
+- **Fitbod:** protokolliert Gewicht, Wdh und optional „Reps in Reserve“ nach jedem Satz, schätzt daraus das 1RM und erhöht Last oder Wiederholungen von selbst, wenn es gut lief; wird manuell geändert, passt es spätere Vorschläge an. Die Formel ist nicht veröffentlicht; Quelle ist Fitbods eigene Hilfe und Werbung [Suche].
+- **Progress: Workout Tracker** (Nebenbefund): Steigerung pro Übung einstellbar, die App addiert sie nach jeder erfolgreichen Einheit [Suche].
 
-Stand: 14.11.2026, aus der ersten Ideenrunde des `produkt-scout` und dem Funktionsvergleich; noch nicht gezielt recherchiert.
+Stand: 14.11.2026, `funktions-tester` (Durchlauf „Letztes Mal“): MCI und Fitbod ergänzt, Rest aus früheren Runden.
+
+Quellen:
+- MCI im App Store (DE): https://apps.apple.com/de/app/app/id1645679272
+- ScreensDesign, Showcase MCI: https://screensdesign.com/showcase/mci-personal-training-ai (nur Suche)
+- Fitbod Help, „How Fitbod Creates Your Workout“: https://help.fitbod.me/hc/en-us/articles/360004429814-How-Fitbod-Creates-Your-Workout (nur Suche)
+- Fitbod Blog, Progressive Overload: https://fitbod.me/blog/what-is-progressive-overload-and-how-fitbod-builds-it-into-every-workout-automatically/ (nur Suche)
 
 ## Pausen-Timer
 

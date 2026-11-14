@@ -23,6 +23,18 @@ Vorbild sind Strong, Hevy und Fitbod: Dort löscht man einen Satz gezielt per Wi
 
 Herkunft ist der eigene Test, Anlehnung an Hevy, das den Timer an den Satz koppelt (vor einem Drop-Satz startet er nicht). Heute startet ein versehentlicher Haken den Timer neu mit voller Dauer; löst man den Haken wieder, läuft der Timer weiter, und die Restzeit der Pause davor ist verloren. Skizze: `startTimer` merkt sich im Speicher den vorherigen Stand (`end`, `total`) und den auslösenden Satz. Wird genau dieser Satz wieder gelöst, solange der Timer noch läuft, stellt `check` den vorherigen Timer wieder her oder stoppt ihn.
 
+Aus dem Funktionsvergleich „Letztes Mal“ vom 14.11.2026 (Agent `funktions-tester`, Befund in `VERGLEICH.md`):
+
+### 17. Steigerungsvorschlag nach Programm-Wiederholungen (aus Funktionsvergleich: „Letztes Mal“)
+- Nutzen: hoch · Aufwand: S · Datenformat: nein
+
+Vorbild ist Fitbod, das Last oder Wiederholungen automatisch erhöht, wenn die letzte Einheit gut lief, und Hevy mit Wiederholungsbereichen. Heute verlangt `stepUp()` fest 10 Wdh in allen Sätzen; ein Programm wie „3 × 6–8 Wdh“ (Bankdrücken in der Bibliothek) erreicht das nie, der Vorschlag erscheint dort nie. Skizze: `stepUp(exId, plan)` nimmt als Schwelle das obere Ende des Programm-Bereichs (`plan.wdh`, z. B. 8 aus „6-8“), sonst weiter `STEP_REPS`; Anzeige und Tipps bleiben gleich. Im Studio kostet es nichts extra; die Schwelle bleibt für Übungen ohne Programm unverändert.
+
+### 18. Satzzahl aus dem Programm übernehmen (aus Funktionsvergleich: „Letztes Mal“)
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Herkunft ist der eigene Test: Bei Vorlagen aus der Bibliothek zeigt „Programm: 2 × 8–12“ eine andere Satzzahl, als die Felder vom letzten Mal vorgeben (nach einem Satz bleibt es bei einem). Skizze: `newEntry(exId, plan)` hängt Sätze mit den Werten des letzten Satzes an, bis `plan.saetze` erreicht ist (höchstens 10); es wird nie gekürzt. Wer weniger trainiert, entfernt einen Satz wie bisher (Tipp mehr), wer dem Programm folgt, spart den Tipp auf „+ Satz“.
+
 ## Angenommen
 
 Noch nichts.

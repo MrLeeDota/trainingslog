@@ -5,7 +5,7 @@ Wie gut ist jede Funktion des Trainingslogs im Vergleich zu führenden Fitness-A
 | Funktion | Urteil | Wichtigste Lücke | Zuletzt geprüft |
 |---|---|---|---|
 | Satz-Erfassung | gleichauf | Keine Aufwärmsätze (Idee 14); ob das Markieren beim Antippen auf dem iPhone hält, ist ungeprüft | 14.11.2026 |
-| „Letztes Mal“ | offen | – | – |
+| „Letztes Mal“ | gleichauf | Steigern nutzt feste 10 Wdh und greift bei Programmen mit 6–8 Wdh nie (Idee 17) | 14.11.2026 |
 | Pausen-Timer | offen | – | – |
 | Vorlagen | offen | – | – |
 | Übungsverwaltung | offen | – | – |
@@ -16,6 +16,32 @@ Wie gut ist jede Funktion des Trainingslogs im Vergleich zu führenden Fitness-A
 | Backup & Export | offen | – | – |
 
 ## Befunde
+
+### „Letztes Mal“
+
+Erste Prüfung am 14.11.2026, Chrome am PC im Handy-Rahmen (390 × 844) auf localhost. Echte Klicks: Vorlage Push starten, „Steigern“ antippen, Verwerfen; dazu die Bibliotheks-Vorlage „Push (Push/Pull/Legs)“. Die Daten stammen aus früheren Tests (Testtrainings von der Satz-Erfassungs-Prüfung); es wurde nichts Neues gespeichert. Die Zeile mit fünf unterschiedlichen Sätzen wurde nur per Skript am Bildschirm geprüft. Nicht geprüft: iPhone, MCI aus eigener Anschauung (App-Store-Text ohne Angaben dazu).
+
+**Bedienung**
+- Tipps: Vorlage starten 1; danach steht alles da (Zeile „Letztes Mal (Sa., 14.11.): 70 kg × 8, 8, 7“ und Felder mit echten Werten vorausgefüllt), ein unveränderter Satz kostet 1 Tipp. „Steigern: 12,5 kg“ 1 Tipp für alle offenen Sätze, danach verschwindet der Knopf und die Felder zeigen 12,5, die Zeile „Letztes Mal“ bleibt bei 10 kg. Erste Übung ohne Vorwerte: „Erstes Mal – leg los!“ mit drei leeren Sätzen (bei Programm-Übungen die Satzzahl des Programms).
+- Lesbarkeit: Zeile grün, 13 px, „Programm: …“ gelb, 13 px, „Steigern“ 149 × 44 px. Fünf verschiedene Sätze brechen auf zwei Zeilen um (35 px hoch), sonst eine Zeile. Gleiche Gewichte werden zu „70 kg × 8, 8, 7“ verkürzt. Der Knopf „Steigern“ steht unter der Zeile, nach dem Antippen springt die Karte um etwa 50 px.
+- Satzzahl und Werte folgen der letzten Einheit, nicht dem Programm: Dips mit Richtwert „2 × 8–12“ nach einem Satz im Test hat nur einen Satz, Kurzhantel-Schrägbankdrücken „3 × 8–12“ ebenfalls. Das Programm ist reine Anzeige, ohne Bezug zum Vorwert.
+- Das letzte Training zählt, auch wenn es ein Teil-Training war oder Aufwärmsätze enthielt (Idee 14); Vorwerte stammen immer aus der letzten Einheit mit dieser Übung, egal welche Vorlage.
+- Steigerungsvorschlag: nur Kraft, nur wenn die letzten zwei Einheiten alle Sätze mit demselben Gewicht und mindestens 10 Wdh hatten (+2,5 kg). Bei Programmen mit Bereichen wie 6–8 Wdh (Bankdrücken im Beispiel) wird nie gesteigert, weil 10 Wdh nie erreicht werden; bei Wdh-Bereichen oberhalb von 10 greift es erst am oberen Rand verspätet. Ohne Hinweis, warum der Vorschlag kommt.
+
+**Was die anderen besser machen**
+- Fitbod steigert Last oder Wiederholungen von selbst und stützt sich auf RiR und das geschätzte 1RM; bei uns ist es eine feste Regel mit einem Tipp. Hevy zeigt Vorwerte pro Satz in einer Spalte (nebeneinander mit den neuen Werten) und übernimmt sie mit einem Tipp; Strong hat pro Satz die Vorwerte. Beide steigern nie von selbst.
+- MCI: laut App-Store-Text kein sichtbarer Vorwert, aber ein Plan, der sich nach Leistung anpasst; näher ließ sich das nicht klären.
+
+**Was wir besser machen**
+- Vorwerte sind echte Werte in den Feldern, ein unveränderter Satz kostet 1 Tipp, und „Steigern“ ersetzt das Ändern jedes kg-Felds (Strong und Hevy haben nichts Vergleichbares, laut gelesenen Seiten).
+- Die Programm-Zeile steht direkt unter der Vorwert-Zeile; Strong und Hevy haben keine Bibliotheksprogramme mit Richtwerten dieser Art in der Zeile (nicht nachgelesen).
+- Alles offline, ohne Konto und kostenlos.
+
+**Urteil: gleichauf.** Der Alltagsfall (Vorlage starten, Werte stimmen, 1 Tipp pro Satz) ist so gut wie bei Strong und Hevy, und „Steigern“ geht darüber hinaus. Zum Vorsprung fehlt, dass die Steigerungsregel zu den Programm-Wiederholungen passt (Idee 17); ohne das greift sie gerade bei Kraftprogrammen mit niedrigen Wdh nie. Aufwärmsätze (Idee 14) verfälschen weiter die letzte Einheit.
+
+**Lücken, die sich nicht lohnen:** Eine Vorwert-Spalte pro Satz wie bei Hevy brächte nur einen Tipp-Gewinn, den die vorausgefüllten Felder schon haben. RiR und Erholungsstand wie bei Fitbod kosten pro Satz zusätzliche Tipps. Ein eigener Schritt pro Übung (Progress) erst, wenn Idee 17 nicht reicht (Datenformat).
+
+Quellen: APPS.md, Abschnitt „Letztes Mal“.
 
 ### Satz-Erfassung
 

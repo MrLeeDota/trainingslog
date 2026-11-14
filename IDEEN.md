@@ -4,7 +4,57 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 ## Vorschläge
 
-Noch keine offenen Vorschläge.
+Runde vom 14.11.2026 (`produkt-scout`), Schwerpunkt MCI. In `NOTIZEN.md` standen keine Notizen. Was über MCI und die anderen Apps bekannt ist, steht mit Quellen in `APPS.md`.
+
+### 20. Gespeichertes Training im Verlauf korrigieren
+- Nutzen: hoch · Aufwand: M · Datenformat: nein
+
+Herkunft: MCI hat „Gewichte nachträglich ändern können“ auf Nutzerwunsch umgesetzt (Roadmap, 225 Stimmen), Strong bietet im Verlauf „Edit Workout“ samt Start- und Endzeit. Bei uns lässt sich ein gespeichertes Training nur ganz löschen: Ein Tippfehler wie 190 statt 10 Wdh bleibt in Rekorden, Kampfkraft und Fortschrittskurve stehen und landet beim nächsten Mal sogar als Vorwert in den Feldern. Skizze: Im aufgeklappten Training neben „Training löschen“ ein Knopf „Bearbeiten“, der ein Sheet mit denselben Satzzeilen wie im Tracker öffnet (Werte ändern, einzelnen Satz oder Übung entfernen, Datum und Uhrzeit per `datetime-local`, `end` rückt mit); „Sichern“ ersetzt den Eintrag, sortiert `S.workouts` nach Datum und ruft `save({put:id})` auf, die Spielwerte rechnen sich von selbst neu, und der `daten-waechter` prüft den Diff.
+
+### 21. Wiederholungsziel für heute anzeigen
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Herkunft: MCI gibt pro Satz Gewicht und Wdh nach der tatsächlichen Leistung vor; Bewertungen loben, dass der Algorithmus beim Steigern hilft, eine kritisiert aber unpassende Vorgaben. Bei uns sagt der Tracker zwischen zwei Gewichtsstufen nicht, was heute dran ist; „Steigern“ erscheint erst, wenn alle Sätze das obere Ende geschafft haben. Skizze: Bei Kraftübungen ohne Steigerungsvorschlag zeigt die Programm- bzw. „Letztes Mal“-Zeile „Ziel: 9, 9, 8“, also pro Satz eine Wdh mehr als letztes Mal, höchstens bis zum oberen Ende von `plan.wdh` bzw. `STEP_REPS` (doppelte Progression wie in `bibliothek/README.md`); die Felder behalten die Vorwerte, ob sie gleich das Ziel bekommen sollen, erst nach einem Test entscheiden (spart Tipps, birgt aber das Risiko unbemerkt falscher Werte).
+
+### 22. Übung im Training tauschen
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Herkunft: MCI, dort tauscht man im Workout-Player Übungen samt Gerät aus, ein UX-Showcase lobt genau diese Flexibilität, und „Gezielt Übungen ausschließen“ steht mit über 250 Stimmen auf der Wunschliste. Ist bei uns ein Gerät besetzt, kostet das ✕, Rückfrage, „+ Übung hinzufügen“, Suchen und Auswählen, und die neue Übung landet am Ende statt an ihrem Platz. Skizze: Ein Knopf „⇄“ (44 px) neben dem ✕ öffnet das Auswahl-Sheet im Modus „Tauschen“ mit „Passende Alternativen“ oben (eigene Übungen und Bibliothek mit gleichem Hauptmuskel `muskeln[0]`, sonst gleicher Kategorie); die Wahl ersetzt den Eintrag an derselben Stelle per `newEntry(id, planFor(id))`, sind schon Sätze abgehakt, kommt die neue Übung direkt darunter, und die Vorlage bleibt unverändert (Idee 7 ist abgelehnt). Danach 2 Tipps statt 5 und mehr.
+
+### 23. Restzeit im laufenden Training
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Herkunft: MCI hat laut Roadmap eine „Live-Anzeige für Trainingsdauer und verbleibende Zeit“ umgesetzt, damit man das Training um andere Termine herum planen kann. Skizze: Die Kopfzeile im Training zeigt „24 min · 7 Sätze erledigt · noch ca. 30 min“; die Restzeit ist die Zahl der offenen Sätze mal der Zeit pro Satz aus den letzten gespeicherten Trainings (`(end − date) / Sätze`, Median der letzten fünf), ohne solche Daten ersatzweise Pausendauer plus 45 s, bei Ausdauer und „nur Zeit“ die Minuten vom letzten Mal. Kein Tipp; die Zeile wird wie `#elapsed` in `tick()` aufgefrischt.
+
+### 24. Aufwärmen aus dem Programm im Training zeigen
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Herkunft: MCI führt vor dem Training durch eine Aufwärm-Anleitung („Finish Warming Up“), und eine Bewertung lobt die Mobility-Routine zu jedem Training; Strong (nur PRO) und Hevy haben einen Aufwärmrechner. Unsere Programme bringen das Aufwärmen schon mit (`aufwaermen` in `bibliothek/vorlagen.json`, z. B. „2 bis 3 Aufwärmsätze … mit 50, 70 und 85 % des Arbeitsgewichts“), die App zeigt den Text aber nirgends an, auch nicht im Programm-Sheet. Skizze: Bei Vorlagen aus einem Programm steht über der ersten Übung eine Zeile „Aufwärmen: 5 min locker, dann 35 · 50 · 60 kg“, die Kilo als 50, 70 und 85 % des vorausgefüllten Gewichts der ersten Grundübung, gerundet mit `stepSize()`; reine Anzeige, es werden keine Aufwärmsätze erfasst (Idee 14 bleibt abgelehnt), und die Prozentwerte gehören besser in ein eigenes Feld der Bibliothek (mit dem `trainings-experte` abstimmen).
+
+### 25. Entlasten-Vorschlag bei Stillstand
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Herkunft: MCI wirbt mit Periodisierung und einem Plan, der sich nach Leistung und Erholung anpasst; `bibliothek/README.md` nennt bei 5×5 als Praxis, nach drei Fehlversuchen um 10 % abzusenken. Der Tracker kennt bisher nur den Weg nach oben („Steigern“). Skizze: Lag eine Kraftübung aus einem Programm in den letzten drei Einheiten mit demselben Gewicht jedes Mal in mindestens einem Satz unter der unteren Grenze von `plan.wdh`, erscheint an der Stelle von „Steigern“ der Knopf „Entlasten: 62,5 kg“ (−10 %, gerundet mit `stepSize()`), ein Tipp setzt die offenen Sätze; die Regel vorher vom `trainings-experte` prüfen lassen.
+
+### 26. Sätze pro Muskel und Woche mit Zielbereich
+- Nutzen: mittel · Aufwand: M · Datenformat: nein
+
+Herkunft: MCI plant laut Roadmap eine „Muskelkarte mit Trainingshäufigkeit, Satz-Übersicht und Erholungszeit“ (269 Stimmen), Hevy zeigt Sätze pro Muskelgruppe und Woche und eine Körperkarte der letzten 7 Tage. Wir zählen bisher Sätze nach Kategorie (Idee 10), obwohl die Bibliothek das Feld `muskeln` genau für diese Auswertung hat und `bibliothek/README.md` als Richtwert 10 bis etwa 20 Sätze pro Muskelgruppe und Woche nennt (ACSM 2026). Skizze: Im Fortschritt „Sätze pro Muskel, letzte 7 Tage“ als Balken mit markiertem Bereich 10–20 und „zuletzt vor X Tagen“ als einfachem Erholungsstand; der Hauptmuskel zählt einen Satz, die übrigen einen halben (Praxis, vom `trainings-experte` prüfen lassen), Übungen ohne Bibliothekseintrag laufen unter ihrer Kategorie, alles berechnet wie `vWeekCompare()`.
+
+### 27. Serie bei Urlaub oder Krankheit pausieren
+- Nutzen: mittel · Aufwand: M · Datenformat: ja (optionales Feld in `settings`, mit Migration)
+
+Herkunft: MCI kennt den Status „Aktiv“, „Krank“ oder „Im Urlaub“ mit Schutz der Serie (Urlaubsmodus laut Roadmap mit 542 Stimmen umgesetzt), Apple Fitness lässt seit watchOS 11 und iOS 18 die Ringe pausieren; bei Hevy beginnt die Serie nach einer Woche ohne Training neu. Bei uns beendet schon eine Kalenderwoche ohne Training die Serie auf dem Startbildschirm, und „Monatsserie“ und „Vierteljahr“ rücken nach jedem Urlaub wieder in die Ferne. Skizze: Im Fortschritt unter der Serie „Pause eintragen“ (diese Woche, 2 Wochen oder bis Datum; ganze Wochen ab Montag, höchstens 12, nicht rückwirkend), gespeichert als `settings.pauses = [{from, to}]`; `progress()` überspringt Wochen in einer Pause, sodass sie die Serie weder brechen noch verlängern, und der Kalender zeigt Pausentage gedämpft. Migration: Fehlt das Feld, gibt es keine Pausen, `cleanSettings()` verwirft ungültige Einträge, und das Feld kommt mit `settings` ins Backup.
+
+### 28. Kurz-Training für Tage mit wenig Zeit
+- Nutzen: mittel · Aufwand: M · Datenformat: ja (optionales Feld am Training, mit Migration)
+
+Herkunft: MCI hat laut Roadmap einen „Zeitsparmodus für kurze, effektive Trainingseinheiten“ umgesetzt (391 Stimmen): weniger Übungen oder Sätze auf Knopfdruck. Skizze: Jede Vorlagen-Karte bekommt einen kleinen zweiten Knopf „Kurz“, der dieselbe Vorlage mit höchstens zwei Sätzen pro Übung startet (laut `bibliothek/README.md` nennt ACSM 2026 mindestens zwei Sätze pro Übung); der Name bleibt, damit „Zuletzt“ und „Dran“ weiter stimmen, und der normale Start kostet nichts extra. Damit das nächste normale Training nicht nur zwei Sätze vorausfüllt, bekommt das gespeicherte Training `short:true`, `newEntry()` nimmt die Satzzahl aus der letzten normalen Einheit, und `stepUp()` überspringt kurze Einheiten; Migration: Fehlt das Feld, war es ein normales Training.
+
+### 29. Trainingskarte als Bild teilen
+- Nutzen: niedrig · Aufwand: M · Datenformat: nein
+
+Herkunft: MCI zeigt nach dem Training eine Zusammenfassung mit „Share my progress“, Stickern und Foto; Hevy erzeugt nach jedem Training Bilder mit Rekorden, Volumen und Muskelverteilung (hell, dunkel oder transparent), Strong teilt nur einen Link zum Import. Skizze: In „Training geschafft“ und im Verlauf ein Knopf „Als Bild teilen“, der per Canvas ein Hochformat-PNG im App-Look zeichnet (Trainingsname, Datum, Dauer, bester Satz pro Übung, Kampfkraft, Rekorde, Stufe, Sternkugeln der Woche; keine Originalfiguren, -namen oder Logos) und es wie das Backup über `navigator.share({files})` anbietet, sonst als Download. Im Training kostet das keinen Tipp, danach nur, wenn man teilen will.
 
 ## Angenommen
 

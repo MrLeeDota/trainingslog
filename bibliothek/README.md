@@ -258,7 +258,7 @@ Die Vorlagen folgen diesen Regeln. Wo es keine klare Studienlage gibt, steht „
 
 Die App-Voreinstellung von 90 s passt damit gut zu Isolationsübungen; für schwere Grundübungen ist sie eher knapp.
 
-**Progression.** Doppelte Progression: im Wiederholungsbereich bleiben, bis alle Sätze die obere Grenze schaffen, dann um den kleinsten Schritt erhöhen. Das entspricht der Regel im ACSM-Positionspapier 2009, die Last um 2 bis 10 % zu erhöhen, sobald 1 bis 2 Wdh über dem Ziel gelingen. Bei 5×5 wird nach jeder erfolgreichen Einheit gesteigert (StrongLifts); das Absenken um 10 % nach drei Fehlversuchen ist Praxis.
+**Progression.** Doppelte Progression: im Wiederholungsbereich bleiben, bis alle Sätze die obere Grenze schaffen, dann um den kleinsten Schritt erhöhen. Das entspricht der Regel im ACSM-Positionspapier 2009, die Last um 2 bis 10 % zu erhöhen, sobald 1 bis 2 Wdh über dem Ziel gelingen. Bei 5×5 wird nach jeder erfolgreichen Einheit gesteigert (StrongLifts); das Absenken um 10 % nach drei Fehlversuchen ist Praxis. Als Stillstand gilt in den Programmen: drei Einheiten in Folge mit demselben Gewicht, jedes Mal mindestens ein Satz unter der unteren Grenze des Bereichs, und die Summe der Wdh ist in der letzten nicht höher als in der ersten; dann bei einem Bereich etwa 5 % und bei einem festen Ziel wie 5×5 etwa 10 % leichter neu ansetzen, gerundet auf den kleinsten Gewichtsschritt, mindestens ein Schritt (Praxis, keine Studienregel).
 
 **Aufwärmen.** 5 min locker, dann 2 bis 3 Aufwärmsätze mit steigendem Gewicht vor der ersten Grundübung. Das ist übliche Praxis; die Prozentwerte in den Vorlagen sind Richtwerte, keine Studienergebnisse.
 

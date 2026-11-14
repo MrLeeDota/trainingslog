@@ -156,13 +156,35 @@ button.hero{display:block;width:100%;text-align:left}
 .cmp-h{font-size:12px;color:var(--muted);text-align:right}
 .cmp b{font-family:var(--display);font-stretch:condensed;font-style:italic;font-weight:900;font-size:20px;color:var(--ki);text-align:right}
 .cmp .muted{text-align:right}
-.catbar{display:grid;grid-template-columns:96px 1fr 30px;gap:10px;align-items:center;margin:8px 0;font-size:14px}
-.catbar i{display:block;height:10px;border-radius:2px;transform:skewX(-16deg);background:linear-gradient(90deg,var(--accent-deep),var(--accent) 50%,var(--ki))}
-.catbar b{text-align:right;color:var(--ki)}
+/* Sätze pro Muskel: Balken mit hell markiertem Zielbereich, Zahl in Gold, sobald der Bereich erreicht ist */
+.mus{background:var(--well);border:1px solid var(--line);border-radius:12px;padding:6px 12px}
+.mus-row{display:grid;grid-template-columns:minmax(0,112px) 1fr 36px;gap:10px;align-items:center;margin:8px 0;font-size:14px}
+.mus-name{overflow-wrap:anywhere;line-height:1.2}
+.mus-name small{display:block;font-size:12px;color:var(--muted)}
+.mus-bar{position:relative;display:block;height:12px;border-radius:3px;background:var(--card);overflow:hidden}
+.mus-bar i{position:absolute;top:0;bottom:0;display:block}
+.mus-bar .zone{background:rgba(255,212,59,.16);border-left:2px solid var(--ki);border-right:2px solid var(--ki);z-index:1}   /* über dem Balken, damit die Grenzen sichtbar bleiben */
+.mus-legend{display:flex;flex-wrap:wrap;gap:4px 16px;margin:10px 0 4px;font-size:12px;color:var(--muted)}
+.mus-legend i{display:inline-block;width:22px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.mus-legend .lz{background:rgba(255,212,59,.16);border-left:2px solid var(--ki);border-right:2px solid var(--ki)}
+.mus-legend .ln{background:var(--line)}
+.mus-bar .fill{left:0;border-radius:3px;background:linear-gradient(90deg,var(--accent-deep),var(--accent));opacity:.75}
+.mus-row.ok .fill{background:linear-gradient(90deg,var(--accent-deep),var(--accent) 50%,var(--ki));opacity:1}
+.mus-row.nozone .fill{background:var(--line);opacity:1}
+.mus-row b{text-align:right;color:var(--muted)}
+.mus-row.ok b{color:var(--ki)}
+.mus-row.nozone b{color:var(--text)}
+.mus-note{font-size:13px;margin-top:8px}
 /* Steigerungsvorschlag: schräger Knopf in Gold wie die Energieanzeigen */
 button.step-up{margin-top:8px;padding:6px 14px 7px 12px;min-height:44px;font-size:14px;font-weight:800;color:var(--accent-ink);border-radius:3px;transform:skewX(-10deg);
   background:linear-gradient(180deg,#fff3a6,var(--ki) 55%,var(--accent));box-shadow:2px 2px 0 var(--ink),0 0 12px rgba(255,212,59,.4)}
 button.step-up:active{transform:skewX(-10deg) translateY(2px);box-shadow:0 0 0 var(--ink)}
+.ex-tools button{font-size:20px;color:var(--text);opacity:.75}
+/* Entlasten: ruhiger als „Steigern“, nur umrandet */
+.step-down-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
+.step-down-row .muted{font-size:13px}
+button.step-down{padding:6px 14px 7px 12px;min-height:44px;font-size:14px;font-weight:800;color:var(--accent-hi);background:transparent;border:2px solid var(--accent);border-radius:3px;transform:skewX(-10deg);box-shadow:none}
+button.step-down:active{transform:skewX(-10deg) translateY(2px)}
 
 /* Fortschrittskurve im Übungs-Sheet */
 .chart{background:var(--well);border:1px solid var(--line);border-radius:12px;padding:10px 10px 8px}
@@ -416,17 +438,42 @@ function stepUp(exId, plan){
   if (runs.length < need) return null;
   const kg = num(runs[0][0].a);
   if (!(kg > 0)) return null;
-  return runs.every(sets => sets.length >= minSets && sets.every(s => num(s.a) === kg && num(s.b) >= reps)) ? kg + stepSize(exId, need === 1) : null;
+  return runs.every(sets => sets.length >= minSets && sets.every(s => num(s.a) === kg && num(s.b) >= reps)) ? kg + stepSize(exId, need === 1, kg) : null;
 }
 /* Gewichtsschritt passend zur Übung, abgeleitet aus Gerät und Grundübung in der Bibliothek (Empfehlung des trainings-experte):
-   Kurzhantel-Isolation 1 kg, Kurzhantel-Grundübung 2 kg, Langhantel-Grundübung für die Beine bei linearer
-   Progression (5×5) 5 kg, sonst STEP_KG (2,5 kg). Übungen ohne Bibliothekseintrag bleiben bei STEP_KG. */
-function stepSize(exId, linear){
+   Kurzhantel-Grundübung 2 kg, Kurzhantel-Isolation 1 kg, ab 10 kg aber 2 kg (schwere Einzelhanteln wie beim Pullover
+   gibt es im Studio meist nur in 2-kg-Schritten), Langhantel-Grundübung für die Beine bei linearer Progression (5×5)
+   5 kg, sonst STEP_KG (2,5 kg). Übungen ohne Bibliothekseintrag bleiben bei STEP_KG. kg: aktuelles Gewicht. */
+function stepSize(exId, linear, kg){
   const l = libOf(exById(exId)), g = (l && l.geraet) || [];
   if (!l) return STEP_KG;
-  if (g.includes("Kurzhantel")) return l.grunduebung ? 2 : 1;
+  if (g.includes("Kurzhantel")) return l.grunduebung || kg >= 10 ? 2 : 1;
   if (linear && l.grunduebung && l.cat === "Beine" && g.includes("Langhantel")) return 5;
   return STEP_KG;
+}
+/* Entlasten-Vorschlag bei Stillstand (Regel vom trainings-experte geprüft, siehe bibliothek/README.md, „Progression“).
+   Nur mit Programm, weil erst dessen Wdh-Bereich gewolltes Halten von Stillstand unterscheidet. Auslöser: In den letzten
+   drei Einheiten der Übung hatten alle Sätze dasselbe Gewicht (> 0), es gab mindestens so viele Sätze wie im Programm,
+   jedes Mal lag ein Satz unter der unteren Grenze, und die Summe der Wdh (über die Programm-Sätze) ist in der neuesten
+   Einheit nicht höher als in der ältesten. Vorschlag: bei einem Bereich 5 %, bei festem Ziel wie „5“ (5×5) 10 % weniger,
+   in ganzen Gewichtsschritten vom aktuellen Gewicht abgezogen. Schließt „Steigern“ aus. Ergebnis: Gewicht oder null. */
+function stepDown(exId, plan){
+  if (exType(exId) !== "kraft" || !plan) return null;
+  const m = String(plan.wdh || "").match(/^\s*(\d+)\s*(?:-\s*(\d+))?\s*$/);
+  if (!m) return null;
+  const low = +m[1], linear = !m[2], n = parseInt(plan.saetze) || 1, runs = [];
+  for (let k = S.workouts.length - 1; k >= 0 && runs.length < 3; k--){
+    const en = S.workouts[k].entries.find(e => e.exId === exId);
+    if (en && en.sets.length) runs.push(en.sets);
+  }
+  if (runs.length < 3) return null;
+  const kg = num(runs[0][0].a), reps = sets => sets.slice(0, n).reduce((t, s) => t + num(s.b), 0);
+  if (!(kg > 0) || !runs.every(sets => sets.length >= n && sets.every(s => num(s.a) === kg) && sets.some(s => num(s.b) < low))) return null;
+  if (reps(runs[0]) > reps(runs[2])) return null;   // es geht noch voran
+  // Schritt im Zielbereich: Kurzhantel-Isolation mit 10 kg geht auf 9 kg zurück (unter 10 kg gibt es 1-kg-Schritte)
+  const step = Math.min(stepSize(exId, false, kg), stepSize(exId, false, kg * .9));
+  const down = kg - step * Math.max(1, Math.round(kg * (linear ? .10 : .05) / step));
+  return down > 0 ? Math.round(down * 100) / 100 : null;
 }
 /* Wiederholungsziel für heute (doppelte Progression, siehe bibliothek/README.md): pro Satz eine Wdh mehr als
    letztes Mal, höchstens bis zum oberen Ende des Programmbereichs bzw. STEP_REPS; wer schon darüber lag, hält.
@@ -510,7 +557,7 @@ function loadLib(){
     })
     .catch(e => { console.warn("Übungsbibliothek nicht geladen:", e); lib.state = "error"; })   // fängt auch Fehler beim Auswerten ab
     .finally(() => {   // offene Ansicht nachziehen (Bibliothek, Richtwerte, Gewichtsschritt), aber nicht, während jemand tippt
-      const uses = (ui.sheet && ["picker","programs","exercise"].includes(ui.sheet.kind)) || (S && S.active && ui.tab === "training");
+      const uses = (ui.sheet && ["picker","programs","exercise","progress"].includes(ui.sheet.kind)) || (S && S.active && ui.tab === "training");
       if (uses && !document.activeElement?.matches("input,textarea,select")) render();
     });
 }
@@ -543,6 +590,30 @@ function planOf(t, exId){
   return u && l ? (u.uebungen || []).find(x => x.uebung === l.id) || null : null;
 }
 const planFor = exId => S.active ? planOf(S.templates.find(t => t.lib && t.name === S.active.name), exId) : null;
+// Richtwert eines Eintrags im laufenden Training. Eine getauschte Übung übernimmt den Richtwert der Übung, die sie ersetzt
+// (Feld planEx am Eintrag; es steht nur im laufenden Training und wird beim Speichern nicht übernommen).
+const entryPlan = en => planFor(en.planEx || en.exId);
+/* Passende Alternativen zum Tauschen im Training: gleiche Erfassungsart und gleicher Hauptmuskel (erster Eintrag in
+   muskeln der Bibliothek); ist die Übung nicht in der Bibliothek, gleiche Kategorie. Eigene Übungen zuerst, dann die
+   Bibliothek. Übungen, die schon im Training sind, fehlen. */
+function swapAlternatives(en){
+  const ex = exById(en.exId);
+  if (!ex || !S.active) return [];
+  const l = libOf(ex), main = l && (l.muskeln || [])[0], type = ex.type || "kraft";
+  const taken = new Set(S.active.entries.map(e => e.exId));
+  const fits = (lx, cat, t) => (t || "kraft") === type && (main && lx ? (lx.muskeln || [])[0] === main : cat === ex.cat);
+  const own = S.exercises.filter(e => !taken.has(e.id) && fits(libOf(e), e.cat, e.type)).sort((a, b) => a.name.localeCompare(b.name, "de")).map(e => ({own:e}));
+  const fromLib = lib.state === "ready" ? lib.ex.filter(x => !libOwner(x) && fits(x, x.cat, x.type)).sort((a, b) => a.name.localeCompare(b.name, "de")).map(x => ({lib:x})) : [];
+  return [...own, ...fromLib];
+}
+function vSwapAlt(en){
+  const alt = swapAlternatives(en), gear = l => esc(((l && l.geraet) || []).join(", "));
+  return `<div class="grp"><h2>Statt ${esc(exName(en.exId))}</h2>
+    ${alt.map(x => x.own
+      ? `<button class="li row between" data-act="picked" data-id="${x.own.id}" data-name="${esc(x.own.name.toLowerCase())}"><span>${esc(x.own.name)} <span class="muted">${gear(libOf(x.own))}</span></span></button>`
+      : `<button class="li row between" data-act="picked-lib" data-lib="${esc(x.lib.id)}" data-name="${esc(x.lib.name.toLowerCase())}"><span>${esc(x.lib.name)} <span class="muted">${gear(x.lib)}</span></span><span class="lib-add" aria-hidden="true">+</span></button>`).join("")
+    || `<p class="muted">Keine passende Übung gefunden. Unten stehen alle Übungen.</p>`}</div>`;
+}
 function vLibList(){
   if (lib.state !== "ready"){ loadLib(); return `<p class="muted">${lib.state === "error" ? "Die Übungsbibliothek ist gerade nicht erreichbar." : "Lade Übungsbibliothek …"}</p>`; }
   const free = lib.ex.filter(l => !libOwner(l));
@@ -682,6 +753,15 @@ let ui = {tab:"training", sheet:null, open:null};
 let bootErr = null;   // gesetzt, wenn die Daten beim Start nicht geladen werden konnten
 const timer = {end:0, total:0, rang:false, by:null, prev:null};
 let undoSet = null;   // zuletzt mit „− Satz“ entfernter Satz, solange er sich zurückholen lässt
+let undoWeight = null;   // Gewichte vor „Steigern“ oder „Entlasten“, solange sie sich zurückholen lassen
+// Gewicht in allen offenen Sätzen setzen (Steigern, Entlasten); der Hinweis bietet 10 s lang „Rückgängig“ an
+function setWeight(en, kg, msg){
+  const u = undoWeight = {en, prev:en.sets.map(s => s.a)};
+  en.sets.forEach(s => { if (!s.done) s.a = fmtNum(kg); });
+  save(); render();
+  toast(`${msg} · Rückgängig`, "undo-weight", true);
+  setTimeout(() => { if (undoWeight === u) undoWeight = null; }, 10500);
+}
 
 /* ---------- Audio (beep at end of rest) ---------- */
 let actx = null, beeps = [];
@@ -859,14 +939,62 @@ function vWeekCompare(){
   const avg = k => past.reduce((t, r) => t + r[k], 0) / 4, one = v => fmtNum(Math.round(v * 10) / 10);
   const rows = [["Trainings", cur.n, avg("n")], ["Sätze", cur.sets, avg("sets")]];
   if (cur.km || avg("km")) rows.push(["Kilometer", cur.km, avg("km")]);
-  const since = Date.now() - WEEK, cats = {};
-  S.workouts.filter(w => w.date >= since).forEach(w => w.entries.forEach(en => { const c = (exById(en.exId) || {}).cat || "Sonstiges"; cats[c] = (cats[c] || 0) + en.sets.length; }));
-  const list = Object.entries(cats).sort((a, b) => b[1] - a[1]), max = list.length ? list[0][1] : 1;
   return `<h2>Diese Woche</h2>
     <div class="cmp"><span></span><span class="cmp-h">Diese Woche</span><span class="cmp-h">Ø 4 Wochen davor</span>
       ${rows.map(r => `<span>${r[0]}</span><b>${one(r[1])}</b><span class="muted">${one(r[2])}</span>`).join("")}</div>
-    ${list.length ? `<h2>Sätze nach Kategorie, letzte 7 Tage</h2>
-      ${list.map(([c, n]) => `<div class="catbar"><span>${esc(c)}</span><i style="width:${Math.max(4, Math.round(100 * n / max))}%"></i><b>${n}</b></div>`).join("")}` : ""}`;
+    ${vMuscleWeek()}`;
+}
+/* Sätze pro Muskelgruppe in den letzten 7 Tagen (Zählweise aus bibliothek/README.md, „Sätze zählen“): Ist ein Muskel der
+   Gruppe Hauptmuskel der Übung (erster Eintrag in muskeln), zählt ein Satz 1, arbeitet er nur mit, ½; pro Gruppe zählt
+   ein Satz höchstens einmal. Übungen ohne Bibliothekseintrag zählen mit 1 unter ihrer Kategorie, wenn sie eindeutig
+   einer Gruppe entspricht; Schultern, Beine und Rumpf sind mehrdeutig und laufen unter „Ohne Zuordnung“. Ausdauer zählt
+   nicht. Der Bereich von 10 bis 20 Sätzen pro Woche (ACSM 2026) ist nur bei den Gruppen markiert, für die er taugt
+   (dritter Wert true); Schulter vorn, Gesäß und Bauch bekommen viel ungezählte Mitarbeit (Fachprüfung trainings-experte). */
+const MUSCLE_GROUPS = [
+  ["Brust", ["Brust"], true], ["Rücken", ["Latissimus", "oberer Rücken"], true],
+  ["Schulter vorn", ["vordere Schulter"], false], ["Schulter seitlich", ["seitliche Schulter"], true], ["Schulter hinten", ["hintere Schulter"], true],
+  ["Bizeps", ["Bizeps"], true], ["Trizeps", ["Trizeps"], true], ["Quadrizeps", ["Quadrizeps"], true], ["Beinbeuger", ["Beinbeuger"], true],
+  ["Gesäß", ["Gesäß"], false], ["Waden", ["Waden"], true], ["Bauch", ["Bauch", "seitliche Bauchmuskeln"], false]
+];
+const CAT_GROUP = {Brust:"Brust", "Rücken":"Rücken", Bizeps:"Bizeps", Trizeps:"Trizeps"};
+const LOOSE = "Ohne Zuordnung", MUSCLE_ZONE = [10, 20];
+// Anteil eines Satzes dieser Übung je Gruppe, z. B. {Brust:1, "Schulter vorn":0.5, Trizeps:0.5}
+function muscleShare(exId){
+  const ex = exById(exId);
+  if (!ex || ex.type === "ausdauer") return {};
+  const l = libOf(ex), m = (l || {}).muskeln || [], out = {};
+  if (m.length) MUSCLE_GROUPS.forEach(([g, ms]) => { const k = m.findIndex(x => ms.includes(x)); if (k >= 0) out[g] = k === 0 ? 1 : .5; });
+  else if (CAT_GROUP[ex.cat]) out[CAT_GROUP[ex.cat]] = 1;
+  // z. B. eigene Beinübung: „Beine“ sagt nicht, welcher Muskel; Padel-Übungen der Bibliothek ohne Muskeln zählen nicht
+  else if (["Schultern", "Beine", "Rumpf"].includes(ex.cat) || (!l && (ex.type || "kraft") === "kraft")) out[LOOSE] = 1;
+  return out;
+}
+function vMuscleWeek(){
+  if (lib.state === "idle") loadLib();
+  const now = Date.now(), since = now - WEEK, sets = {}, direct = {}, any = {}, share = {};
+  S.workouts.forEach(w => { if (w.date < now - 4 * WEEK) return; w.entries.forEach(en => {
+    const sh = share[en.exId] || (share[en.exId] = muscleShare(en.exId));
+    Object.entries(sh).forEach(([g, f]) => {
+      sets[g] = (sets[g] || 0) + (w.date >= since ? f * en.sets.length : 0);
+      any[g] = Math.max(any[g] || 0, w.date);
+      if (f === 1) direct[g] = Math.max(direct[g] || 0, w.date);
+    });
+  }); });
+  const last = g => direct[g] || any[g];
+  // Gruppen, die in den letzten 4 Wochen trainiert wurden; diese Woche vergessene stehen dann mit 0 da.
+  // „Ohne Zuordnung“ nur, wenn es in den letzten 7 Tagen solche Sätze gab.
+  const rows = [...MUSCLE_GROUPS.filter(([g]) => g in sets), ...(sets[LOOSE] ? [[LOOSE, [], false]] : [])];
+  if (!rows.length) return "";
+  // Feste Skala bis 24 Sätze, damit der Bereich 10–20 immer an derselben Stelle steht; mehr füllt den Balken ganz
+  const top = 24, pct = v => `${(100 * Math.min(v, top) / top).toFixed(1)}%`;
+  const ago = t => { const d = Math.round((dayStart(now) - dayStart(t)) / 864e5); return d <= 0 ? "heute" : d === 1 ? "gestern" : `vor ${d} T.`; };
+  return `<h2>Sätze pro Muskel, letzte 7 Tage</h2>
+    <div class="mus">${rows.map(([g, , zone]) => { const n = sets[g], st = !zone ? " nozone" : n >= MUSCLE_ZONE[0] ? " ok" : "";
+      return `<div class="mus-row${st}"><span class="mus-name">${esc(g)}<small>${g === LOOSE ? "eigene Übungen" : ago(last(g))}</small></span>
+        <span class="mus-bar" role="img" aria-label="${fmtNum(n)} Sätze"><i class="fill" style="width:${pct(n)}"></i>${zone ? `<i class="zone" style="left:${pct(MUSCLE_ZONE[0])};width:${pct(MUSCLE_ZONE[1] - MUSCLE_ZONE[0])}"></i>` : ""}</span>
+        <b>${fmtNum(n)}</b></div>`; }).join("")}
+      <div class="mus-legend"><span><i class="lz"></i>Zielbereich 10–20 Sätze</span><span><i class="ln"></i>ohne Zielbereich</span></div></div>
+    <p class="muted mus-note">Hauptmuskel einer Übung: ein Satz zählt voll, mitarbeitende Muskeln: halb. Mehr als 20 schadet nicht, bringt aber kaum noch etwas. Schulter vorn, Gesäß und Bauch arbeiten bei vielen Übungen ungezählt mit und haben deshalb keinen Zielbereich. Unter dem Namen: wann der Muskel zuletzt Hauptmuskel war.</p>`;
 }
 const vBadge = (a, got) => `<div class="li row badge${got ? "" : " off"}">${orb(1, got)}<span class="grow"><b>${a[0]}</b><span class="muted">${a[1]}</span></span></div>`;
 // Sternkugel als SVG mit n Sternen (1–7). lit: gesammelt und leuchtend, sonst versteinert.
@@ -928,17 +1056,20 @@ function vEntry(en, i){
   const last = lastFor(en.exId);
   const cols = `grid-template-columns:26px repeat(${T.f.length},1fr) 52px`;
   // Steigerungsknopf nur, solange noch ein offener Satz unter dem vorgeschlagenen Gewicht liegt
-  const plan = planFor(en.exId);   // Richtwert, wenn die Vorlage aus einem Bibliotheks-Programm stammt
+  const plan = entryPlan(en);   // Richtwert, wenn die Vorlage aus einem Bibliotheks-Programm stammt
   const up = stepUp(en.exId, plan), showUp = up && en.sets.some(s => !s.done && num(s.a) < up);
-  const goal = up ? null : repGoal(en, plan);   // Ziel nur zwischen zwei Gewichtsstufen, nicht neben „Steigern“
+  const down = up ? null : stepDown(en.exId, plan), showDown = down && en.sets.some(s => !s.done && num(s.a) > down);
+  const goal = up || showDown ? null : repGoal(en, plan);   // Ziel nur zwischen zwei Gewichtsstufen, nicht neben „Steigern“ oder „Entlasten“
   return `<div class="card">
     <div class="row between" style="align-items:flex-start">
       <div class="grow"><div class="ex-name">${esc(ex.name)}</div>${ex.note ? `<div class="ex-note">${esc(ex.note)}</div>` : ""}
       <div class="last">${last ? `Letztes Mal (${fmtDate(last.date)}): ${esc(fmtSets(ex.type, last.sets))}` : `<span class="muted">Erstes Mal – leg los!</span>`}</div>
-      ${plan ? `<div class="plan">Programm: ${esc(libDose(plan))}</div>` : ""}
+      ${plan ? `<div class="plan">Programm${en.planEx ? ` wie ${esc(exName(en.planEx))}` : ""}: ${esc(libDose(plan))}</div>` : ""}
       ${goal ? `<div class="goal">Ziel heute: <b>${esc(fmtGoal(goal))}</b></div>` : ""}
-      ${showUp ? `<button class="step-up" data-act="step-up" data-i="${i}" aria-label="Gewicht in den offenen Sätzen auf ${fmtNum(up)} kg erhöhen">Steigern: ${fmtNum(up)} kg</button>` : ""}</div>
-      <button class="ghost" data-act="del-entry" data-i="${i}" aria-label="Übung entfernen">✕</button>
+      ${showUp ? `<button class="step-up" data-act="step-up" data-i="${i}" aria-label="Gewicht in den offenen Sätzen auf ${fmtNum(up)} kg erhöhen">Steigern: ${fmtNum(up)} kg</button>` : ""}
+      ${showDown ? `<div class="step-down-row"><button class="step-down" data-act="step-down" data-i="${i}" aria-label="Gewicht in den offenen Sätzen auf ${fmtNum(down)} kg senken">Entlasten: ${fmtNum(down)} kg</button><span class="muted">3 Einheiten ohne Fortschritt</span></div>` : ""}</div>
+      <span class="row ex-tools" style="gap:0;flex:none"><button class="ghost" data-act="swap" data-i="${i}" aria-label="${esc(ex.name)} gegen eine andere Übung tauschen">⇄</button>
+      <button class="ghost" data-act="del-entry" data-i="${i}" aria-label="Übung entfernen">✕</button></span>
     </div>
     <div class="set head" style="${cols}"><span>#</span>${T.f.map(f => `<span>${f[1]}</span>`).join("")}<span></span></div>
     ${en.sets.map((s, j) => `<div class="set ${s.done ? "done" : ""}" style="${cols}">
@@ -1025,14 +1156,15 @@ function vHistory(){
 function vSheet(s){
   if (s.kind === "picker"){
     // target "lib": nur Bibliothek, um Übungen in die eigene Liste zu holen (Tab Übungen)
-    const onlyLib = s.target === "lib";
-    const inWorkout = new Set(s.target === "active" && S.active ? S.active.entries.map(e => e.exId)
+    // target "swap": Übung s.i im laufenden Training ersetzen, passende Alternativen stehen oben
+    const onlyLib = s.target === "lib", swap = s.target === "swap" && S.active && S.active.entries[s.i];
+    const inWorkout = new Set((s.target === "active" || s.target === "swap") && S.active ? S.active.entries.map(e => e.exId)
       : s.target === "edit-w" ? s.back.draft.entries.map(e => e.exId) : (s.back?.draft?.ex || []));
-    return `<div class="sheet-head"><button class="ghost" data-act="close">${onlyLib ? "Fertig" : "Zurück"}</button><b>${onlyLib ? "Übungsbibliothek" : "Übung wählen"}</b>${onlyLib ? `<span style="width:60px"></span>` : `<button class="ghost accent" data-act="new-ex-inline">Neu</button>`}</div>
+    return `<div class="sheet-head"><button class="ghost" data-act="close">${onlyLib ? "Fertig" : "Zurück"}</button><b>${onlyLib ? "Übungsbibliothek" : swap ? "Übung tauschen" : "Übung wählen"}</b>${onlyLib ? `<span style="width:60px"></span>` : `<button class="ghost accent" data-act="new-ex-inline">Neu</button>`}</div>
     <input id="pick-q" placeholder="Suchen …" autocomplete="off">
     ${onlyLib ? "" : `<button class="small ghost accent" style="margin-top:6px;padding-left:0" data-act="to-lib">↓ Zur Übungsbibliothek</button>`}
     <p class="muted" id="pick-none" style="margin-top:12px" hidden>${onlyLib ? "Keine passende Übung in der Bibliothek." : "Keine passende Übung. Über „Neu“ legst du eine eigene an."}</p>
-    <div id="pick-list">${onlyLib ? "" : groupByCat(S.exercises).map(([cat, list]) => `<div class="grp"><h2>${esc(cat)}</h2>
+    <div id="pick-list">${swap ? vSwapAlt(swap) : ""}${onlyLib ? "" : groupByCat(S.exercises).map(([cat, list]) => `<div class="grp"><h2>${esc(cat)}</h2>
       ${list.map(e => `<button class="li row between" data-act="picked" data-id="${e.id}" data-name="${esc(e.name.toLowerCase())}"><span>${esc(e.name)}</span>${inWorkout.has(e.id) ? `<span class="muted">✓ drin</span>` : ""}</button>`).join("")}</div>`).join("")}
       ${onlyLib ? `<p class="muted">Tippen übernimmt die Übung in deine Liste.</p>` : `<h2 class="lib-title">Aus der Bibliothek</h2>`}${vLibList()}</div>`;
   }
@@ -1092,7 +1224,7 @@ function vSheet(s){
   if (s.kind === "progress"){
     const p = progress(S.workouts), got = ACHIEVEMENTS.filter(a => a[2](p));
     return `<div class="sheet-head"><button class="ghost" data-act="close">Fertig</button><b>Fortschritt</b><span style="width:60px"></span></div>
-    <div class="lvl-box">${vLevel(p)}<span class="muted">Noch ${fmtInt(levelFloor(p.level + 1) - p.power)} Kampfkraft bis Stufe ${p.level + 1}: ${rankOf(p.level + 1)}</span></div>
+    <div class="lvl-box">${vLevel(p)}<span class="muted">Noch ${fmtInt(levelFloor(p.level + 1) - p.power)} Kampfkraft bis Stufe ${p.level + 1}${rankOf(p.level + 1) !== rankOf(p.level) ? `: ${rankOf(p.level + 1)}` : ""}</span></div>
     <div class="stats">
       <div class="stat"><b>${fmtInt(p.n)}</b><span>Trainings</span></div>
       <div class="stat"><b>${fmtInt(p.sets)}</b><span>Sätze</span></div>
@@ -1328,10 +1460,18 @@ const actions = {
     }
   },
   "step-up": el => {
-    const en = S.active.entries[+el.dataset.i], up = stepUp(en.exId, planFor(en.exId));
-    if (!up) return;
-    en.sets.forEach(s => { if (!s.done) s.a = fmtNum(up); });
-    save(); render();
+    const en = S.active.entries[+el.dataset.i], up = stepUp(en.exId, entryPlan(en));
+    if (up) setWeight(en, up, `Gewicht auf ${fmtNum(up)} kg erhöht`);
+  },
+  "step-down": el => {
+    const en = S.active.entries[+el.dataset.i], down = stepDown(en.exId, entryPlan(en));
+    if (down) setWeight(en, down, `Gewicht auf ${fmtNum(down)} kg gesenkt`);
+  },
+  "undo-weight": () => {
+    const u = undoWeight; undoWeight = null;
+    if (!u || !S.active || !S.active.entries.includes(u.en)){ toast("Nichts mehr rückgängig zu machen", null, true); return; }
+    u.en.sets.forEach((s, j) => { if (!s.done && j < u.prev.length) s.a = u.prev[j]; });
+    save(); render(); toast("Gewicht zurückgesetzt", null, true);
   },
   "add-set": el => { const en = S.active.entries[+el.dataset.i], p = en.sets[en.sets.length - 1] || {a:"", b:""}; en.sets.push({a:p.a, b:p.b, done:false}); save(); render(); },
   "del-set": async el => {
@@ -1354,9 +1494,27 @@ const actions = {
   },
   "del-entry": async el => { if (await ask("Übung aus diesem Training entfernen?", "Entfernen", true)){ S.active.entries.splice(+el.dataset.i, 1); save(); render(); } },
   pick: el => { retryLib(); ui.sheet = {kind:"picker", target:el.dataset.target, back:ui.sheet}; render(); },
+  swap: el => { retryLib(); ui.sheet = {kind:"picker", target:"swap", i:+el.dataset.i}; render(); },
   picked: el => {
     const s = ui.sheet, id = el.dataset.id;
     if (s.target === "active"){ S.active.entries.push(newEntry(id)); save(); ui.sheet = null; render(); setTimeout(() => window.scrollTo({top:document.body.scrollHeight, behavior:"smooth"}), 30); }
+    else if (s.target === "swap"){
+      // Tauschen: Die neue Übung kommt an dieselbe Stelle. Sind schon Sätze abgehakt, bleiben sie bei der alten Übung,
+      // deren offene Sätze entfallen, und die neue Übung übernimmt so viele Sätze, wie noch offen waren, direkt darunter.
+      const a = S.active, k = s.i, old = a && a.entries[k];
+      if (!old || old.exId === id){ ui.sheet = null; render(); return; }
+      if (a.entries.some(e => e.exId === id)){ toast(`„${exName(id)}“ ist schon in diesem Training`); return; }
+      const own = planFor(id), planEx = own ? null : old.planEx || old.exId, inherit = planEx ? planFor(planEx) : null;
+      const en = newEntry(id, own || inherit);
+      if (inherit) en.planEx = planEx;   // Richtwert der ersetzten Übung (Programm-Platz) übernehmen
+      const done = old.sets.filter(x => x.done), open = old.sets.length - done.length;
+      if (done.length){
+        if (open){ old.sets = done; en.sets = en.sets.slice(0, open); while (en.sets.length < open) en.sets.push({...en.sets[en.sets.length - 1], done:false}); }
+        a.entries.splice(k + 1, 0, en);
+      } else a.entries.splice(k, 1, en);
+      save(); ui.sheet = null; render();
+      toast(done.length && open ? `${open === 1 ? "Letzter Satz" : `Restliche ${open} Sätze`} mit „${exName(id)}“` : `„${exName(id)}“ statt „${exName(old.exId)}“`);
+    }
     else if (s.target === "edit-w"){
       const d = s.back.draft;
       if (d.entries.some(e => e.exId === id)){ toast(`„${exName(id)}“ ist schon in diesem Training`); return; }

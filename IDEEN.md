@@ -4,12 +4,15 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 ## Vorschläge
 
-Runde vom 14.11.2026 (`produkt-scout`), Schwerpunkt MCI. In `NOTIZEN.md` standen keine Notizen. Was über MCI und die anderen Apps bekannt ist, steht mit Quellen in `APPS.md`.
+Noch keine offenen Vorschläge. Die MCI-Runde vom 14.11.2026 ist ganz einsortiert; was über MCI und die anderen Apps bekannt ist, steht mit Quellen in `APPS.md`.
 
-### 22. Übung im Training tauschen
-- Nutzen: mittel · Aufwand: S · Datenformat: nein
+## Angenommen
 
-Herkunft: MCI, dort tauscht man im Workout-Player Übungen samt Gerät aus, ein UX-Showcase lobt genau diese Flexibilität, und „Gezielt Übungen ausschließen“ steht mit über 250 Stimmen auf der Wunschliste. Ist bei uns ein Gerät besetzt, kostet das ✕, Rückfrage, „+ Übung hinzufügen“, Suchen und Auswählen, und die neue Übung landet am Ende statt an ihrem Platz. Skizze: Ein Knopf „⇄“ (44 px) neben dem ✕ öffnet das Auswahl-Sheet im Modus „Tauschen“ mit „Passende Alternativen“ oben (eigene Übungen und Bibliothek mit gleichem Hauptmuskel `muskeln[0]`, sonst gleicher Kategorie); die Wahl ersetzt den Eintrag an derselben Stelle per `newEntry(id, planFor(id))`, sind schon Sätze abgehakt, kommt die neue Übung direkt darunter, und die Vorlage bleibt unverändert (Idee 7 ist abgelehnt). Danach 2 Tipps statt 5 und mehr.
+Noch nichts.
+
+## Abgelehnt
+
+Vorerst nicht gebraucht (14.11.2026, aus der MCI-Runde):
 
 ### 23. Restzeit im laufenden Training
 - Nutzen: niedrig · Aufwand: S · Datenformat: nein
@@ -20,16 +23,6 @@ Herkunft: MCI hat laut Roadmap eine „Live-Anzeige für Trainingsdauer und verb
 - Nutzen: niedrig · Aufwand: S · Datenformat: nein
 
 Herkunft: MCI führt vor dem Training durch eine Aufwärm-Anleitung („Finish Warming Up“), und eine Bewertung lobt die Mobility-Routine zu jedem Training; Strong (nur PRO) und Hevy haben einen Aufwärmrechner. Unsere Programme bringen das Aufwärmen schon mit (`aufwaermen` in `bibliothek/vorlagen.json`, z. B. „2 bis 3 Aufwärmsätze … mit 50, 70 und 85 % des Arbeitsgewichts“), die App zeigt den Text aber nirgends an, auch nicht im Programm-Sheet. Skizze: Bei Vorlagen aus einem Programm steht über der ersten Übung eine Zeile „Aufwärmen: 5 min locker, dann 35 · 50 · 60 kg“, die Kilo als 50, 70 und 85 % des vorausgefüllten Gewichts der ersten Grundübung, gerundet mit `stepSize()`; reine Anzeige, es werden keine Aufwärmsätze erfasst (Idee 14 bleibt abgelehnt), und die Prozentwerte gehören besser in ein eigenes Feld der Bibliothek (mit dem `trainings-experte` abstimmen).
-
-### 25. Entlasten-Vorschlag bei Stillstand
-- Nutzen: niedrig · Aufwand: S · Datenformat: nein
-
-Herkunft: MCI wirbt mit Periodisierung und einem Plan, der sich nach Leistung und Erholung anpasst; `bibliothek/README.md` nennt bei 5×5 als Praxis, nach drei Fehlversuchen um 10 % abzusenken. Der Tracker kennt bisher nur den Weg nach oben („Steigern“). Skizze: Lag eine Kraftübung aus einem Programm in den letzten drei Einheiten mit demselben Gewicht jedes Mal in mindestens einem Satz unter der unteren Grenze von `plan.wdh`, erscheint an der Stelle von „Steigern“ der Knopf „Entlasten: 62,5 kg“ (−10 %, gerundet mit `stepSize()`), ein Tipp setzt die offenen Sätze; die Regel vorher vom `trainings-experte` prüfen lassen.
-
-### 26. Sätze pro Muskel und Woche mit Zielbereich
-- Nutzen: mittel · Aufwand: M · Datenformat: nein
-
-Herkunft: MCI plant laut Roadmap eine „Muskelkarte mit Trainingshäufigkeit, Satz-Übersicht und Erholungszeit“ (269 Stimmen), Hevy zeigt Sätze pro Muskelgruppe und Woche und eine Körperkarte der letzten 7 Tage. Wir zählen bisher Sätze nach Kategorie (Idee 10), obwohl die Bibliothek das Feld `muskeln` genau für diese Auswertung hat und `bibliothek/README.md` als Richtwert 10 bis etwa 20 Sätze pro Muskelgruppe und Woche nennt (ACSM 2026). Skizze: Im Fortschritt „Sätze pro Muskel, letzte 7 Tage“ als Balken mit markiertem Bereich 10–20 und „zuletzt vor X Tagen“ als einfachem Erholungsstand; der Hauptmuskel zählt einen Satz, die übrigen einen halben (Praxis, vom `trainings-experte` prüfen lassen), Übungen ohne Bibliothekseintrag laufen unter ihrer Kategorie, alles berechnet wie `vWeekCompare()`.
 
 ### 27. Serie bei Urlaub oder Krankheit pausieren
 - Nutzen: mittel · Aufwand: M · Datenformat: ja (optionales Feld in `settings`, mit Migration)
@@ -45,17 +38,6 @@ Herkunft: MCI hat laut Roadmap einen „Zeitsparmodus für kurze, effektive Trai
 - Nutzen: niedrig · Aufwand: M · Datenformat: nein
 
 Herkunft: MCI zeigt nach dem Training eine Zusammenfassung mit „Share my progress“, Stickern und Foto; Hevy erzeugt nach jedem Training Bilder mit Rekorden, Volumen und Muskelverteilung (hell, dunkel oder transparent), Strong teilt nur einen Link zum Import. Skizze: In „Training geschafft“ und im Verlauf ein Knopf „Als Bild teilen“, der per Canvas ein Hochformat-PNG im App-Look zeichnet (Trainingsname, Datum, Dauer, bester Satz pro Übung, Kampfkraft, Rekorde, Stufe, Sternkugeln der Woche; keine Originalfiguren, -namen oder Logos) und es wie das Backup über `navigator.share({files})` anbietet, sonst als Download. Im Training kostet das keinen Tipp, danach nur, wenn man teilen will.
-
-### 30. Gewichtsschritt bei schweren Kurzhanteln (aus Fachprüfung: Arnold-Split)
-- Nutzen: niedrig · Aufwand: S · Datenformat: nein
-
-Herkunft: `trainings-experte` beim Anlegen des Arnold-Splits am 14.11.2026. `stepSize()` schlägt bei Kurzhantel-Isolationsübungen immer +1 kg vor. Beim Kurzhantel-Pullover (eine schwere Hantel, oft 20 bis 30 kg) ist der kleinste Schritt im Studio aber meist 2 kg, oft schon ab etwa 10 kg. Skizze: In `stepSize()` das aktuelle Gewicht mitgeben und bei Isolation unter 10 kg 1 kg, ab 10 kg 2 kg vorschlagen; das ist übliche Praxis und hängt vom Studio ab.
-
-## Angenommen
-
-Noch nichts.
-
-## Abgelehnt
 
 Vorerst nicht gebraucht (13.11.2026):
 
@@ -79,6 +61,34 @@ Vorbild ist Strong: Ein Tipp auf die Satznummer öffnet Aufwärmen, Drop und Ver
 ## Erledigt
 
 Umgesetzt am 14.11.2026:
+
+### 22. Übung im Training tauschen
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Herkunft: MCI, dort tauscht man im Workout-Player Übungen samt Gerät aus, ein UX-Showcase lobt genau diese Flexibilität, und „Gezielt Übungen ausschließen“ steht mit über 250 Stimmen auf der Wunschliste. Ist bei uns ein Gerät besetzt, kostet das ✕, Rückfrage, „+ Übung hinzufügen“, Suchen und Auswählen, und die neue Übung landet am Ende statt an ihrem Platz. Skizze: Ein Knopf „⇄“ (44 px) neben dem ✕ öffnet das Auswahl-Sheet im Modus „Tauschen“ mit „Passende Alternativen“ oben (eigene Übungen und Bibliothek mit gleichem Hauptmuskel `muskeln[0]`, sonst gleicher Kategorie); die Wahl ersetzt den Eintrag an derselben Stelle per `newEntry(id, planFor(id))`, sind schon Sätze abgehakt, kommt die neue Übung direkt darunter, und die Vorlage bleibt unverändert (Idee 7 ist abgelehnt). Danach 2 Tipps statt 5 und mehr.
+
+Umgesetzt: „⇄“ neben dem ✕, Auswahl-Sheet „Übung tauschen“ mit „Statt …“ oben (`swapAlternatives()`). Die Ersatzübung übernimmt den Programm-Richtwert der ersetzten Übung (`planEx`, nur im laufenden Training). Sind schon Sätze abgehakt, bleiben sie, und die neue Übung kommt mit den restlichen Sätzen darunter.
+
+### 25. Entlasten-Vorschlag bei Stillstand
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Herkunft: MCI wirbt mit Periodisierung und einem Plan, der sich nach Leistung und Erholung anpasst; `bibliothek/README.md` nennt bei 5×5 als Praxis, nach drei Fehlversuchen um 10 % abzusenken. Der Tracker kennt bisher nur den Weg nach oben („Steigern“). Skizze: Lag eine Kraftübung aus einem Programm in den letzten drei Einheiten mit demselben Gewicht jedes Mal in mindestens einem Satz unter der unteren Grenze von `plan.wdh`, erscheint an der Stelle von „Steigern“ der Knopf „Entlasten: 62,5 kg“ (−10 %, gerundet mit `stepSize()`), ein Tipp setzt die offenen Sätze; die Regel vorher vom `trainings-experte` prüfen lassen.
+
+Umgesetzt nach der Fachprüfung des `trainings-experte` mit geänderter Regel: Auslöser sind drei Einheiten mit gleichem Gewicht, jedes Mal ein Satz unter der unteren Grenze und keine Steigerung der Wdh-Summe. Abzug 5 % bei einem Bereich, 10 % bei 5×5, in ganzen Gewichtsschritten (`stepDown()`). Nach dem `gym-tester`: kein „Ziel heute“ neben „Entlasten“, und „Rückgängig“ nach Steigern und Entlasten.
+
+### 26. Sätze pro Muskel und Woche mit Zielbereich
+- Nutzen: mittel · Aufwand: M · Datenformat: nein
+
+Herkunft: MCI plant laut Roadmap eine „Muskelkarte mit Trainingshäufigkeit, Satz-Übersicht und Erholungszeit“ (269 Stimmen), Hevy zeigt Sätze pro Muskelgruppe und Woche und eine Körperkarte der letzten 7 Tage. Wir zählen bisher Sätze nach Kategorie (Idee 10), obwohl die Bibliothek das Feld `muskeln` genau für diese Auswertung hat und `bibliothek/README.md` als Richtwert 10 bis etwa 20 Sätze pro Muskelgruppe und Woche nennt (ACSM 2026). Skizze: Im Fortschritt „Sätze pro Muskel, letzte 7 Tage“ als Balken mit markiertem Bereich 10–20 und „zuletzt vor X Tagen“ als einfachem Erholungsstand; der Hauptmuskel zählt einen Satz, die übrigen einen halben (Praxis, vom `trainings-experte` prüfen lassen), Übungen ohne Bibliothekseintrag laufen unter ihrer Kategorie, alles berechnet wie `vWeekCompare()`.
+
+Umgesetzt im Fortschritt anstelle von „Sätze nach Kategorie“ (`vMuscleWeek()`). Nach der Fachprüfung ohne Zielbereich bei Schulter vorn, Gesäß und Bauch; Kategorien Schultern, Beine und Rumpf ohne Bibliothekseintrag laufen unter „Ohne Zuordnung“. Nach dem `gym-tester`: feste Skala bis 24 Sätze, deutlichere Bereichsgrenzen, Legende.
+
+### 30. Gewichtsschritt bei schweren Kurzhanteln (aus Fachprüfung: Arnold-Split)
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Herkunft: `trainings-experte` beim Anlegen des Arnold-Splits am 14.11.2026. `stepSize()` schlägt bei Kurzhantel-Isolationsübungen immer +1 kg vor. Beim Kurzhantel-Pullover (eine schwere Hantel, oft 20 bis 30 kg) ist der kleinste Schritt im Studio aber meist 2 kg, oft schon ab etwa 10 kg. Skizze: In `stepSize()` das aktuelle Gewicht mitgeben und bei Isolation unter 10 kg 1 kg, ab 10 kg 2 kg vorschlagen; das ist übliche Praxis und hängt vom Studio ab.
+
+Umgesetzt in `stepSize()`: Kurzhantel-Isolation ab 10 kg 2 kg; beim Entlasten gilt der Schritt im Bereich darunter (10 kg → 9 kg).
 
 ### 20. Gespeichertes Training im Verlauf korrigieren
 - Nutzen: hoch · Aufwand: M · Datenformat: nein

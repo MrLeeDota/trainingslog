@@ -233,6 +233,9 @@ button.li:active{transform:none;opacity:.6}
   background:var(--ink);color:var(--text);border:2px solid var(--ki);padding:9px 16px;border-radius:999px;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.45);width:max-content;max-width:90vw}
 #toast.show{transform:translate(-50%,0)}
 #toast[data-act]{cursor:pointer;border-color:var(--accent);box-shadow:0 0 18px rgba(255,138,31,.6),0 8px 24px rgba(0,0,0,.45)}
+/* Hinweis unten, oberhalb von Pausen-Timer und Tab-Leiste; ausgeblendet nur durchsichtig, damit er nichts verdeckt */
+#toast.low{top:auto;bottom:calc(184px + env(safe-area-inset-bottom));transform:translate(-50%,16px);opacity:0;pointer-events:none;transition:transform .25s,opacity .25s;padding:12px 18px}
+#toast.low.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
 .status{display:flex;gap:8px;align-items:flex-start;font-size:14px;color:var(--muted);margin-bottom:12px}
 .status i{flex:none;width:9px;height:9px;border-radius:50%;margin-top:5px;background:var(--muted)}
 .status.ok i{background:var(--scan)}.status.warn i{background:#ffb341}
@@ -630,7 +633,8 @@ function flush(){
 /* ---------- UI state ---------- */
 let ui = {tab:"training", sheet:null, open:null};
 let bootErr = null;   // gesetzt, wenn die Daten beim Start nicht geladen werden konnten
-const timer = {end:0, total:0, rang:false};
+const timer = {end:0, total:0, rang:false, by:null, prev:null};
+let undoSet = null;   // zuletzt mit „− Satz“ entfernter Satz, solange er sich zurückholen lässt
 
 /* ---------- Audio (beep at end of rest) ---------- */
 let actx = null, beeps = [];
@@ -655,8 +659,21 @@ function scheduleBeep(sec){
     });
   } catch(e){}
 }
-function startTimer(sec){ timer.end = Date.now() + sec * 1000; timer.total = sec; timer.rang = false; scheduleBeep(sec); tick(); }
-function stopTimer(){ timer.end = 0; cancelBeep(); tick(); }
+// by: der Satz, der die Pause ausgelöst hat. Der Stand davor wird gemerkt, damit undoTimer() ihn zurückholen kann.
+function startTimer(sec, by){
+  timer.prev = by ? {end:timer.end, total:timer.total, rang:timer.rang} : null; timer.by = by || null;
+  timer.end = Date.now() + sec * 1000; timer.total = sec; timer.rang = false; scheduleBeep(sec); tick();
+}
+// Wird der auslösende Satz gleich wieder gelöst, läuft die vorherige Pause weiter; gab es keine, stoppt der Timer.
+function undoTimer(by){
+  if (!timer.end || !by || timer.by !== by) return;
+  const p = timer.prev;
+  if (p && p.end > Date.now()){
+    timer.end = p.end; timer.total = p.total; timer.rang = p.rang; timer.by = timer.prev = null;
+    scheduleBeep((p.end - Date.now()) / 1000); tick();
+  } else stopTimer();
+}
+function stopTimer(){ timer.end = 0; timer.by = timer.prev = null; cancelBeep(); tick(); }
 function shiftTimer(delta){
   if (!timer.end) return;
   timer.end = Math.max(Date.now() + 1000, timer.end + delta * 1000);
@@ -676,9 +693,11 @@ function ask(text, ok = "OK", danger = false){
 function closeDlg(v){ $("#dlg").classList.remove("open"); $("#dlg").innerHTML = ""; const r = dlgResolve; dlgResolve = null; r && r(v); }
 let toastT = null;
 // act (optional): Aktion aus "actions", die ein Tipp auf den Hinweis auslöst – der Hinweis bleibt dann länger stehen.
-function toast(msg, act){
+// low: unten über Timer und Tab-Leiste statt oben, für Hinweise zu einer Aktion, die der Daumen gerade unten gemacht hat
+function toast(msg, act, low){
   const t = $("#toast"); t.textContent = msg;
   if (act) t.dataset.act = act; else delete t.dataset.act;
+  t.classList.toggle("low", !!low);
   t.classList.add("show"); clearTimeout(toastT);
   toastT = setTimeout(() => t.classList.remove("show"), act ? 10000 : 2200);
 }
@@ -1219,7 +1238,8 @@ const actions = {
       }
     }
     s.done = !s.done; save();
-    if (s.done && exType(en.exId) === "kraft") startTimer(S.settings.rest);
+    if (s.done && exType(en.exId) === "kraft") startTimer(S.settings.rest, s);
+    if (!s.done) undoTimer(s);   // versehentlicher Haken: die Pause davor kommt zurück
     render();
     if (s.done){
       // Sofort melden, wenn der Satz den bisherigen Bestwert der Übung übertrifft (und nicht schon ein früherer Satz heute).
@@ -1239,7 +1259,19 @@ const actions = {
     const en = S.active.entries[+el.dataset.i], last = en.sets[en.sets.length - 1];
     // Ein schon abgehakter Satz ist erledigte Arbeit: nur nach Rückfrage entfernen
     if (last && last.done && !(await ask(`Satz ${en.sets.length} ist schon abgehakt (${fmtSets(exType(en.exId), [last])}). Trotzdem entfernen?`, "Entfernen", true))) return;
-    if (S.active && S.active.entries[+el.dataset.i] === en && en.sets.length > 1){ en.sets.pop(); save(); render(); }
+    if (!(S.active && S.active.entries[+el.dataset.i] === en && en.sets.length > 1)) return;
+    const set = en.sets.pop(), nr = en.sets.length + 1;
+    if (timer.by === set) undoTimer(set);   // Pause des entfernten Satzes gleich mit zurücknehmen
+    const u = undoSet = {en, set, at:en.sets.length};
+    save(); render();
+    toast(`Satz ${nr} entfernt · Rückgängig`, "undo-set", true);
+    setTimeout(() => { if (undoSet === u) undoSet = null; }, 10500);   // nach dem Hinweis verfällt das Rückgängig
+  },
+  "undo-set": () => {
+    const u = undoSet; undoSet = null;
+    if (!u || !S.active || !S.active.entries.includes(u.en)){ toast("Nichts mehr rückgängig zu machen", null, true); return; }
+    u.en.sets.splice(Math.min(u.at, u.en.sets.length), 0, u.set);
+    save(); render(); toast(`Satz ${Math.min(u.at, u.en.sets.length - 1) + 1} wiederhergestellt`, null, true);
   },
   "del-entry": async el => { if (await ask("Übung aus diesem Training entfernen?", "Entfernen", true)){ S.active.entries.splice(+el.dataset.i, 1); save(); render(); } },
   pick: el => { retryLib(); ui.sheet = {kind:"picker", target:el.dataset.target, back:ui.sheet}; render(); },

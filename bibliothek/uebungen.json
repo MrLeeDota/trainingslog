@@ -80,6 +80,19 @@
       ]
     },
     {
+      "id": "pullover-kurzhantel",
+      "name": "Kurzhantel-Pullover",
+      "cat": "Brust",
+      "type": "kraft",
+      "geraet": ["Kurzhantel", "Bank"],
+      "muskeln": ["Brust", "Latissimus", "Trizeps"],
+      "grunduebung": false,
+      "hinweise": [
+        "Längs oder quer auf der Flachbank, eine Kurzhantel mit beiden Händen an der oberen Scheibe halten, die Ellbogen leicht gebeugt und fest.",
+        "Hantel im Bogen hinter den Kopf absenken, bis Brust und Latissimus gedehnt sind, und bis über die Brust zurückführen; die Rippen bleiben unten, kein Hohlkreuz."
+      ]
+    },
+    {
       "id": "schulterdruecken-langhantel",
       "name": "Schulterdrücken",
       "cat": "Schultern",
@@ -103,6 +116,19 @@
       "hinweise": [
         "Sitzend mit Rückenlehne, die Hanteln von Ohrhöhe nach oben drücken.",
         "Ellbogen etwas vor dem Körper halten, nicht ganz zur Seite."
+      ]
+    },
+    {
+      "id": "arnold-druecken",
+      "name": "Arnold-Drücken",
+      "cat": "Schultern",
+      "type": "kraft",
+      "geraet": ["Kurzhantel", "Bank"],
+      "muskeln": ["vordere Schulter", "seitliche Schulter", "Trizeps"],
+      "grunduebung": true,
+      "hinweise": [
+        "Sitzend mit Rückenlehne, die Hanteln vor der Brust auf Kinnhöhe, die Handflächen zeigen zum Körper.",
+        "Beim Hochdrücken die Ellbogen zur Seite öffnen und die Hände nach vorn drehen, oben fast strecken; abwärts in umgekehrter Reihenfolge zurückdrehen."
       ]
     },
     {
@@ -223,6 +249,19 @@
       ]
     },
     {
+      "id": "stirndruecken-langhantel",
+      "name": "Stirndrücken",
+      "cat": "Trizeps",
+      "type": "kraft",
+      "geraet": ["Langhantel", "Bank"],
+      "muskeln": ["Trizeps"],
+      "grunduebung": false,
+      "hinweise": [
+        "Rückenlage auf der Flachbank, die SZ-Stange über der Brust; die Oberarme leicht nach hinten geneigt und während der Bewegung ruhig.",
+        "Nur die Unterarme bewegen: Stange kontrolliert zur Stirn oder knapp hinter den Kopf absenken, die Ellbogen zeigen nach oben statt nach außen."
+      ]
+    },
+    {
       "id": "klimmzuege",
       "name": "Klimmzüge",
       "cat": "Rücken",
@@ -324,6 +363,19 @@
       "hinweise": [
         "Die Handflächen beim Hochführen nach oben drehen.",
         "Abwechselnd oder gleichzeitig; unten die Arme ganz strecken."
+      ]
+    },
+    {
+      "id": "bizepscurls-schraegbank",
+      "name": "Schrägbank-Curls",
+      "cat": "Bizeps",
+      "type": "kraft",
+      "geraet": ["Kurzhantel", "Bank"],
+      "muskeln": ["Bizeps", "Unterarme"],
+      "grunduebung": false,
+      "hinweise": [
+        "Rücken an der Schrägbank (etwa 45 bis 60 Grad), die Arme hängen senkrecht nach unten, die Handflächen zeigen nach vorn.",
+        "Ohne Schwung beugen, die Oberarme bleiben hinter dem Körper, unten ganz strecken; mit weniger Gewicht als bei normalen Curls beginnen."
       ]
     },
     {
@@ -493,6 +545,19 @@
       "hinweise": [
         "Volle Bewegung: unten die Fersen tief sinken lassen, oben ganz auf die Fußballen.",
         "Geht auch an der Beinpresse oder mit einer Kurzhantel auf einer Stufe."
+      ]
+    },
+    {
+      "id": "wadenheben-sitzend",
+      "name": "Wadenheben sitzend",
+      "cat": "Beine",
+      "type": "kraft",
+      "geraet": ["Maschine"],
+      "muskeln": ["Waden"],
+      "grunduebung": false,
+      "hinweise": [
+        "Polster knapp über den Knien, die Fußballen auf der Kante; unten die Fersen tief sinken lassen, oben ganz hoch.",
+        "Mit gebeugtem Knie arbeitet vor allem der tiefe Wadenmuskel (Schollenmuskel), das ergänzt das Wadenheben im Stehen; ohne Maschine mit einer Kurzhantel auf den Knien."
       ]
     },
     {

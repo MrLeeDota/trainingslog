@@ -1,6 +1,6 @@
 # Übungsbibliothek und Vorlagen
 
-Dieser Ordner enthält Trainingsinhalte für den Trainingslog: eine Übungsbibliothek und Programm-Vorlagen. Die App nutzt die Dateien noch nicht. Das Format ist so gewählt, dass sie sich später leicht übernehmen lassen: Name, Kategorie und Erfassungsart heißen wie in der App (`name`, `cat`, `type`).
+Dieser Ordner enthält Trainingsinhalte für den Trainingslog: eine Übungsbibliothek und Programm-Vorlagen. Die App lädt beide Dateien im Hintergrund, auch offline: Übungen lassen sich in die eigene Liste übernehmen, Programm-Einheiten als Vorlage. Name, Kategorie und Erfassungsart heißen wie in der App (`name`, `cat`, `type`).
 
 | Datei | Inhalt |
 |---|---|
@@ -220,15 +220,23 @@ Eine **Vorlage** ist ein Programm (z. B. Push/Pull/Legs). Sie besteht aus **Einh
 
 ### Zuordnung zur App
 
-Eine App-Vorlage ist `{id, name, ex:[Übungs-IDs]}`. Aus jeder **Einheit** wird eine App-Vorlage: `name` der Einheit, `ex` = die Übungen der Einheit in Reihenfolge, über den Namen den App-Übungen zugeordnet. Sätze, Wiederholungen, Dauer und Pausen nutzt die App bisher nicht: Sie füllt die Felder mit den Werten vom letzten Mal, hat eine einzige Pausenzeit für alle Übungen und startet den Pausen-Timer nur nach Kraft-Sätzen. `dauerSek` müsste beim Übernehmen in Minuten umgerechnet werden.
+Eine App-Vorlage ist `{id, name, ex:[Übungs-IDs], lib}`. Aus jeder **Einheit** wird beim Übernehmen eine App-Vorlage: `name` der Einheit (gibt es den Namen schon, hängt die App den Programmnamen an), `ex` = die Übungen der Einheit in Reihenfolge, `lib` = ID der Einheit. Fehlende Übungen legt die App aus der Bibliothek an; vorhandene erkennt sie am Feld `lib` der Übung oder am Namen.
+
+Über `lib` liest die App im Training den Richtwert der Einheit und zeigt ihn unter der Übung („Programm: 4 × 6-8 Wdh · Pause 3:00 min“):
+- `saetze` gibt beim Start die Zahl der Sätze vor (ergänzt, nie gekürzt).
+- Das obere Ende von `wdh` ist die Schwelle für den Steigerungsvorschlag und die Obergrenze für das Wiederholungsziel („Ziel heute“); ein fester Wert wie `"5"` gilt als lineare Progression.
+- `pauseSek` steht nur in der Anzeige; der Pausen-Timer nutzt die allgemeine Pausendauer der App und startet nur nach Kraft-Sätzen.
+- Nicht angezeigt werden bisher `dauerSek`, `streckeKm`, `hinweis` an einer Übung der Einheit sowie `wochenplan`, `aufwaermen`, `intensitaet` und `progression` des Programms.
 
 ## Fachliche Grundlagen
 
 Die Vorlagen folgen diesen Regeln. Wo es keine klare Studienlage gibt, steht „Praxis“.
 
-**Häufigkeit.** Jede große Muskelgruppe mindestens zweimal pro Woche (WHO 2020; ACSM 2026). Bei gleichem Wochenvolumen ist die Verteilung auf die Tage für den Muskelaufbau nahezu egal (Schoenfeld 2019); entscheidend ist, dass genug Sätze zusammenkommen.
+**Häufigkeit.** Jede große Muskelgruppe mindestens zweimal pro Woche (WHO 2020; ACSM 2026). Bei gleichem Wochenvolumen ist die Verteilung auf die Tage für den Muskelaufbau nahezu egal (Schoenfeld 2019); entscheidend ist, dass genug Sätze zusammenkommen. Eine Meta-Regression über 67 Studien fand für den Muskelaufbau einen vernachlässigbaren Einfluss der Häufigkeit, für die Kraft dagegen mehr Zuwachs bei häufigerem Training, mit abnehmendem Zusatznutzen (Pelland 2026). Der Arnold-Split an 5 Tagen trainiert die Beine bewusst nur einmal pro Woche; was das bedeutet, steht im Hinweis seiner Beineinheit.
 
 **Sätze und Volumen.** Mindestens 2 Sätze pro Übung, für Kraft 2 bis 3 (ACSM 2026). Für Muskelaufbau mindestens 10 Sätze pro Muskelgruppe und Woche; über etwa 18 bis 20 Sätze bringt mehr kaum noch zusätzlichen Nutzen (ACSM 2026). Mehr Wochensätze gehen mit mehr Muskelzuwachs einher (Schoenfeld 2017). Die Vorlagen nutzen 2 bis 4 Sätze pro Übung, bei 5×5 fünf.
+
+**Sätze zählen.** Ein direkter Satz ist einer, bei dem der Muskel in `muskeln` an erster Stelle steht. Mitarbeitende Muskeln zählen als halber Satz, z. B. der Trizeps beim Bankdrücken; diese Zählweise passte in Pelland 2026 am besten zu den Daten. Wo eine Vorlage „halb gezählt“ schreibt, sind direkte und halbe Sätze zusammengerechnet.
 
 **Wiederholungen und Last.** Für Kraft wirken schwere Lasten ab etwa 80 % des Maximums am besten (ACSM 2026). Nach der Epley-Formel, die auch die App nutzt, entsprechen 80 % etwa 7 bis 8 Wiederholungen bis zum Versagen; die Kraft-Schwerpunkte liegen deshalb bei 3 bis 8 Wdh. Für Muskelaufbau spielt die Last zwischen 30 und 100 % des Maximums keine einheitliche Rolle (ACSM 2026). Die Vorlagen nutzen 6 bis 15 Wdh, weil sich das gut steuern lässt und Sätze mit sehr vielen Wiederholungen lange dauern (Praxis; ACSM 2009 nannte 6 bis 12 als Schwerpunkt und 8 bis 12 für Einsteiger).
 
@@ -254,6 +262,8 @@ Die App-Voreinstellung von 90 s passt damit gut zu Isolationsübungen; für schw
 
 **Aufwärmen.** 5 min locker, dann 2 bis 3 Aufwärmsätze mit steigendem Gewicht vor der ersten Grundübung. Das ist übliche Praxis; die Prozentwerte in den Vorlagen sind Richtwerte, keine Studienergebnisse.
 
+**Supersätze.** Zwei Übungen im Wechsel, Pause erst nach dem Paar. In einer Meta-Analyse über 19 Studien verkürzten Supersätze die Trainingszeit deutlich, bei vergleichbarer Wiederholungszahl, Muskelaktivierung und Erholung und ohne Nachteil bei den langfristigen Zuwächsen an Kraft und Muskelmasse; die Anstrengung war höher (Zhang 2025). Langzeitstudien speziell zu Paaren aus Gegenspielern wie Brust und Rücken gibt es kaum. Die App bildet Supersätze nicht ab, die Vorlagen nennen sie deshalb nur im Hinweis einer Einheit; die Pausen nach einem Paar sind Praxis.
+
 **Laufen.**
 - WHO 2020: pro Woche 150 bis 300 min moderate oder 75 bis 150 min intensive Ausdauerbelastung, dazu an mindestens 2 Tagen Krafttraining für alle großen Muskelgruppen.
 - Der Einsteigerplan folgt im Aufbau dem NHS-Plan Couch to 5K (9 Wochen, 3 Läufe pro Woche, Lauf-Geh-Wechsel, Wochen dürfen wiederholt werden). Die reinen Laufminuten steigen anfangs prozentual stark, weil die Ausgangsmenge klein ist; die Gehpausen halten die Belastung niedrig.
@@ -277,6 +287,8 @@ Gelesen wurde jeweils, was in Klammern steht.
 - Singer A, Wolf M, …, Schoenfeld BJ: Give it a rest: a systematic review with Bayesian meta-analysis on the effect of inter-set rest interval duration on muscle hypertrophy. Frontiers in Sports and Active Living 6, 2024. (Abstract)
 - Schoenfeld BJ, Ogborn D, Krieger JW: Dose-response relationship between weekly resistance training volume and increases in muscle mass: A systematic review and meta-analysis. Journal of Sports Sciences 35(11), 2017, S. 1073–1082. (Abstract)
 - Schoenfeld BJ, Grgic J, Krieger J: How many times per week should a muscle be trained to maximize muscle hypertrophy? A systematic review and meta-analysis of studies examining the effects of resistance training frequency. Journal of Sports Sciences 37(11), 2019, S. 1286–1295. (Abstract)
+- Pelland JC, Remmert JF, Robinson ZP, Hinson SR, Zourdos MC: The Resistance Training Dose Response: Meta-Regressions Exploring the Effects of Weekly Volume and Frequency on Muscle Hypertrophy and Strength Gains. Sports Medicine 56(2), 2026, S. 481–505. (Abstract in der Datenbank SPONET, Preprint-Seite auf SportRxiv)
+- Zhang X, Weakley J, Li H, Li Z, García-Ramos A: Superset Versus Traditional Resistance Training Prescriptions: A Systematic Review and Meta-analysis Exploring Acute and Chronic Effects on Mechanical, Metabolic, and Perceptual Variables. Sports Medicine 55(4), 2025, S. 953–975. (Volltext auf PubMed Central, in Teilen)
 - World Health Organization (Bull FC et al.): World Health Organization 2020 guidelines on physical activity and sedentary behaviour. British Journal of Sports Medicine 54(24), 2020, S. 1451–1462. (Volltext)
 - NHS (National Health Service, Großbritannien): Couch to 5K running plan, nhs.uk. (Webseite, abgerufen November 2026)
 - Buist I, Bredeweg SW, van Mechelen W, Lemmink KA, Pepping GJ, Diercks RL: No effect of a graded training program on the number of running-related injuries in novice runners: a randomized controlled trial. American Journal of Sports Medicine 36(1), 2008, S. 33–39. (Abstract)
@@ -289,7 +301,7 @@ Gelesen wurde jeweils, was in Klammern steht.
 - van Dyk N, Behan FP, Whiteley R: Including the Nordic hamstring exercise in injury prevention programmes halves the rate of hamstring injuries: a systematic review and meta-analysis of 8459 athletes. British Journal of Sports Medicine 53(21), 2019, S. 1362–1370. (Abstract)
 - StrongLifts: Stronglifts 5×5 Workout Program, Quick Start Guide, stronglifts.com. (Webseite; Praxisquelle, keine Studie)
 
-Allgemeines Fachwissen ohne eigene Quelle: Auswahl und Namen der Übungen, Technik-Hinweise, Zuordnung der Muskeln, Aufteilung der Splits, Aufwärmsätze, Tempolauf, langer Lauf und Steigerungsläufe, die Padel-Technik.
+Allgemeines Fachwissen ohne eigene Quelle: Auswahl und Namen der Übungen, Technik-Hinweise, Zuordnung der Muskeln, Aufteilung der Splits einschließlich des Arnold-Splits und seiner Paarung von Brust und Rücken, Aufwärmsätze, Tempolauf, langer Lauf und Steigerungsläufe, die Padel-Technik.
 
 ## Gesundheit
 

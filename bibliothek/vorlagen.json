@@ -52,6 +52,85 @@
       ]
     },
     {
+      "id": "arnold-split-5-tage",
+      "name": "Arnold-Split an 5 Tagen",
+      "beschreibung": "Split nach dem Vorbild von Arnold Schwarzenegger mit den Einheiten Brust & Rücken, Schultern & Arme und Beine. Anders als im klassischen Arnold-Split mit 6 Tagen kommen die Beine nur einmal pro Woche dran, Brust & Rücken und Schultern & Arme je zweimal: Variante A schwerer mit Langhantel und Klimmzügen, Variante B mit anderen Übungen, mehr Kurzhantel und Kabel und mehr Wiederholungen. Ein verbreitetes Praxisprogramm; als Ganzes ist es nicht in Studien geprüft.",
+      "erfahrung": ["fortgeschritten", "erfahren"],
+      "ziel": ["muskelaufbau", "kraft"],
+      "tageProWoche": [5],
+      "wochenplan": "Mo Brust & Rücken A, Di Schultern & Arme A, Mi Beine, Do Ruhetag, Fr Brust & Rücken B, Sa Schultern & Arme B, So Ruhetag. Brust & Rücken mit den meisten schweren Grundübungen folgt jeweils auf einen Ruhetag; Schultern & Arme am Tag danach besteht überwiegend aus Isolationsübungen, die die Vorarbeit beim Drücken und Rudern besser vertragen. Der Beintag trennt die beiden Oberkörper-Blöcke, so liegen zwischen zwei Einheiten für dieselben Muskeln 2 bis 3 Tage. Fällt ein Tag aus, mit der nächsten Einheit weitermachen (in der App „Dran“); Padel-Matches und harte Läufe nicht auf den Tag nach dem Beintag legen. Direkte Sätze pro Woche: Brust 16, Rücken 15, Schultern vorn 7, seitlich 8, hinten 6, Bizeps 8, Trizeps 6, Quadrizeps 10, Beinbeuger 7, Waden 7. Schultern und Arme arbeiten bei Drücken und Rudern mit; halb gezählt kommen Schultern vorn auf 12, seitlich 11,5, hinten 9, Bizeps 15,5 und Trizeps 16 Sätze, das Gesäß, das nur mitarbeitet, auf 5.",
+      "aufwaermen": "5 min locker auf Rad, Rudergerät oder mit dem Springseil. Vor der ersten Übung 2 bis 3 Aufwärmsätze mit steigendem Gewicht und wenigen Wdh, etwa mit 50, 70 und 85 % des Arbeitsgewichts; am Beintag auch vor dem Rumänischen Kreuzheben 1 bis 2 leichtere Sätze.",
+      "intensitaet": "Arbeitssätze mit etwa 2 bis 3 Wdh in Reserve beenden; Muskelversagen ist nicht nötig.",
+      "progression": "Doppelte Progression: das Gewicht halten, bis alle Sätze die obere Wdh-Grenze erreichen, dann um den kleinsten Schritt erhöhen (2,5 kg an der Langhantel, 1 bis 2 kg an Kurzhantel und Kabel) und wieder an der unteren Grenze beginnen. Fast jede Übung kommt nur einmal pro Woche vor; Steigerungen brauchen deshalb mehr Wochen als in Plänen, die eine Übung zweimal pro Woche trainieren.",
+      "einheiten": [
+        {
+          "id": "arnold-split-5-tage-brust-ruecken-a",
+          "name": "Brust & Rücken A",
+          "hinweis": "Im Arnold-Stil, wer mag: Brust und Rücken paarweise im Wechsel, also je ein Satz Bankdrücken und Klimmzüge, danach Kurzhantel-Schrägbankdrücken und Langhantelrudern. Nach dem ersten Paar etwa 2 min Pause, nach dem zweiten 90 s. Das spart Zeit, ist aber anstrengender. Die App kennt keine Supersätze: einfach abwechselnd bei beiden Übungen abhaken.",
+          "uebungen": [
+            {"uebung": "bankdruecken-langhantel", "saetze": 4, "wdh": "6-8", "pauseSek": 180},
+            {"uebung": "klimmzuege", "saetze": 4, "wdh": "6-10", "pauseSek": 150, "hinweis": "Schaffst du alle Sätze mit 10 Wdh, mit Zusatzgewicht weitermachen und es als kg eintragen."},
+            {"uebung": "schraegbankdruecken-kurzhantel", "saetze": 3, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "rudern-langhantel", "saetze": 3, "wdh": "6-10", "pauseSek": 150},
+            {"uebung": "pullover-kurzhantel", "saetze": 3, "wdh": "10-12", "pauseSek": 90}
+          ]
+        },
+        {
+          "id": "arnold-split-5-tage-schultern-arme-a",
+          "name": "Schultern & Arme A",
+          "hinweis": "Bizepscurls und Stirndrücken lassen sich wie bei Arnold paarweise im Wechsel trainieren, mit etwa 60 s Pause nach jedem Paar.",
+          "uebungen": [
+            {"uebung": "schulterdruecken-langhantel", "saetze": 4, "wdh": "6-8", "pauseSek": 180},
+            {"uebung": "seitheben-kurzhantel", "saetze": 4, "wdh": "12-15", "pauseSek": 90},
+            {"uebung": "bizepscurls-langhantel", "saetze": 3, "wdh": "8-12", "pauseSek": 90},
+            {"uebung": "stirndruecken-langhantel", "saetze": 3, "wdh": "8-12", "pauseSek": 90},
+            {"uebung": "face-pulls", "saetze": 3, "wdh": "12-15", "pauseSek": 60},
+            {"uebung": "haengendes-beinheben", "saetze": 3, "wdh": "8-15", "pauseSek": 60}
+          ]
+        },
+        {
+          "id": "arnold-split-5-tage-beine",
+          "name": "Beine",
+          "hinweis": "Die einzige Beineinheit der Woche und mit gut 75 min die längste: Quadrizeps 10 Sätze, Beinbeuger und Waden je 7, das Gesäß arbeitet in Kniebeugen, Kreuzheben und Beinpresse mit. Die Empfehlung, jede große Muskelgruppe mindestens zweimal pro Woche zu trainieren, erfüllen die Beine damit nicht. Für Muskelaufbau ist das bei gleichem Wochenvolumen kaum ein Nachteil; Beinbeuger und Waden bleiben aber unter den empfohlenen 10 Sätzen, und die Kraft in Kniebeuge und Kreuzheben wächst mit häufigerem Training meist schneller. Mehr Sätze passen kaum in eine Einheit, ohne dass die letzten Übungen unter müden Beinen leiden.",
+          "uebungen": [
+            {"uebung": "kniebeugen-langhantel", "saetze": 4, "wdh": "6-8", "pauseSek": 180},
+            {"uebung": "rumaenisches-kreuzheben-langhantel", "saetze": 3, "wdh": "8-10", "pauseSek": 120},
+            {"uebung": "beinpresse", "saetze": 3, "wdh": "10-12", "pauseSek": 120},
+            {"uebung": "beinbeuger", "saetze": 4, "wdh": "10-15", "pauseSek": 90},
+            {"uebung": "beinstrecker", "saetze": 3, "wdh": "12-15", "pauseSek": 90},
+            {"uebung": "wadenheben-stehend", "saetze": 4, "wdh": "10-15", "pauseSek": 90},
+            {"uebung": "wadenheben-sitzend", "saetze": 3, "wdh": "12-15", "pauseSek": 90}
+          ]
+        },
+        {
+          "id": "arnold-split-5-tage-brust-ruecken-b",
+          "name": "Brust & Rücken B",
+          "hinweis": "Paarweise im Wechsel, wer mag: Schrägbankdrücken mit Latzug, Butterfly mit Kabelrudern; nach jedem Paar etwa 90 s Pause. Die App kennt keine Supersätze: einfach abwechselnd bei beiden Übungen abhaken.",
+          "uebungen": [
+            {"uebung": "schraegbankdruecken-langhantel", "saetze": 3, "wdh": "6-10", "pauseSek": 150},
+            {"uebung": "latzug", "saetze": 3, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "butterfly", "saetze": 3, "wdh": "10-15", "pauseSek": 90},
+            {"uebung": "rudern-kabel", "saetze": 3, "wdh": "10-12", "pauseSek": 120},
+            {"uebung": "rudern-kurzhantel-einarmig", "saetze": 2, "wdh": "8-12", "jeSeite": true, "pauseSek": 90}
+          ]
+        },
+        {
+          "id": "arnold-split-5-tage-schultern-arme-b",
+          "name": "Schultern & Arme B",
+          "hinweis": "Schrägbank-Curls und Überkopf-Trizepsstrecken arbeiten mit gedehntem Muskel und ergänzen so die Armübungen vom A-Tag; wer mag, trainiert sie paarweise im Wechsel mit etwa 60 s Pause nach jedem Paar.",
+          "uebungen": [
+            {"uebung": "arnold-druecken", "saetze": 3, "wdh": "8-12", "pauseSek": 120},
+            {"uebung": "seitheben-kurzhantel", "saetze": 4, "wdh": "12-15", "pauseSek": 90},
+            {"uebung": "reverse-butterfly", "saetze": 3, "wdh": "12-15", "pauseSek": 90},
+            {"uebung": "bizepscurls-schraegbank", "saetze": 3, "wdh": "10-12", "pauseSek": 90},
+            {"uebung": "trizepsstrecken-ueberkopf-kabel", "saetze": 3, "wdh": "10-15", "pauseSek": 90},
+            {"uebung": "hammercurls-kurzhantel", "saetze": 2, "wdh": "10-15", "pauseSek": 90},
+            {"uebung": "pallof-press-kabel", "saetze": 3, "wdh": "10-12", "jeSeite": true, "pauseSek": 60}
+          ]
+        }
+      ]
+    },
+    {
       "id": "ober-unterkoerper",
       "name": "Ober-/Unterkörper",
       "beschreibung": "Vier Einheiten pro Woche, jede Muskelgruppe zweimal. Die A-Tage legen den Schwerpunkt auf schwere Grundübungen, die B-Tage auf mehr Wiederholungen.",

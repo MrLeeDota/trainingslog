@@ -13,10 +13,7 @@ Herkunft ist der eigene Test: Bei Vorlagen aus der Bibliothek zeigt „Programm:
 
 ## Angenommen
 
-### 19. Gewichtsschritt beim Steigern nach Übung staffeln (aus Fachprüfung: Steigerungsvorschlag)
-- Nutzen: mittel · Aufwand: S · Datenformat: nein
-
-Heute schlägt „Steigern“ immer +2,5 kg vor. Bei Isolationsübungen mit Kurzhanteln wie Seitheben oder Curls sind das 15–30 % mehr, zu viel; bei Kniebeugen und Kreuzheben im 5×5 steigern Anfänger üblicherweise 5 kg (Praxis nach Starting Strength und StrongLifts, ACSM nennt 2–10 % Laststeigerung; laut Agent aus Fachwissen, nicht nachgelesen). Skizze: Den Schritt aus dem Gerät der Bibliothek ableiten (`libOf()`): Kurzhantel-Isolation 1 kg, Kurzhantel-Grundübung 2 kg, Langhantel, Kabel und Maschine 2,5 kg, Langhantel-Beinübung im 5×5 5 kg; ohne Bibliothekseintrag weiter 2,5 kg.
+Noch nichts.
 
 ## Abgelehnt
 
@@ -42,6 +39,11 @@ Vorbild ist Strong: Ein Tipp auf die Satznummer öffnet Aufwärmen, Drop und Ver
 ## Erledigt
 
 Umgesetzt am 14.11.2026:
+
+### 19. Gewichtsschritt beim Steigern nach Übung staffeln (aus Fachprüfung: Steigerungsvorschlag)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Heute schlägt „Steigern“ immer +2,5 kg vor. Bei Isolationsübungen mit Kurzhanteln wie Seitheben oder Curls sind das 15–30 % mehr, zu viel; bei Kniebeugen und Kreuzheben im 5×5 steigern Anfänger üblicherweise 5 kg (Praxis nach Starting Strength und StrongLifts, ACSM nennt 2–10 % Laststeigerung; laut Agent aus Fachwissen, nicht nachgelesen). Skizze: Den Schritt aus dem Gerät der Bibliothek ableiten (`libOf()`): Kurzhantel-Isolation 1 kg, Kurzhantel-Grundübung 2 kg, Langhantel, Kabel und Maschine 2,5 kg, Langhantel-Beinübung im 5×5 5 kg; ohne Bibliothekseintrag weiter 2,5 kg.
 
 ### 17. Steigerungsvorschlag nach Programm-Wiederholungen (aus Funktionsvergleich: „Letztes Mal“)
 - Nutzen: hoch · Aufwand: S · Datenformat: nein

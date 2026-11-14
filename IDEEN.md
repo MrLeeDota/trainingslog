@@ -11,16 +11,12 @@ Aus dem Funktionsvergleich „Letztes Mal“ vom 14.11.2026 (Agent `funktions-te
 
 Herkunft ist der eigene Test: Bei Vorlagen aus der Bibliothek zeigt „Programm: 2 × 8–12“ eine andere Satzzahl, als die Felder vom letzten Mal vorgeben (nach einem Satz bleibt es bei einem). Skizze: `newEntry(exId, plan)` hängt Sätze mit den Werten des letzten Satzes an, bis `plan.saetze` erreicht ist (höchstens 10); es wird nie gekürzt. Wer weniger trainiert, entfernt einen Satz wie bisher (Tipp mehr), wer dem Programm folgt, spart den Tipp auf „+ Satz“.
 
-Aus der Fachprüfung des Steigerungsvorschlags vom 14.11.2026 (Agent `trainings-experte`):
+## Angenommen
 
 ### 19. Gewichtsschritt beim Steigern nach Übung staffeln (aus Fachprüfung: Steigerungsvorschlag)
 - Nutzen: mittel · Aufwand: S · Datenformat: nein
 
 Heute schlägt „Steigern“ immer +2,5 kg vor. Bei Isolationsübungen mit Kurzhanteln wie Seitheben oder Curls sind das 15–30 % mehr, zu viel; bei Kniebeugen und Kreuzheben im 5×5 steigern Anfänger üblicherweise 5 kg (Praxis nach Starting Strength und StrongLifts, ACSM nennt 2–10 % Laststeigerung; laut Agent aus Fachwissen, nicht nachgelesen). Skizze: Den Schritt aus dem Gerät der Bibliothek ableiten (`libOf()`): Kurzhantel-Isolation 1 kg, Kurzhantel-Grundübung 2 kg, Langhantel, Kabel und Maschine 2,5 kg, Langhantel-Beinübung im 5×5 5 kg; ohne Bibliothekseintrag weiter 2,5 kg.
-
-## Angenommen
-
-Noch nichts.
 
 ## Abgelehnt
 

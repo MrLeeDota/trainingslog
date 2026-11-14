@@ -405,7 +405,17 @@ function stepUp(exId, plan){
   if (runs.length < need) return null;
   const kg = num(runs[0][0].a);
   if (!(kg > 0)) return null;
-  return runs.every(sets => sets.length >= minSets && sets.every(s => num(s.a) === kg && num(s.b) >= reps)) ? kg + STEP_KG : null;
+  return runs.every(sets => sets.length >= minSets && sets.every(s => num(s.a) === kg && num(s.b) >= reps)) ? kg + stepSize(exId, need === 1) : null;
+}
+/* Gewichtsschritt passend zur Übung, abgeleitet aus Gerät und Grundübung in der Bibliothek (Empfehlung des trainings-experte):
+   Kurzhantel-Isolation 1 kg, Kurzhantel-Grundübung 2 kg, Langhantel-Grundübung für die Beine bei linearer
+   Progression (5×5) 5 kg, sonst STEP_KG (2,5 kg). Übungen ohne Bibliothekseintrag bleiben bei STEP_KG. */
+function stepSize(exId, linear){
+  const l = libOf(exById(exId)), g = (l && l.geraet) || [];
+  if (!l) return STEP_KG;
+  if (g.includes("Kurzhantel")) return l.grunduebung ? 2 : 1;
+  if (linear && l.grunduebung && l.cat === "Beine" && g.includes("Langhantel")) return 5;
+  return STEP_KG;
 }
 
 /* Fortschrittskurve einer Übung: ein Wert pro Einheit.
@@ -472,8 +482,9 @@ function loadLib(){
       lib.byId = new Map(lib.ex.map(l => [l.id, l])); lib.state = "ready";
     })
     .catch(e => { console.warn("Übungsbibliothek nicht geladen:", e); lib.state = "error"; })   // fängt auch Fehler beim Auswerten ab
-    .finally(() => {   // offene Ansicht nachziehen, aber nicht, während jemand tippt
-      if (ui.sheet && ["picker","programs","exercise"].includes(ui.sheet.kind) && !document.activeElement?.matches("input,textarea,select")) render();
+    .finally(() => {   // offene Ansicht nachziehen (Bibliothek, Richtwerte, Gewichtsschritt), aber nicht, während jemand tippt
+      const uses = (ui.sheet && ["picker","programs","exercise"].includes(ui.sheet.kind)) || (S && S.active && ui.tab === "training");
+      if (uses && !document.activeElement?.matches("input,textarea,select")) render();
     });
 }
 function retryLib(){ if (lib.state === "error") lib.state = "idle"; }

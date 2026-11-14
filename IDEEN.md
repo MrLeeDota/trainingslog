@@ -4,22 +4,15 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 ## Vorschläge
 
-Ideenrunde Pausen-Timer (14.11.2026, `produkt-scout`). In `NOTIZEN.md` standen keine Notizen. Recherche und Quellen stehen in `APPS.md` unter „Pausen-Timer“.
+Noch keine offenen Vorschläge.
 
-### 36. Pause aus dem Programm für den Timer
-- Nutzen: hoch · Aufwand: S · Datenformat: nein
+## Angenommen
 
-Herkunft ist der eigene Befund im Funktionsvergleich „Letztes Mal“: Bankdrücken zeigt „Pause 3:00 min“, der Timer läuft aber mit der allgemeinen Pause von 1:30. Vorbilder sind Fitbod, das die Pause pro Übung nach ihrer Schwierigkeit erzeugt (nur aus Suchergebnissen), und MacroFactor, das z. B. Grundübungen im Unterkörper 3:00 und Isolation im Oberkörper 1:30 gibt; Hevy und Strong stellen sie pro Übung von Hand ein. Im Arnold-Split weicht die Programm-Pause bei 15 der 30 Übungsplätze von 1:30 ab (60 bis 180 s). Für 3:00 braucht man heute pro Pause 6 Tipps auf „+15“, bei Bankdrücken mit 4 Sätzen bis zu 24. Skizze: In der Aktion `check` startet `startTimer((entryPlan(en) || {}).pauseSek || S.settings.rest, s)`. Getauschte Übungen bekommen über `planEx` die Pause ihres Programmplatzes, Übungen ohne Programm behalten die allgemeine Pause. −15/+15 ändern nur die laufende Pause, eine eigene Dauer pro Übung (Idee 8) gibt es also weiterhin nicht. Der Timer zeigt „Pause · Programm“, und unter der Einstellung „Pausen-Timer“ steht „gilt, wenn das Programm keine Pause vorgibt“. Danach `bibliothek/README.md` („Zuordnung zur App“) und `CLAUDE.md` anpassen.
+Noch nichts.
 
-### 37. Nächsten Satz nicht unter dem Timer verstecken
-- Nutzen: mittel · Aufwand: S · Datenformat: nein
+## Abgelehnt
 
-Vorbild ist Hevy: Es springt mit „Smart Superset Scrolling“ nach jedem Satz zur nächsten Übung der Gruppe, und die Live Activity zeigt den nächsten Satz samt Vorgabe. Strong springt mit „Weiter“ zum nächsten Satz. Bei uns belegen Timer und Tab-Leiste in der Pause die unteren 180 px; im Funktionsvergleich „Satz-Erfassung“ lag der dritte Satz der zweiten Übung darunter, man musste wischen. Skizze: Nach dem Abhaken sucht die App den nächsten offenen Satz: in derselben Übung, sonst den ersten offenen Satz der folgenden Übungen, mit Idee 39 den des Partners. Sie markiert ihn mit einem orangen Rand links und scrollt sanft, wenn er hinter dem Timer liegt. Beginnt mit ihm eine neue Übung, rückt deren Karte nach oben, dann sind „Letztes Mal“, „Steigern“ und „Ziel heute“ schon in der Pause lesbar. Die App scrollt nicht, wenn der Satz schon zu sehen ist oder ein Feld den Fokus hat, und bei `prefers-reduced-motion` springt sie ohne Animation.
-
-### 38. Pause übersteht App-Wechsel und Neuladen
-- Nutzen: mittel · Aufwand: S · Datenformat: nein (Feld nur im laufenden Training, nicht im gespeicherten Training und nicht im Backup)
-
-Hevy zeigt die Pause per Live Activity auch außerhalb der App, MCI und StrongLifts melden das Ende per Mitteilung. Das kann eine PWA nicht, nach der Rückkehr aber kann sie die richtige Zeit zeigen. Heute fehlt der Timer nach einem Neuladen (Funktionsvergleich „Satz-Erfassung“), und iOS beendet Web-Apps im Hintergrund oft, etwa wenn man in der Pause die Musik-App öffnet (allgemeines Wissen, nicht nachgelesen). Laut WebKit stoppt Audio im Hintergrund; der geplante Piepton könnte nach der Rückkehr deshalb verspätet kommen (Vermutung, auf dem iPhone prüfen). Skizze: `startTimer`, `shiftTimer` und `stopTimer` schreiben `{end, total}` als `S.active.rest` mit. Wie `planEx` gelangt das Feld nicht ins gespeicherte Training, und ins Backup ohnehin nicht, weil `backupJson()` `active:null` setzt. Beim Start stellt die App den Timer daraus wieder her. Beim Verlassen der App (`visibilitychange`) ruft sie `cancelBeep()` auf. Bei der Rückkehr plant sie den Ton für die Restzeit neu oder zeigt gleich „Pause vorbei“ (mit Idee 40 samt Überzeit). Nach einem Neuladen kommt der Ton erst nach dem ersten Tipp, weil iOS Audio nur nach einer Berührung freigibt. Den `daten-waechter` kurz prüfen lassen.
+Vorerst nicht gebraucht (14.11.2026, aus der Runde Pausen-Timer):
 
 ### 39. Supersätze erkennen: Pause zählt für die Übung, die als Nächstes dran ist
 - Nutzen: mittel · Aufwand: M · Datenformat: nein
@@ -35,12 +28,6 @@ Herkunft ist ein eigener Befund aus der Recherche: Unser Piepton läuft über We
 - Nutzen: niedrig · Aufwand: S · Datenformat: nein
 
 Vorbild ist MyFitCoach: Dort ertönt 10 s vor dem Ende ein „Get-Ready Alarm“, damit man sich wieder in Position bringt. Bei Strong und Hevy ist so etwas nicht belegt. Vor Bankdrücken oder Kniebeugen mit 3 min Pause braucht man ein paar Sekunden, um sich hinzulegen oder unter die Stange zu gehen. Skizze: Ab 10 s Restzeit werden Leiste und Zahl orange. Bei Pausen ab 60 s plant `scheduleBeep` zusätzlich einen einzelnen kurzen, tieferen Ton bei Ende minus 10 s, und −15/+15 sowie Rückgängig verschieben ihn mit. Stört der zweite Ton, bleibt nur der Farbwechsel (der Stummschalter gilt wie bei Idee 40).
-
-## Angenommen
-
-Noch nichts.
-
-## Abgelehnt
 
 Vorerst nicht gebraucht (14.11.2026, aus dem Funktionsvergleich „Letztes Mal“):
 
@@ -98,6 +85,27 @@ Vorbild ist Strong: Ein Tipp auf die Satznummer öffnet Aufwärmen, Drop und Ver
 ## Erledigt
 
 Umgesetzt am 14.11.2026:
+
+### 36. Pause aus dem Programm für den Timer
+- Nutzen: hoch · Aufwand: S · Datenformat: nein
+
+Herkunft ist der eigene Befund im Funktionsvergleich „Letztes Mal“: Bankdrücken zeigt „Pause 3:00 min“, der Timer läuft aber mit der allgemeinen Pause von 1:30. Vorbilder sind Fitbod, das die Pause pro Übung nach ihrer Schwierigkeit erzeugt (nur aus Suchergebnissen), und MacroFactor, das z. B. Grundübungen im Unterkörper 3:00 und Isolation im Oberkörper 1:30 gibt; Hevy und Strong stellen sie pro Übung von Hand ein. Im Arnold-Split weicht die Programm-Pause bei 15 der 30 Übungsplätze von 1:30 ab (60 bis 180 s). Für 3:00 braucht man heute pro Pause 6 Tipps auf „+15“, bei Bankdrücken mit 4 Sätzen bis zu 24. Skizze: In der Aktion `check` startet `startTimer((entryPlan(en) || {}).pauseSek || S.settings.rest, s)`. Getauschte Übungen bekommen über `planEx` die Pause ihres Programmplatzes, Übungen ohne Programm behalten die allgemeine Pause. −15/+15 ändern nur die laufende Pause, eine eigene Dauer pro Übung (Idee 8) gibt es also weiterhin nicht. Der Timer zeigt „Pause · Programm“, und unter der Einstellung „Pausen-Timer“ steht „gilt, wenn das Programm keine Pause vorgibt“. Danach `bibliothek/README.md` („Zuordnung zur App“) und `CLAUDE.md` anpassen.
+
+Umgesetzt: `restFor()` nimmt die Programm-Pause (10–600 s), sonst die Einstellung; der Timer zeigt „Pause · Programm“, unter der Einstellung steht ein erklärender Satz. `bibliothek/README.md` ist angepasst.
+
+### 37. Nächsten Satz nicht unter dem Timer verstecken
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Vorbild ist Hevy: Es springt mit „Smart Superset Scrolling“ nach jedem Satz zur nächsten Übung der Gruppe, und die Live Activity zeigt den nächsten Satz samt Vorgabe. Strong springt mit „Weiter“ zum nächsten Satz. Bei uns belegen Timer und Tab-Leiste in der Pause die unteren 180 px; im Funktionsvergleich „Satz-Erfassung“ lag der dritte Satz der zweiten Übung darunter, man musste wischen. Skizze: Nach dem Abhaken sucht die App den nächsten offenen Satz: in derselben Übung, sonst den ersten offenen Satz der folgenden Übungen, mit Idee 39 den des Partners. Sie markiert ihn mit einem orangen Rand links und scrollt sanft, wenn er hinter dem Timer liegt. Beginnt mit ihm eine neue Übung, rückt deren Karte nach oben, dann sind „Letztes Mal“, „Steigern“ und „Ziel heute“ schon in der Pause lesbar. Die App scrollt nicht, wenn der Satz schon zu sehen ist oder ein Feld den Fokus hat, und bei `prefers-reduced-motion` springt sie ohne Animation.
+
+Umgesetzt: `nextOpen()` und `revealNext()`, Markierung mit orangem Strich und oranger Nummer. Nach dem `gym-tester`: Die App scrollt nur noch, wenn Timer oder Tab-Leiste den Satz wirklich verdecken (vorher rückte die Seite bei 390 px nach jedem Haken um 7–8 px), und die Markierung übersteht ein Neuladen.
+
+### 38. Pause übersteht App-Wechsel und Neuladen
+- Nutzen: mittel · Aufwand: S · Datenformat: nein (Feld nur im laufenden Training, nicht im gespeicherten Training und nicht im Backup)
+
+Hevy zeigt die Pause per Live Activity auch außerhalb der App, MCI und StrongLifts melden das Ende per Mitteilung. Das kann eine PWA nicht, nach der Rückkehr aber kann sie die richtige Zeit zeigen. Heute fehlt der Timer nach einem Neuladen (Funktionsvergleich „Satz-Erfassung“), und iOS beendet Web-Apps im Hintergrund oft, etwa wenn man in der Pause die Musik-App öffnet (allgemeines Wissen, nicht nachgelesen). Laut WebKit stoppt Audio im Hintergrund; der geplante Piepton könnte nach der Rückkehr deshalb verspätet kommen (Vermutung, auf dem iPhone prüfen). Skizze: `startTimer`, `shiftTimer` und `stopTimer` schreiben `{end, total}` als `S.active.rest` mit. Wie `planEx` gelangt das Feld nicht ins gespeicherte Training, und ins Backup ohnehin nicht, weil `backupJson()` `active:null` setzt. Beim Start stellt die App den Timer daraus wieder her. Beim Verlassen der App (`visibilitychange`) ruft sie `cancelBeep()` auf. Bei der Rückkehr plant sie den Ton für die Restzeit neu oder zeigt gleich „Pause vorbei“ (mit Idee 40 samt Überzeit). Nach einem Neuladen kommt der Ton erst nach dem ersten Tipp, weil iOS Audio nur nach einer Berührung freigibt. Den `daten-waechter` kurz prüfen lassen.
+
+Umgesetzt: `keepRest()`/`restoreRest()` mit `S.active.rest`, Ton im Hintergrund abgesagt und bei der Rückkehr neu geplant. Der `daten-waechter` fand kein Datenrisiko; seine zwei Hinweise sind eingebaut (Import beendet eine laufende Pause, unplausibel lange Pausen werden ignoriert).
 
 ### 33. Wiedereinstieg nach langer Pause (aus Funktionsvergleich: „Letztes Mal“)
 - Nutzen: mittel · Aufwand: S · Datenformat: nein

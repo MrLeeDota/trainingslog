@@ -225,7 +225,7 @@ Eine App-Vorlage ist `{id, name, ex:[Übungs-IDs], lib}`. Aus jeder **Einheit** 
 Über `lib` liest die App im Training den Richtwert der Einheit und zeigt ihn unter der Übung („Programm: 4 × 6-8 Wdh · Pause 3:00 min“):
 - `saetze` gibt beim Start die Zahl der Sätze vor (ergänzt, nie gekürzt).
 - Das obere Ende von `wdh` ist die Schwelle für den Steigerungsvorschlag und die Obergrenze für das Wiederholungsziel („Ziel heute“); ein fester Wert wie `"5"` gilt als lineare Progression.
-- `pauseSek` steht nur in der Anzeige; der Pausen-Timer nutzt die allgemeine Pausendauer der App und startet nur nach Kraft-Sätzen.
+- `pauseSek` steht in der Anzeige und ist die Dauer des Pausen-Timers nach jedem Kraft-Satz dieser Übung; ohne Programm nutzt der Timer die allgemeine Pausendauer der App.
 - Nicht angezeigt werden bisher `dauerSek`, `streckeKm`, `hinweis` an einer Übung der Einheit sowie `wochenplan`, `aufwaermen`, `intensitaet` und `progression` des Programms.
 
 ## Fachliche Grundlagen

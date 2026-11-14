@@ -213,6 +213,10 @@ button.step-down:active{transform:skewX(-10deg) translateY(2px)}
 .check{height:48px;padding:0;border-radius:12px;font-size:20px;font-weight:800;color:var(--muted)}
 .set.done .check{background:radial-gradient(circle at 35% 28%,#fff3a6,var(--ki) 45%,var(--accent) 100%);color:var(--accent-ink);box-shadow:0 3px 0 var(--accent-shade),0 0 14px rgba(255,212,59,.6)}
 .set.done input{background:rgba(255,212,59,.12);border-color:rgba(255,212,59,.5);color:var(--ki)}
+/* Nächster Satz nach dem Abhaken: oranger Strich links und orange Nummer */
+.set.next{position:relative}
+.set.next::before{content:"";position:absolute;left:-9px;top:6px;bottom:6px;width:3px;border-radius:2px;background:var(--accent)}
+.set.next .num{color:var(--accent)}
 /* Bleibt beim Scrollen oben stehen und reicht bis unter die iPhone-Statusleiste */
 .live-head{position:sticky;top:0;z-index:5;margin:calc(-1 * env(safe-area-inset-top)) -16px 10px;padding:calc(8px + env(safe-area-inset-top)) 16px 10px;
   background:rgba(13,20,64,.9);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:2px solid var(--ink)}
@@ -813,9 +817,9 @@ function flush(){
 }
 
 /* ---------- UI state ---------- */
-let ui = {tab:"training", sheet:null, open:null};
+let ui = {tab:"training", sheet:null, open:null, next:null};   // next: der als Nächstes markierte Satz (Idee 37)
 let bootErr = null;   // gesetzt, wenn die Daten beim Start nicht geladen werden konnten
-const timer = {end:0, total:0, rang:false, by:null, prev:null};
+const timer = {end:0, total:0, rang:false, by:null, prev:null, src:null};
 let undoSet = null;   // zuletzt mit „− Satz“ entfernter Satz, solange er sich zurückholen lässt
 let undoVals = null;   // Werte vor „Steigern“, „Entlasten“ oder „Ziel eintragen“, solange sie sich zurückholen lassen
 // Ein Feld (f: "a" = kg, "b" = Wdh) in allen offenen Sätzen setzen, val(j) liefert den Wert für Satz j;
@@ -832,7 +836,13 @@ const setWeight = (en, kg, msg) => setValues(en, "a", () => fmtNum(kg), msg);
 /* ---------- Audio (beep at end of rest) ---------- */
 let actx = null, beeps = [];
 function unlockAudio(){
-  try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch(e){}
+  try {
+    const fresh = !actx;
+    if (fresh) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === "suspended") actx.resume();
+    // Nach einem Neuladen läuft die Pause schon (Idee 38): den Ton jetzt planen, wo Audio freigegeben ist
+    if (fresh && timer.end > Date.now()) scheduleBeep((timer.end - Date.now()) / 1000);
+  } catch(e){}
 }
 function cancelBeep(){ beeps.forEach(o => { try { o.stop(); } catch(e){} }); beeps = []; }
 function scheduleBeep(sec){
@@ -852,26 +862,81 @@ function scheduleBeep(sec){
     });
   } catch(e){}
 }
+/* Nächster Satz nach dem Abhaken (Idee 37): der nächste offene Satz derselben Übung, sonst ein früher übersprungener,
+   sonst der erste offene Satz der folgenden Übungen (danach wieder von vorn). Ergebnis: das Satz-Objekt oder null. */
+function nextOpen(i, j){
+  const es = S.active.entries, own = es[i].sets;
+  for (let k = j + 1; k < own.length; k++) if (!own[k].done) return own[k];
+  for (let k = 0; k < j; k++) if (!own[k].done) return own[k];
+  for (let d = 1; d < es.length; d++){ const s = es[(i + d) % es.length].sets.find(x => !x.done); if (s) return s; }
+  return null;
+}
+/* Den markierten Satz sichtbar machen, falls er hinter dem Pausen-Timer (oder der Tab-Leiste) oder unter der Kopfzeile
+   liegt. Beginnt mit ihm eine neue Übung, rückt deren Karte nach oben, damit „Letztes Mal“ und Ziel in der Pause lesbar
+   sind. Nicht, wenn gerade ein Feld den Fokus hat. */
+function revealNext(newEx){
+  const row = document.querySelector(".set.next");
+  if (!row || document.activeElement?.matches("input,textarea,select")) return;
+  const tb = $("#timer"), head = document.querySelector(".live-head"), bottom = parseFloat(getComputedStyle(tb).bottom) || 0;
+  const edge = window.innerHeight - bottom - (tb.classList.contains("show") ? tb.offsetHeight : 0), low = edge - 12;
+  const high = (head ? head.getBoundingClientRect().bottom : 0) + 8;
+  const r = row.getBoundingClientRect(), card = row.closest(".card").getBoundingClientRect();
+  // Nur scrollen, wenn Timer, Tab-Leiste oder Kopfzeile den Satz wirklich verdecken; knappe Fälle bleiben ruhig,
+  // damit die Seite nicht nach jedem Haken ein paar Pixel unter dem Finger wegrückt
+  if (r.top >= high - 8 && r.bottom <= edge) return;
+  let dy = r.bottom > edge ? r.bottom - low : r.top - high;
+  if (newEx && r.bottom - (card.top - high) <= low) dy = card.top - high;
+  window.scrollBy({top:dy, behavior:matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
+}
+/* Pausendauer nach einem Satz (Idee 36): bei Vorlagen aus einem Bibliotheks-Programm dessen Pause (pauseSek, bei einer
+   getauschten Übung die des Programmplatzes), sonst die allgemeine Einstellung. Eine eigene Pause pro Übung gibt es nicht. */
+function restFor(en){
+  const p = num((entryPlan(en) || {}).pauseSek);
+  return p >= 10 && p <= 600 ? {sec:Math.round(p), src:"Programm"} : {sec:S.settings.rest, src:null};
+}
+/* Die laufende Pause steht als {end, total, src} in S.active.rest (Idee 38), damit sie einen App-Wechsel und ein
+   Neuladen übersteht. Das Feld gibt es nur im laufenden Training: finish() übernimmt es nicht, das Backup setzt active:null. */
+// next: Position [Übung, Satz] des markierten nächsten Satzes (Idee 37), damit die Markierung ein Neuladen übersteht
+function keepRest(){
+  if (!S || !S.active) return;
+  if (timer.end){
+    const i = ui.next ? S.active.entries.findIndex(e => e.sets.includes(ui.next)) : -1;
+    S.active.rest = {end:timer.end, total:timer.total, src:timer.src || null};
+    if (i >= 0) S.active.rest.next = [i, S.active.entries[i].sets.indexOf(ui.next)];
+  } else delete S.active.rest;
+  save();
+}
+function restoreRest(){
+  const r = S && S.active && S.active.rest;
+  if (!r) return;
+  if (Number.isFinite(r.end) && r.end > Date.now() - 8000 && r.end < Date.now() + 3600e3 && Number.isFinite(r.total) && r.total > 0){
+    timer.end = r.end; timer.total = r.total; timer.src = r.src || null; timer.rang = r.end <= Date.now();
+    if (!timer.rang) scheduleBeep((r.end - Date.now()) / 1000);   // klappt erst, wenn Audio nach einem Tipp freigegeben ist
+    const n = Array.isArray(r.next) && S.active.entries[r.next[0]] && S.active.entries[r.next[0]].sets[r.next[1]];
+    if (n && !n.done) ui.next = n;
+  } else delete S.active.rest;
+}
 // by: der Satz, der die Pause ausgelöst hat. Der Stand davor wird gemerkt, damit undoTimer() ihn zurückholen kann.
-function startTimer(sec, by){
-  timer.prev = by ? {end:timer.end, total:timer.total, rang:timer.rang} : null; timer.by = by || null;
-  timer.end = Date.now() + sec * 1000; timer.total = sec; timer.rang = false; scheduleBeep(sec); tick();
+// src: woher die Dauer stammt ("Programm" oder null für die allgemeine Einstellung), steht im Timer.
+function startTimer(sec, by, src){
+  timer.prev = by ? {end:timer.end, total:timer.total, rang:timer.rang, src:timer.src} : null; timer.by = by || null;
+  timer.end = Date.now() + sec * 1000; timer.total = sec; timer.rang = false; timer.src = src || null; scheduleBeep(sec); keepRest(); tick();
 }
 // Wird der auslösende Satz gleich wieder gelöst, läuft die vorherige Pause weiter; gab es keine, stoppt der Timer.
 function undoTimer(by){
   if (!timer.end || !by || timer.by !== by) return;
   const p = timer.prev;
   if (p && p.end > Date.now()){
-    timer.end = p.end; timer.total = p.total; timer.rang = p.rang; timer.by = timer.prev = null;
-    scheduleBeep((p.end - Date.now()) / 1000); tick();
+    timer.end = p.end; timer.total = p.total; timer.rang = p.rang; timer.src = p.src; timer.by = timer.prev = null;
+    scheduleBeep((p.end - Date.now()) / 1000); keepRest(); tick();
   } else stopTimer();
 }
-function stopTimer(){ timer.end = 0; timer.by = timer.prev = null; cancelBeep(); tick(); }
+function stopTimer(){ timer.end = 0; timer.by = timer.prev = null; cancelBeep(); keepRest(); tick(); }
 function shiftTimer(delta){
   if (!timer.end) return;
   timer.end = Math.max(Date.now() + 1000, timer.end + delta * 1000);
   timer.total = Math.max(timer.total + delta, 1); timer.rang = false;
-  scheduleBeep((timer.end - Date.now()) / 1000); tick();
+  scheduleBeep((timer.end - Date.now()) / 1000); keepRest(); tick();
 }
 
 /* ---------- Dialog + toast ---------- */
@@ -1146,7 +1211,7 @@ function vEntry(en, i){
     ${showDown ? `<div class="step-down-row"><button class="step-down" data-act="step-down" data-i="${i}" aria-label="Gewicht in den offenen Sätzen auf ${fmtNum(down)} kg senken">Entlasten: ${fmtNum(down)} kg</button><span class="muted">3 Einheiten ohne Fortschritt</span></div>` : ""}
     ${showBack ? `<div class="step-down-row"><button class="step-down" data-act="comeback" data-i="${i}" aria-label="Gewicht für den Wiedereinstieg in den offenen Sätzen senken: ${backTo}">Wiedereinstieg: ${backTo}</button><span class="muted">${weeks(back.weeks)} Pause</span></div>` : ""}
     <div class="set head" style="${cols}"><span>#</span>${T.f.map(f => `<span>${f[1]}</span>`).join("")}<span></span></div>
-    ${en.sets.map((s, j) => `<div class="set ${s.done ? "done" : ""}" style="${cols}">
+    ${en.sets.map((s, j) => `<div class="set ${s.done ? "done" : s === ui.next ? "next" : ""}" style="${cols}">
       <span class="num">${j + 1}</span>
       ${T.f.map(f => `<input inputmode="${f[2]}" autocomplete="off" data-i="${i}" data-j="${j}" data-f="${f[0]}" value="${esc(s[f[0]])}" placeholder="–">`).join("")}
       <button class="check" data-act="check" data-i="${i}" data-j="${j}" aria-label="Satz ${j + 1} abhaken">✓</button>
@@ -1216,8 +1281,9 @@ function vHistory(){
     </div>`;
   }).join("") : `<div class="card muted">Noch keine Trainings gespeichert. Starte eins im Tab „Training“.</div>`}
   <h2>Einstellungen</h2>
-  <div class="card row between"><span>Pausen-Timer</span>
-    <select data-setting="rest" style="width:auto">${[45,60,90,120,150,180,240].map(s => `<option value="${s}" ${S.settings.rest == s ? "selected" : ""}>${fmtSec(s)}</option>`).join("")}</select>
+  <div class="card"><div class="row between"><span>Pausen-Timer</span>
+    <select data-setting="rest" style="width:auto">${[45,60,90,120,150,180,240].map(s => `<option value="${s}" ${S.settings.rest == s ? "selected" : ""}>${fmtSec(s)}</option>`).join("")}</select></div>
+    <p class="muted" style="margin:8px 0 0">Bei Vorlagen aus einem Programm gilt die Pause des Programms.</p>
   </div>
   <h2>Daten & Backup</h2>
   <div class="card">${vStatus()}
@@ -1396,7 +1462,7 @@ function tick(){
     return;
   }
   tb.classList.remove("over");
-  $("#tlabel").textContent = "Pause";
+  $("#tlabel").textContent = timer.src ? `Pause · ${timer.src}` : "Pause";
   $("#ttime").textContent = `${Math.floor(rem/60)}:${String(rem%60).padStart(2,"0")}`;
   $("#tfill").style.width = `${Math.min(100, 100 * (1 - remMs / (timer.total * 1000)))}%`;
 }
@@ -1470,7 +1536,7 @@ function applyImport(text){
   ask(`Backup mit ${d.workouts.length} Trainings laden? Die aktuellen Daten werden ersetzt.`, "Laden", true).then(ok => {
     if (!ok) return;
     const before = new Set(S.workouts.map(w => w.id));
-    S = normalize(d); S.active = null;
+    S = normalize(d); S.active = null; stopTimer();   // eine laufende Pause gehört zum ersetzten Training
     // Ältere Backups kennen settings.lastBackup noch nicht: Die geladenen Daten sind auf dem Stand ihres Exports gesichert.
     if (!S.settings.lastBackup && Date.parse(d.exportedAt) > 0) S.settings.lastBackup = Date.parse(d.exportedAt);
     const now = new Set(S.workouts.map(w => w.id));
@@ -1527,9 +1593,11 @@ const actions = {
       }
     }
     s.done = !s.done; save();
-    if (s.done && exType(en.exId) === "kraft") startTimer(S.settings.rest, s);
+    ui.next = s.done ? nextOpen(+el.dataset.i, +el.dataset.j) : null;   // vor dem Timer, damit keepRest() die Markierung mitspeichert
+    if (s.done && exType(en.exId) === "kraft"){ const r = restFor(en); startTimer(r.sec, s, r.src); }
     if (!s.done) undoTimer(s);   // versehentlicher Haken: die Pause davor kommt zurück
     render();
+    if (ui.next) revealNext(!en.sets.includes(ui.next));
     if (s.done){
       // Sofort melden, wenn der Satz den bisherigen Bestwert der Übung übertrifft (und nicht schon ein früherer Satz heute).
       const type = exType(en.exId), [unit, v] = setMark(type, s), best = (progress(S.workouts).bests[en.exId] || {})[unit] || 0;
@@ -1825,7 +1893,12 @@ document.addEventListener("change", e => {
 });
 // Beim Verlassen der App (und bei der Rückkehr) alles Offene sofort sichern – iOS friert die Seite im Hintergrund ein.
 function saveNow(){ if (saveT){ clearTimeout(saveT); saveT = null; save(); } flush(); }
-document.addEventListener("visibilitychange", () => { saveNow(); tick(); keepAwake(); });
+document.addEventListener("visibilitychange", () => {
+  saveNow(); tick(); keepAwake();
+  // Im Hintergrund hält iOS das Audio an; der geplante Ton käme sonst verspätet. Bei der Rückkehr für die Restzeit neu planen.
+  if (document.visibilityState === "hidden") cancelBeep();
+  else if (timer.end > Date.now() && actx){ try { actx.resume(); } catch(e){} scheduleBeep((timer.end - Date.now()) / 1000); }
+});
 window.addEventListener("pagehide", saveNow);
 
 /* ---------- Start ---------- */
@@ -1850,6 +1923,7 @@ async function boot(){
     else bootErr = e;
   }
   clearTimeout(slow);
+  restoreRest();   // laufende Pause aus dem gespeicherten Training übernehmen (Idee 38)
   render();
   if (S) loadLib();   // Übungsbibliothek im Hintergrund laden
   // Den Browser bitten, die Daten nicht von sich aus zu löschen (klappt v. a. bei installierter App).

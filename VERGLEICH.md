@@ -5,7 +5,7 @@ Wie gut ist jede Funktion des Trainingslogs im Vergleich zu führenden Fitness-A
 | Funktion | Urteil | Wichtigste Lücke | Zuletzt geprüft |
 |---|---|---|---|
 | Satz-Erfassung | gleichauf | Keine Aufwärmsätze (Idee 14); ob das Markieren beim Antippen auf dem iPhone hält, ist ungeprüft | 14.11.2026 |
-| „Letztes Mal“ | gleichauf | Steigern nutzt feste 10 Wdh und greift bei Programmen mit 6–8 Wdh nie (Idee 17) | 14.11.2026 |
+| „Letztes Mal“ | vorne | „Ziel heute“ ist nur Text: Das Ziel zu schaffen kostet 8–11 Tipps pro Übung, mit Übernahme per Tipp wären es 4–5 (Idee 31) | 14.11.2026 |
 | Pausen-Timer | offen | – | – |
 | Vorlagen | offen | – | – |
 | Übungsverwaltung | offen | – | – |
@@ -19,29 +19,64 @@ Wie gut ist jede Funktion des Trainingslogs im Vergleich zu führenden Fitness-A
 
 ### „Letztes Mal“
 
-Erste Prüfung am 14.11.2026, Chrome am PC im Handy-Rahmen (390 × 844) auf localhost. Echte Klicks: Vorlage Push starten, „Steigern“ antippen, Verwerfen; dazu die Bibliotheks-Vorlage „Push (Push/Pull/Legs)“. Die Daten stammen aus früheren Tests (Testtrainings von der Satz-Erfassungs-Prüfung); es wurde nichts Neues gespeichert. Die Zeile mit fünf unterschiedlichen Sätzen wurde nur per Skript am Bildschirm geprüft. Nicht geprüft: iPhone, MCI aus eigener Anschauung (App-Store-Text ohne Angaben dazu).
+Zweite Prüfung am 14.11.2026, nach den Ideen 17–22, 25 und 30 (erste Prüfung am selben Tag: „gleichauf“). Getestet in Chrome am PC im Handy-Rahmen (390 × 844) auf localhost, mit echten Klicks und Tastatureingaben. Über Vorlagen → „+ Programm aus der Bibliothek“ wurden die Arnold-Split-Einheiten „Brust & Rücken A“, „Schultern & Arme A“ und „Schultern & Arme B“ übernommen. Für einen realistischen Verlauf habe ich die vorhandenen Testtrainings vorübergehend herausgenommen und per Skript neun Arnold-Split-Trainings vom 22.09. bis 10.11.2026 angelegt (mit `save({put:id})`). Darin: Bankdrücken zweimal 80 × 8, 8, 8, 8, Klimmzüge zuletzt ohne Gewicht 4 × 10, Kurzhantel-Schrägbankdrücken 26 × 10, 9, 8, Langhantelrudern dreimal 70 kg mit Sätzen unter 6, Kurzhantel-Pullover zuletzt nur 2 Sätze, Stirndrücken zuletzt am 22.09. und Hängendes Beinheben nie. Ein Training „Brust & Rücken A“ wurde über den echten Ablauf gespeichert und im Verlauf korrigiert, drei weitere wurden gestartet und verworfen (B&R A, S&A A, S&A B, dazu die eigene Vorlage Push ohne Programm). Am Ende wurde der alte Stand wiederhergestellt (23 Trainings, 22 Übungen, 7 Vorlagen, Einstellungen; nach dem Neuladen verglichen). Nicht geprüft: iPhone (Schrift, Tastatur, Daumen), MCI aus eigener Anschauung.
 
-**Bedienung**
-- Tipps: Vorlage starten 1; danach steht alles da (Zeile „Letztes Mal (Sa., 14.11.): 70 kg × 8, 8, 7“ und Felder mit echten Werten vorausgefüllt), ein unveränderter Satz kostet 1 Tipp. „Steigern: 12,5 kg“ 1 Tipp für alle offenen Sätze, danach verschwindet der Knopf und die Felder zeigen 12,5, die Zeile „Letztes Mal“ bleibt bei 10 kg. Erste Übung ohne Vorwerte: „Erstes Mal – leg los!“ mit drei leeren Sätzen (bei Programm-Übungen die Satzzahl des Programms).
-- Lesbarkeit: Zeile grün, 13 px, „Programm: …“ gelb, 13 px, „Steigern“ 149 × 44 px. Fünf verschiedene Sätze brechen auf zwei Zeilen um (35 px hoch), sonst eine Zeile. Gleiche Gewichte werden zu „70 kg × 8, 8, 7“ verkürzt. Der Knopf „Steigern“ steht unter der Zeile, nach dem Antippen springt die Karte um etwa 50 px.
-- Satzzahl und Werte folgen der letzten Einheit, nicht dem Programm: Dips mit Richtwert „2 × 8–12“ nach einem Satz im Test hat nur einen Satz, Kurzhantel-Schrägbankdrücken „3 × 8–12“ ebenfalls. Das Programm ist reine Anzeige, ohne Bezug zum Vorwert.
-- Das letzte Training zählt, auch wenn es ein Teil-Training war oder Aufwärmsätze enthielt (Idee 14); Vorwerte stammen immer aus der letzten Einheit mit dieser Übung, egal welche Vorlage.
-- Steigerungsvorschlag: nur Kraft, nur wenn die letzten zwei Einheiten alle Sätze mit demselben Gewicht und mindestens 10 Wdh hatten (+2,5 kg). Bei Programmen mit Bereichen wie 6–8 Wdh (Bankdrücken im Beispiel) wird nie gesteigert, weil 10 Wdh nie erreicht werden; bei Wdh-Bereichen oberhalb von 10 greift es erst am oberen Rand verspätet. Ohne Hinweis, warum der Vorschlag kommt.
+**Tipps pro Ablauf**
+
+| Ablauf | Tipps |
+|---|---|
+| Vorlage starten bis zum ersten abgehakten, unveränderten Satz | 2 |
+| Bankdrücken: „Steigern: 82,5 kg“, dann 8, 7, 7, 6 Wdh | 9 (1 + 1 + 3 + 1 + 3) |
+| Langhantelrudern: „Entlasten: 67,5 kg“, dann 8, 8, 7 Wdh | 10 (1 + 3 + 3 + 3) |
+| Kurzhantel-Schrägbankdrücken: „Ziel heute: 11, 10, 9 Wdh“ schaffen (Felder zeigen 10, 9, 8) | 11 (4 + 4 + 3); stünde das Ziel in den Feldern, wären es 3, mit Übernahme per Tipp 4. Gerechnet: Bankdrücken (Ziel 8, 9, 8, 7) 8, Reverse Butterfly (15, 15, 14) 9 |
+| Steigern oder Entlasten zurücknehmen | 1 (Tipp auf den Hinweis) |
+| Übung tauschen (⇄, Ersatz wählen) | 2; neue Übung 60 × 12 in 3 Sätzen danach 9 |
+| Gespeicherten Satz im Verlauf korrigieren | 4 (Bearbeiten, Feld, Ziffer, Sichern), „Letztes Mal“ zeigt den neuen Wert sofort |
+| Arnold-Einheit als Vorlage übernehmen | 4 für die erste (Tab, Programm, Arnold-Split, Übernehmen) plus Scrollen, je 1 für weitere |
+
+**Bedienung (Messwerte in App-Pixeln bei 390 px)**
+- Regeln: Alle Vorschläge stimmten mit `CLAUDE.md` überein. „Steigern: 82,5 kg“ nach zweimal 4 × 8 bei 6–8 Wdh (Idee 17), Arnold-Drücken 18 → 20 kg (Kurzhantel-Grundübung), Seitheben 10 → 12 kg (Kurzhantel-Isolation ab 10 kg, +20 %), Pallof-Press 15 → 17,5 kg. „Entlasten: 67,5 kg“ mit dem Grund „3 Einheiten ohne Fortschritt“ (Idee 25). „Ziel heute“ zeigte z. B. 11, 10, 9 und 12, 11, 10, bei Wdh über dem Bereich hält es (8, 9, 8, 7). Kurzhantel-Pullover nach 2 Sätzen: 3 vorausgefüllte Sätze nach dem Programm (Idee 18), „Steigern“ blieb aus, weil die letzte Einheit nur 2 Sätze hatte. Die getauschte Übung zeigte „Programm wie Kurzhantel-Pullover: 3 × 10-12 Wdh“ mit 3 leeren Sätzen (Idee 22), auch nach dem Neuladen.
+- Die eigene Vorlage Push ohne Programm zeigt für dasselbe Bankdrücken „Ziel heute: 9, 10, 8, 7“ (Obergrenze 10 statt 8). Das ist gewollt, für den Nutzer aber eine zweite Zielvorgabe zur selben Übung.
+- Tap-Flächen: „Steigern“ 151 × 44, „Entlasten“ 161 × 44, ⇄ und ✕ je 44 × 44, der Hinweis mit „Rückgängig“ 298 × 47. „Ziel heute“ ist nur Text (18 px hoch), nicht antippbar.
+- Lesbarkeit: „Letztes Mal“ grün, „Programm“ gelb, „Ziel heute“ blassblau mit goldenen Zahlen, alle 13 px; Kontrast auf dem Kartenblau 11,4 : 1, 10,2 : 1 und 7,3 : 1. Weil ⇄ und ✕ rechts neben dem ganzen Kopf stehen, hat der Text nur 215 der 311 px Kartenbreite. „Letztes Mal“ und „Programm“ brechen deshalb in jeder Karte auf zwei Zeilen um (je 35 px), obwohl sie mit 221–294 px in die volle Breite passen würden. Vom Kartenrand bis zur Satztabelle sind es 150–209 px, eine Karte mit 4 Sätzen ist 461–493 px hoch. Es passen also keine zwei Übungen auf den Bildschirm (844 px); „Schultern & Arme B“ mit 7 Übungen ist 3518 px lang.
+- Daumen: „Steigern“ und „Entlasten“ stehen oben in der Karte (bei Karte am Bildschirmrand oben etwa y 278 von 844, also im oberen Drittel). Der Hinweis mit „Rückgängig“ erscheint unten (y 533–647), gut erreichbar. Der Rekord-Hinweis oben verdeckt weiter Titel und „Verwerfen“.
+- Rückmeldung: Steigern und Entlasten melden „Gewicht auf 82,5 kg erhöht · Rückgängig“; die Karte springt um 52 px (Steigern) bzw. etwa 70 px (Entlasten samt Begründungszeile). „Steigern“ nennt keinen Grund, „Entlasten“ schon. Ist „Ziel heute“ geschafft, ändert sich nichts an der Zeile, und „Training geschafft“ zeigt nur Rekorde, nicht „besser als letztes Mal“. Nach dem Neuladen mitten im Training war alles erhalten (Werte, Haken, Tausch).
+- Körpergewicht: Klimmzüge zweimal 4 × 10 ohne Gewicht, das Programm sieht dann laut seinem Hinweis Zusatzgewicht vor. Die App zeigt nur „Ziel heute: 4 × 10 Wdh“, also dasselbe wie letztes Mal; der Hinweis des Programms an der Übung (`hinweis`) erscheint weder im Training noch im Programm-Sheet.
+- Lange Pause: Stirndrücken zuletzt am 22.09. (53 Tage). Die Zeile zeigt „Letztes Mal (Di., 22.09.)“ ohne Hinweis aufs Alter, die Felder 30 × 10, 10, 9 und „Ziel heute: 11, 11, 10“, verlangt nach sieben Wochen Pause also mehr als vorher.
+- Programm-Pause: Die Zeile sagt „Pause 3:00 min“ (Bankdrücken), der Timer läuft mit der allgemeinen Pause von 1:30. Das gehört zum Pausen-Timer (siehe unten).
+- Konsole: keine Meldungen.
 
 **Was die anderen besser machen**
-- Fitbod steigert Last oder Wiederholungen von selbst und stützt sich auf RiR und das geschätzte 1RM; bei uns ist es eine feste Regel mit einem Tipp. Hevy zeigt Vorwerte pro Satz in einer Spalte (nebeneinander mit den neuen Werten) und übernimmt sie mit einem Tipp; Strong hat pro Satz die Vorwerte. Beide steigern nie von selbst.
-- MCI: laut App-Store-Text kein sichtbarer Vorwert, aber ein Plan, der sich nach Leistung anpasst; näher ließ sich das nicht klären.
+- Hevy Trainer (nur Pro) erhöht das Gewicht nach derselben Regel wie wir (oberes Ende des Bereichs in allen Sätzen), markiert Übungen mit Fortschritt, erinnert bei Stillstand und plant auf Wunsch alle sechs Wochen eine Entlastungswoche mit 40 % weniger. Die Spalte „Previous“ zeigt das letzte Mal als Ziel; per Einstellung kommen die Vorwerte aus irgendeinem Training oder nur aus derselben Routine (Hilfe-Center gesperrt, nur Suche).
+- Fitbod senkt die Vorschläge nach einer Trainingspause von selbst und lernt aus geänderten Werten (nur Suche). MCI arbeitet mit einem Krafttest samt „Reps in Reserve“-Regler und einer „Progression Engine“; was pro Satz vorgegeben wird, zeigen die Bildbeschreibungen nicht.
+- Strong übernimmt nach dem Training auf Wunsch die Werte in die Vorlage („Update Values Only“) und zeigt Vorwerte pro Satz; Vorschläge zum Steigern gibt es laut Hilfe nicht.
 
 **Was wir besser machen**
-- Vorwerte sind echte Werte in den Feldern, ein unveränderter Satz kostet 1 Tipp, und „Steigern“ ersetzt das Ändern jedes kg-Felds (Strong und Hevy haben nichts Vergleichbares, laut gelesenen Seiten).
-- Die Programm-Zeile steht direkt unter der Vorwert-Zeile; Strong und Hevy haben keine Bibliotheksprogramme mit Richtwerten dieser Art in der Zeile (nicht nachgelesen).
-- Alles offline, ohne Konto und kostenlos.
+- Vorwerte sind echte Werte in den Feldern, ein unveränderter Satz kostet 1 Tipp, nach dem Neuladen ist alles da.
+- „Steigern“ folgt jetzt dem Programm-Bereich, mit einem Gewichtsschritt passend zum Gerät, und „Entlasten“ greift nach drei Einheiten Stillstand. Beides kostet 1 Tipp, lässt sich mit 1 Tipp zurücknehmen und ist kostenlos und offline. Bei Hevy gibt es das nur im Pro-Abo (Trainer); einen Gewichtsschritt pro Gerät nennt Hevy nicht. Strong hat nichts davon.
+- „Ziel heute“ setzt die doppelte Progression des Programms Satz für Satz um, und Programm-Richtwert, Satzzahl und Tausch passen zusammen.
+- Korrekturen im Verlauf wirken sofort auf „Letztes Mal“.
 
-**Urteil: gleichauf.** Der Alltagsfall (Vorlage starten, Werte stimmen, 1 Tipp pro Satz) ist so gut wie bei Strong und Hevy, und „Steigern“ geht darüber hinaus. Zum Vorsprung fehlt, dass die Steigerungsregel zu den Programm-Wiederholungen passt (Idee 17); ohne das greift sie gerade bei Kraftprogrammen mit niedrigen Wdh nie. Aufwärmsätze (Idee 14) verfälschen weiter die letzte Einheit.
+**Urteil: vorne.** Im Alltag (Vorlage starten, Werte stimmen, 1 Tipp pro Satz) ist die App so schnell wie Strong und Hevy. Darüber hinaus sagt sie bei einem Programm wie dem Arnold-Split, wann gesteigert, gehalten oder entlastet wird, nach derselben Regel wie Hevy Trainer, aber ohne Abo und ohne Konto. Fitbod und MCI passen sich stärker automatisch an, kosten aber Abo und teils zusätzliche Eingaben. Schwächen bleiben: Das Ziel steht nur als Text da (wer es schafft, braucht 8–11 Tipps pro Übung statt 4–5), Körpergewichtsübungen bekommen am oberen Ende keinen Hinweis, nach einer langen Pause wird mehr verlangt als vorher, und der schmale Kopf kostet Scrollweg.
 
-**Lücken, die sich nicht lohnen:** Eine Vorwert-Spalte pro Satz wie bei Hevy brächte nur einen Tipp-Gewinn, den die vorausgefüllten Felder schon haben. RiR und Erholungsstand wie bei Fitbod kosten pro Satz zusätzliche Tipps. Ein eigener Schritt pro Übung (Progress) erst, wenn Idee 17 nicht reicht (Datenformat).
+**Lücken, die nicht vorgeschlagen werden:** Die Pause aus dem Programm für den Timer zu übernehmen, berührt die abgelehnte Idee 8 und gehört zum Pausen-Timer; das sollte dessen Prüfung bewerten. Vorwerte nur aus derselben Vorlage (Hevy) bringen beim Arnold-Split nichts, weil Seitheben in A und B denselben Bereich hat. Eine feste Entlastungswoche alle sechs Wochen (Hevy Trainer) braucht einen Wochenplan, den die App nicht kennt; „Entlasten“ greift bei echtem Stillstand. RiR und Erholungsstand wie bei Fitbod und MCI kosten pro Satz zusätzliche Tipps. Nach „Steigern“ bleiben die Wdh beim alten Wert (z. B. 8); die untere Grenze vorzubelegen, kostet Tipps, wenn man mehr schafft.
 
-Quellen: APPS.md, Abschnitt „Letztes Mal“.
+**Quellen**
+- Selbst gelesen (zweite Prüfung):
+  - Hevy, „Workout Plan Generator“ (Hevy Trainer): https://www.hevyapp.com/features/workout-plan-generator/
+  - Hevy, „Exercise Programming Options“ (Wdh-Bereiche, Ziel pro Satz): https://www.hevyapp.com/features/exercise-programming-options/
+  - Hevy, „Progressive Overload“ (Spalte „Previous“): https://www.hevyapp.com/progressive-overload/
+  - Strong Help Center, „Save a Workout as a Template / Update a Template when completing a Workout“: https://help.strongapp.io/article/177-update-template
+  - ScreensDesign, App-Seite MCI (Bildbeschreibungen): https://screensdesign.com/apps/mci-personal-training-ai/
+- Nur aus Suchergebnissen (Seiten mit Fehler 403):
+  - Hevy Help Center, „Previous Workout Values“: https://help.hevyapp.com/hc/en-us/articles/34105442929943
+  - Hevy Help Center, „Hevy Trainer Explained“: https://help.hevyapp.com/hc/en-us/articles/38385724273047-Hevy-Trainer-Explained-How-It-Builds-Your-Workout-Program
+  - Fitbod Help, „How Fitbod Creates Your Workout“: https://help.fitbod.me/hc/en-us/articles/360004429814-How-Fitbod-Creates-Your-Workout
+  - Fitbod Help, „Took a Break? Here's How to Recalibrate Your Fitbod Recommendations“: https://help.fitbod.me/hc/en-us/articles/34320813009431-Took-a-Break-Here-s-How-to-Recalibrate-Your-Fitbod-Recommendations
+  - Fitbod Blog, „How Fitbod's AI Knows Exactly When You Should Lift Heavier And When To Recover“: https://fitbod.me/blog/how-fitbods-ai-knows-exactly-when-you-should-lift-heavier-and-when-to-recover/
+  - Alpha Progression, „Alpha Progression vs. Hevy“ (Aussage eines Wettbewerbers): https://alphaprogression.com/en/blog/alpha-progression-vs-hevy
+  - Forenstimmen: Auch diesmal waren keine echten Reddit-Threads zu finden.
+- Aus der ersten Prüfung und von `produkt-scout` (Einzelheiten in `APPS.md`, Abschnitt „Letztes Mal“): MCI im App Store, WorldsApps-Bewertungen, Strong „Focus Metric“, Hevy „Track Exercises“.
 
 ### Satz-Erfassung
 

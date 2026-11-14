@@ -111,6 +111,10 @@ button.hero{display:block;width:100%;text-align:left}
 .tpl::before{content:"";position:absolute;left:0;top:0;bottom:0;width:9px;background:linear-gradient(180deg,var(--accent-hi),var(--accent-deep))} /* Gürtel */
 .tpl .t{font-size:25px;line-height:1.05;letter-spacing:.01em}
 .tpl-foot{display:flex;align-items:center;gap:14px;margin-top:8px}
+/* Überschrift je Programm auf dem Startbildschirm */
+.tpl-group{margin:18px 2px 8px;font-size:14px;font-weight:700;color:var(--text);overflow-wrap:anywhere}
+.tpl-group .muted{font-weight:400}
+.tpl-slot{display:block;font-size:12px;margin-top:2px}
 .tpl-foot .muted{font-size:13px}
 /* Vorlage, die am längsten her ist */
 .tpl.due{border-color:var(--accent);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 4px 0 var(--ink),0 0 18px rgba(255,138,31,.35)}
@@ -264,6 +268,8 @@ button.li:active{transform:none;opacity:.6}
 .panel{position:absolute;left:0;right:0;bottom:0;max-height:90vh;overflow:auto;-webkit-overflow-scrolling:touch;background:var(--card);
   border-top:3px solid var(--accent);border-radius:20px 20px 0 0;padding:0 16px calc(28px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto}
 .panel.anim{animation:up .22s ease-out}
+/* Auswahl-Sheet immer hoch: sonst schrumpft es beim Suchen, und das Suchfeld rutscht unter dem Finger weg */
+.panel.tall{height:90vh}
 @keyframes up{from{transform:translateY(40px);opacity:.5}}
 .sheet-head{display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--card);padding:12px 0 8px;z-index:2}
 .sheet-head b{font-size:21px}
@@ -625,7 +631,7 @@ function loadLib(){
     })
     .catch(e => { console.warn("Übungsbibliothek nicht geladen:", e); lib.state = "error"; })   // fängt auch Fehler beim Auswerten ab
     .finally(() => {   // offene Ansicht nachziehen (Bibliothek, Richtwerte, Gewichtsschritt), aber nicht, während jemand tippt
-      const uses = (ui.sheet && ["picker","programs","exercise","progress"].includes(ui.sheet.kind)) || (S && S.active && ui.tab === "training");
+      const uses = (ui.sheet && ["picker","programs","exercise","progress","template"].includes(ui.sheet.kind)) || (S && ui.tab === "training");   // Startbildschirm: Dran und Ordnung nach Programm
       if (uses && !document.activeElement?.matches("input,textarea,select")) render();
     });
 }
@@ -652,10 +658,22 @@ function libDose(x){
 }
 /* Richtwert einer Übung aus dem Bibliotheks-Programm, aus dem eine Vorlage stammt (Feld lib der Vorlage).
    Wird nur nachgeschlagen, nicht gespeichert. planFor() gilt für das laufende Training, erkannt am Vorlagennamen. */
+/* Steht die Übung nicht in der Einheit, weil sie in der Vorlage eine andere ersetzt (Idee 46), bekommt sie den Richtwert
+   eines frei gewordenen Programmplatzes: einer Übung der Einheit, die in der Vorlage fehlt, mit gleichem Hauptmuskel
+   (muskeln[0]; ohne Bibliothekseintrag gleiche Kategorie), bei mehreren der an derselben Position. Gleiche Regel wie
+   beim Tauschen im Training (Idee 22). Das Ergebnis trägt dann slot (der Bibliothekseintrag des Programmplatzes). */
 function planOf(t, exId){
   if (!t || !t.lib || lib.state !== "ready") return null;
-  const u = lib.progs.flatMap(p => p.einheiten).find(x => x.id === t.lib), l = libOf(exById(exId));
-  return u && l ? (u.uebungen || []).find(x => x.uebung === l.id) || null : null;
+  const u = lib.progs.flatMap(p => p.einheiten).find(x => x.id === t.lib), ex = exById(exId), l = libOf(ex);
+  if (!u || !ex) return null;
+  const list = u.uebungen || [], own = l && list.find(x => x.uebung === l.id);
+  if (own) return own;
+  const inTpl = new Set((t.ex || []).map(id => (libOf(exById(id)) || {}).id).filter(Boolean)), main = l && (l.muskeln || [])[0];
+  const free = list.map((x, k) => ({x, k, s:lib.byId.get(x.uebung)})).filter(f => f.s && !inTpl.has(f.s.id)
+    && (main ? (f.s.muskeln || [])[0] === main : !l && f.s.cat === ex.cat));
+  if (!free.length) return null;
+  const pos = (t.ex || []).indexOf(exId), f = free.find(c => c.k === pos) || free[0];
+  return {...f.x, slot:f.s};
 }
 const planFor = exId => S.active ? planOf(S.templates.find(t => t.lib && t.name === S.active.name), exId) : null;
 // Richtwert eines Eintrags im laufenden Training. Eine getauschte Übung übernimmt den Richtwert der Übung, die sie ersetzt
@@ -664,19 +682,20 @@ const entryPlan = en => planFor(en.planEx || en.exId);
 /* Passende Alternativen zum Tauschen im Training: gleiche Erfassungsart und gleicher Hauptmuskel (erster Eintrag in
    muskeln der Bibliothek); ist die Übung nicht in der Bibliothek, gleiche Kategorie. Eigene Übungen zuerst, dann die
    Bibliothek. Übungen, die schon im Training sind, fehlen. */
-function swapAlternatives(en){
-  const ex = exById(en.exId);
-  if (!ex || !S.active) return [];
+// exId: die zu ersetzende Übung, takenIds: Übungen, die schon im Training bzw. in der Vorlage sind
+function swapAlternatives(exId, takenIds){
+  const ex = exById(exId);
+  if (!ex) return [];
   const l = libOf(ex), main = l && (l.muskeln || [])[0], type = ex.type || "kraft";
-  const taken = new Set(S.active.entries.map(e => e.exId));
+  const taken = new Set(takenIds);
   const fits = (lx, cat, t) => (t || "kraft") === type && (main && lx ? (lx.muskeln || [])[0] === main : cat === ex.cat);
   const own = S.exercises.filter(e => !taken.has(e.id) && fits(libOf(e), e.cat, e.type)).sort((a, b) => a.name.localeCompare(b.name, "de")).map(e => ({own:e}));
   const fromLib = lib.state === "ready" ? lib.ex.filter(x => !libOwner(x) && fits(x, x.cat, x.type)).sort((a, b) => a.name.localeCompare(b.name, "de")).map(x => ({lib:x})) : [];
   return [...own, ...fromLib];
 }
-function vSwapAlt(en){
-  const alt = swapAlternatives(en), gear = l => esc(((l && l.geraet) || []).join(", "));
-  return `<div class="grp"><h2>Statt ${esc(exName(en.exId))}</h2>
+function vSwapAlt(exId, takenIds){
+  const alt = swapAlternatives(exId, takenIds), gear = l => esc(((l && l.geraet) || []).join(", "));
+  return `<div class="grp"><h2>Statt ${esc(exName(exId))}</h2>
     ${alt.map(x => x.own
       ? `<button class="li row between" data-act="picked" data-id="${x.own.id}" data-name="${esc(x.own.name.toLowerCase())}"><span>${esc(x.own.name)} <span class="muted">${gear(libOf(x.own))}</span></span></button>`
       : `<button class="li row between" data-act="picked-lib" data-lib="${esc(x.lib.id)}" data-name="${esc(x.lib.name.toLowerCase())}"><span>${esc(x.lib.name)} <span class="muted">${gear(x.lib)}</span></span><span class="lib-add" aria-hidden="true">+</span></button>`).join("")
@@ -1144,12 +1163,55 @@ function orb(n, lit){
 }
 /* Wann jede Vorlage zuletzt trainiert wurde (erkannt am Trainingsnamen, umbenannte Vorlagen verlieren ihre alten Trainings)
    und welche „dran“ ist: von den schon einmal trainierten Vorlagen die, die am längsten her ist, sofern nicht heute. */
+/* „Zuletzt“ und „Dran“ für die Vorlagen (erkannt am Trainingsnamen).
+   Vorlagen aus einem Bibliotheks-Programm (Feld lib) bilden je Programm eine Gruppe in Programm-Reihenfolge (Idee 44):
+   Dran ist die erste nie trainierte Einheit, sonst die am längsten nicht trainierte; so kommt bei fester Reihenfolge
+   immer die nächste, und eine übersprungene Einheit wird nachgeholt. Programme mit dauerWochen (Laufplan Woche für
+   Woche) bekommen kein Dran. Eigene Vorlagen bekommen Dran nur nach der alten Regel (die am längsten nicht trainierte
+   von mindestens zwei trainierten), wenn es keine Programm-Gruppe gibt; ebenso, solange die Bibliothek nicht geladen ist.
+   Ergebnis: last (Name → letztes Datum), due (Set der Vorlagen-IDs mit „Dran“), groups [{p, tpls, rotation, due, recent,
+   week}] und own (Vorlagen ohne Programm-Gruppe). */
 function templateDays(){
-  const last = {};
+  const last = {}, today = dayStart(Date.now()), monday = weekStart(Date.now());
   S.workouts.forEach(w => { last[w.name] = Math.max(last[w.name] || 0, w.date); });
-  const done = S.templates.filter(t => last[t.name]);
-  const oldest = done.length >= 2 ? done.reduce((a, b) => last[b.name] < last[a.name] ? b : a) : null;
-  return {last, due: oldest && dayStart(last[oldest.name]) < dayStart(Date.now()) ? oldest.id : null};
+  const groups = [];
+  if (lib.state === "ready") lib.progs.forEach(p => {
+    const tpls = (p.einheiten || []).map(u => S.templates.find(t => t.lib === u.id)).filter(Boolean);
+    if (!tpls.length) return;
+    const rotation = !p.dauerWochen;
+    const due = rotation ? tpls.find(t => !last[t.name]) || tpls.reduce((a, b) => last[b.name] < last[a.name] ? b : a) : null;
+    const week = new Set(S.workouts.filter(w => w.date >= monday && tpls.some(t => t.name === w.name)).map(w => w.name)).size;
+    groups.push({p, tpls, rotation, due:due && !(last[due.name] >= today && tpls.every(t => last[t.name] >= today)) ? due : null,
+      recent:Math.max(0, ...tpls.map(t => last[t.name] || 0)), week});
+  });
+  const inGroup = new Set(groups.flatMap(g => g.tpls)), own = S.templates.filter(t => !inGroup.has(t));
+  // Nur ein „Dran“: die nächste Einheit des zuletzt trainierten Programms; dessen Gruppe kommt zuerst
+  const lead = groups.filter(g => g.due).sort((a, b) => b.recent - a.recent)[0] || null;
+  if (lead) groups.splice(groups.indexOf(lead), 1), groups.unshift(lead);
+  const due = new Set(lead ? [lead.due.id] : []);
+  if (!groups.some(g => g.rotation)){
+    const done = own.filter(t => last[t.name]);
+    const oldest = done.length >= 2 ? done.reduce((a, b) => last[b.name] < last[a.name] ? b : a) : null;
+    if (oldest && dayStart(last[oldest.name]) < today) due.add(oldest.id);
+  }
+  return {last, due, groups, own, top:lead ? lead.due : null};
+}
+// Vorlagen auf dem Startbildschirm (Idee 45): Mit Programm-Vorlagen steht die nächste Einheit (Dran) des zuletzt
+// trainierten Programms oben, darunter je Programm die übrigen Einheiten in Programm-Reihenfolge, zuletzt die eigenen
+// Vorlagen. Ohne Programm-Vorlagen (oder solange die Bibliothek lädt) bleibt die Liste in der angelegten Reihenfolge.
+function vTplList(td){
+  const card = t => { const seen = td.last[t.name], due = td.due.has(t.id), ago = seen ? relDay(seen) : "";
+    return `<button class="tpl${due ? " due" : ""}" data-act="start" data-id="${t.id}">
+      <span class="t">${esc(t.name)}</span>${due ? `<span class="due-tag">Dran</span>` : ""}
+      <span class="muted">${t.ex.map(exName).map(esc).join(" · ") || "Keine Übungen"}</span>
+      <span class="tpl-foot"><span class="go">Starten</span><span class="muted">${seen ? `Zuletzt ${ago[0].toLowerCase() + ago.slice(1)}` : "Noch nie trainiert"}</span></span></button>`; };
+  if (!td.groups.length) return S.templates.map(card).join("");
+  const top = td.top;
+  const head =(title, sub) => `<div class="tpl-group">${esc(title)}${sub ? ` <span class="muted">· ${sub}</span>` : ""}</div>`;
+  return (top ? card(top) : "")
+    + td.groups.map(g => { const rest = g.tpls.filter(t => t !== top);
+        return rest.length ? head(g.p.name, g.rotation ? `diese Woche ${g.week} von ${g.tpls.length}` : "") + rest.map(card).join("") : ""; }).join("")
+    + (td.own.length ? head("Eigene Vorlagen") + td.own.map(card).join("") : "");
 }
 function vTraining(){
   const a = S.active;
@@ -1167,11 +1229,7 @@ function vTraining(){
       <span class="row between muted hero-foot"><span>${p.streak ? `Serie: ${weeks(p.streak)}` : "Noch keine Serie"}</span><span>Erfolge ${ACHIEVEMENTS.filter(a => a[2](p)).length}/${ACHIEVEMENTS.length} ›</span></span>
     </button>
     <h2>Vorlage starten</h2>
-    ${S.templates.map(t => { const seen = td.last[t.name], due = t.id === td.due, ago = seen ? relDay(seen) : "";
-      return `<button class="tpl${due ? " due" : ""}" data-act="start" data-id="${t.id}">
-      <span class="t">${esc(t.name)}</span>${due ? `<span class="due-tag">Dran</span>` : ""}
-      <span class="muted">${t.ex.map(exName).map(esc).join(" · ") || "Keine Übungen"}</span>
-      <span class="tpl-foot"><span class="go">Starten</span><span class="muted">${seen ? `Zuletzt ${ago[0].toLowerCase() + ago.slice(1)}` : "Noch nie trainiert"}</span></span></button>`; }).join("")}
+    ${vTplList(td)}
     <button class="block" data-act="start" data-id="">+ Freies Training</button>`;
   }
   const done = a.entries.reduce((n, e) => n + e.sets.filter(s => s.done).length, 0);
@@ -1206,7 +1264,7 @@ function vEntry(en, i){
       <button class="ghost" data-act="del-entry" data-i="${i}" aria-label="Übung entfernen">✕</button></span></div>
     ${ex.note ? `<div class="ex-note">${esc(ex.note)}</div>` : ""}
     <div class="last">${last ? `Letztes Mal (${fmtDate(last.date)}${back ? `, vor ${weeks(back.weeks)}` : ""}): ${esc(fmtSets(ex.type, last.sets))}` : `<span class="muted">Erstes Mal – leg los!</span>`}</div>
-    ${plan ? `<div class="plan">Programm${en.planEx ? ` wie ${esc(exName(en.planEx))}` : ""}: ${esc(libDose(plan))}</div>` : ""}
+    ${plan ? `<div class="plan">Programm${en.planEx ? ` wie ${esc(exName(en.planEx))}` : plan.slot ? ` wie ${esc((libOwner(plan.slot) || plan.slot).name)}` : ""}: ${esc(libDose(plan))}</div>` : ""}
     ${goalOpen ? (g => `<button class="goal-btn" data-act="goal" data-i="${i}" aria-label="${esc(g)} in die offenen Sätze eintragen">Ziel eintragen: <b>${esc(g)}</b></button>`)(fmtGoal(goal.filter((_, j) => !en.sets[j].done)))
       : goal ? `<div class="goal-btn goal-text${goalHit ? " hit" : ""}">${goalHit ? "✓ Ziel geschafft:" : "Ziel heute:"} <b>${esc(fmtGoal(goal))}</b></div>` : ""}
     ${showUp ? `<button class="step-up" data-act="step-up" data-i="${i}" aria-label="Gewicht in den offenen Sätzen auf ${fmtNum(up)} kg erhöhen">Steigern: ${fmtNum(up)} kg</button>` : ""}
@@ -1298,15 +1356,18 @@ function vHistory(){
 function vSheet(s){
   if (s.kind === "picker"){
     // target "lib": nur Bibliothek, um Übungen in die eigene Liste zu holen (Tab Übungen)
-    // target "swap": Übung s.i im laufenden Training ersetzen, passende Alternativen stehen oben
-    const onlyLib = s.target === "lib", swap = s.target === "swap" && S.active && S.active.entries[s.i];
+    // target "swap": Übung s.i im laufenden Training ersetzen, "tpl-swap": Übung s.k in der Vorlage (Entwurf in s.back);
+    // passende Alternativen stehen jeweils oben
+    const onlyLib = s.target === "lib";
     const inWorkout = new Set((s.target === "active" || s.target === "swap") && S.active ? S.active.entries.map(e => e.exId)
       : s.target === "edit-w" ? s.back.draft.entries.map(e => e.exId) : (s.back?.draft?.ex || []));
+    const swapId = s.target === "swap" ? S.active && S.active.entries[s.i] && S.active.entries[s.i].exId
+      : s.target === "tpl-swap" ? s.back.draft.ex[s.k] : null, swap = !!swapId;
     return `<div class="sheet-head"><button class="ghost" data-act="close">${onlyLib ? "Fertig" : "Zurück"}</button><b>${onlyLib ? "Übungsbibliothek" : swap ? "Übung tauschen" : "Übung wählen"}</b>${onlyLib ? `<span style="width:60px"></span>` : `<button class="ghost accent" data-act="new-ex-inline">Neu</button>`}</div>
     <input id="pick-q" placeholder="Suchen …" autocomplete="off">
     ${onlyLib ? "" : `<button class="small ghost accent" style="margin-top:6px;padding-left:0" data-act="to-lib">↓ Zur Übungsbibliothek</button>`}
     <p class="muted" id="pick-none" style="margin-top:12px" hidden>${onlyLib ? "Keine passende Übung in der Bibliothek." : "Keine passende Übung. Über „Neu“ legst du eine eigene an."}</p>
-    <div id="pick-list">${swap ? vSwapAlt(swap) : ""}${onlyLib ? "" : groupByCat(S.exercises).map(([cat, list]) => `<div class="grp"><h2>${esc(cat)}</h2>
+    <div id="pick-list">${swap ? vSwapAlt(swapId, [...inWorkout]) : ""}${onlyLib ? "" : groupByCat(S.exercises).map(([cat, list]) => `<div class="grp"><h2>${esc(cat)}</h2>
       ${list.map(e => `<button class="li row between" data-act="picked" data-id="${e.id}" data-name="${esc(e.name.toLowerCase())}"><span>${esc(e.name)}</span>${inWorkout.has(e.id) ? `<span class="muted">✓ drin</span>` : ""}</button>`).join("")}</div>`).join("")}
       ${onlyLib ? `<p class="muted">Tippen übernimmt die Übung in deine Liste.</p>` : `<h2 class="lib-title">Aus der Bibliothek</h2>`}${vLibList()}</div>`;
   }
@@ -1315,8 +1376,9 @@ function vSheet(s){
     return `<div class="sheet-head"><button class="ghost" data-act="close">Abbrechen</button><b>${d.isNew ? "Neue Vorlage" : "Vorlage"}</b><button class="ghost accent" data-act="save-tpl">Sichern</button></div>
     <label class="lbl">Name</label><input data-draft="name" value="${esc(d.name)}" placeholder="z. B. Push" autocomplete="off">
     <h2>Übungen (Reihenfolge im Training)</h2>
-    <div class="list" style="padding:0">${d.ex.map((id, k) => `<div class="li row between"><span class="grow">${esc(exName(id))}</span>
-      <span class="row" style="gap:4px"><button class="small" data-act="tpl-move" data-k="${k}" data-d="-1" ${k ? "" : "disabled"}>↑</button><button class="small" data-act="tpl-move" data-k="${k}" data-d="1" ${k < d.ex.length - 1 ? "" : "disabled"}>↓</button><button class="small danger" data-act="tpl-rm" data-k="${k}">✕</button></span></div>`).join("") || `<p class="muted">Noch keine Übungen.</p>`}</div>
+    <div class="list" style="padding:0">${d.ex.map((id, k) => { const pl = planOf(d, id), slot = pl && pl.slot ? (libOwner(pl.slot) || pl.slot).name : "";
+      return `<div class="li row between"><span class="grow">${esc(exName(id))}${slot ? `<span class="muted tpl-slot">Programmplatz ${esc(slot)} · ${esc(libDose(pl))}</span>` : ""}</span>
+      <span class="row" style="gap:4px"><button class="small" data-act="tpl-move" data-k="${k}" data-d="-1" ${k ? "" : "disabled"} aria-label="nach oben">↑</button><button class="small" data-act="tpl-move" data-k="${k}" data-d="1" ${k < d.ex.length - 1 ? "" : "disabled"} aria-label="nach unten">↓</button><button class="small" data-act="tpl-swap" data-k="${k}" aria-label="${esc(exName(id))} gegen eine andere Übung tauschen">⇄</button><button class="small danger" data-act="tpl-rm" data-k="${k}" aria-label="aus der Vorlage entfernen">✕</button></span></div>`; }).join("") || `<p class="muted">Noch keine Übungen.</p>`}</div>
     <button class="block" style="margin-top:10px" data-act="pick" data-target="template">+ Übung hinzufügen</button>
     ${d.isNew ? "" : `<button class="block ghost danger" style="margin-top:14px" data-act="del-tpl">Vorlage löschen</button>`}`;
   }
@@ -1424,7 +1486,7 @@ function render(){
   });
   const sh = $("#sheet"), wasOpen = sh.classList.contains("open"), oldPanel = sh.querySelector(".panel"), st = oldPanel ? oldPanel.scrollTop : 0;
   if (ui.sheet){
-    sh.innerHTML = `<div class="backdrop" data-act="close"></div><div class="panel${wasOpen ? "" : " anim"}">${vSheet(ui.sheet)}</div>`;
+    sh.innerHTML = `<div class="backdrop" data-act="close"></div><div class="panel${wasOpen ? "" : " anim"}${ui.sheet.kind === "picker" ? " tall" : ""}">${vSheet(ui.sheet)}</div>`;
     sh.classList.add("open");
     if (wasOpen && ui.sheet === lastSheet) sh.querySelector(".panel").scrollTop = st;
   } else { sh.innerHTML = ""; sh.classList.remove("open"); }
@@ -1675,6 +1737,13 @@ const actions = {
       save(); ui.sheet = null; render();
       toast(done.length && open ? `${open === 1 ? "Letzter Satz" : `Restliche ${open} Sätze`} mit „${exName(id)}“` : `„${exName(id)}“ statt „${exName(old.exId)}“`);
     }
+    else if (s.target === "tpl-swap"){
+      // In der Vorlage ersetzen, an derselben Stelle; den Programm-Richtwert gibt planOf() über den frei gewordenen Platz
+      const d = s.back.draft;
+      if (d.ex[s.k] === id){ ui.sheet = s.back; render(); return; }
+      if (d.ex.includes(id)){ toast(`„${exName(id)}“ ist schon in der Vorlage`); return; }
+      d.ex[s.k] = id; ui.sheet = s.back; render();
+    }
     else if (s.target === "edit-w"){
       const d = s.back.draft;
       if (d.entries.some(e => e.exId === id)){ toast(`„${exName(id)}“ ist schon in diesem Training`); return; }
@@ -1714,6 +1783,7 @@ const actions = {
   "new-tpl": () => { ui.sheet = {kind:"template", draft:{isNew:true, id:uid(), name:"", ex:[]}}; render(); },
   "edit-tpl": el => { const t = S.templates.find(x => x.id === el.dataset.id); ui.sheet = {kind:"template", draft:{...t, ex:[...t.ex]}}; render(); },
   "tpl-move": el => { const ex = ui.sheet.draft.ex, k = +el.dataset.k, j = k + +el.dataset.d; [ex[k], ex[j]] = [ex[j], ex[k]]; render(); },
+  "tpl-swap": el => { retryLib(); ui.sheet = {kind:"picker", target:"tpl-swap", k:+el.dataset.k, back:ui.sheet}; render(); },
   "tpl-rm": el => { ui.sheet.draft.ex.splice(+el.dataset.k, 1); render(); },
   "save-tpl": () => {
     const d = ui.sheet.draft;

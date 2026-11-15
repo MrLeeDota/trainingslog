@@ -165,6 +165,12 @@ button.hero{display:block;width:100%;text-align:left}
 .cal-day.today{box-shadow:inset 0 0 0 2px var(--accent)}
 .cal-day.on.today{box-shadow:inset 0 0 0 2px var(--ink),0 0 10px rgba(255,138,31,.7)}
 .cal-sum{margin:8px 4px 0;font-size:13px}
+/* Kalendertage antippbar (Idee 78): Tap-Fläche 44 px, die Kugel bleibt 40 px */
+.cal-hit{display:flex;align-items:center;justify-content:center;min-height:44px;padding:0;background:none;box-shadow:none;border-radius:50%}
+.cal-day.sel{outline:2px solid var(--text);outline-offset:2px}
+.cal-dayinfo{margin-top:6px;border-top:1px solid var(--line)}
+.cal-dayinfo .li{width:100%;text-align:left;padding:10px 4px;background:none;box-shadow:none;border-radius:0}
+button.stat{text-align:left;width:100%;font:inherit;box-shadow:none}
 .cmp{display:grid;grid-template-columns:1fr auto auto;gap:8px 18px;align-items:baseline;background:var(--well);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
 .cmp-h{font-size:12px;color:var(--muted);text-align:right}
 .cmp b{font-family:var(--display);font-stretch:condensed;font-style:italic;font-weight:900;font-size:20px;color:var(--ki);text-align:right}
@@ -246,6 +252,24 @@ button.step-down:active{transform:skewX(-10deg) translateY(2px)}
 .chart-dot{fill:var(--well);stroke:var(--ki);stroke-width:2}
 .chart-last{fill:var(--ki);stroke:var(--ink);stroke-width:1.5;filter:drop-shadow(0 0 5px rgba(255,212,59,.8))}
 .chart-foot{font-size:12px}
+.chart-rec{fill:var(--ki);stroke:var(--ink);stroke-width:1.5}
+.chart-sel{stroke:var(--text);stroke-width:2.5}
+.chart-cursor{stroke:var(--muted);stroke-width:1;stroke-dasharray:2 3}
+.chart-seg{font-size:11px;fill:var(--muted)}
+.chart-now{white-space:nowrap;padding-left:8px}
+#recs{scroll-margin-top:72px}   /* unter der festen Kopfzeile des Sheets */
+[class^="trend-"]{text-align:right}
+.chart svg[data-act]{cursor:pointer}
+.chart-range{display:flex;gap:6px;margin-top:6px}
+.chart-range .chip{flex:1;padding:6px 8px}
+.bests .li{gap:10px}
+.bests b{text-align:right;font-size:14px}
+.trend-sum{font-weight:700;margin:4px 2px 8px}
+.trend-up{color:var(--scan)}
+.trend-same{color:var(--ki)}
+.trend-down{color:var(--danger)}
+.trend-few,.trend-pause{color:var(--muted)}
+.chart-pickinfo{font-size:13px;margin-top:2px;overflow-wrap:anywhere}
 .set{display:grid;gap:8px;align-items:center;margin-top:8px}
 .set.head{margin-top:12px}
 .set.head span{font-size:12px;font-weight:700;color:var(--muted);text-align:center}
@@ -607,51 +631,228 @@ function betterThanLast(en, plan, at){
   return min > min0 ? {name, label:`+${fmtNum(min - min0)} min`} : null;
 }
 
-/* Fortschrittskurve einer Übung: ein Wert pro Einheit.
-   Kraft: geschätztes Maximum für 1 Wdh nach Epley (kg × (1 + Wdh/30)), ohne Gewicht die meisten Wiederholungen;
-   Ausdauer: Tempo in min/km (kleiner ist besser); nur Zeit: Minuten der Einheit. */
+/* Einheitswert (Regel des trainings-experte, bibliothek/README.md „Regeln für Auswertungen“), gemeinsame Grundlage der
+   Kurve (Idee 76), der Kraftentwicklung (73) und der Bestwerte (75):
+   Kraft mit Gewicht: nur die Sätze mit dem schwersten Gewicht der Einheit, je Satz Epley kg × (1 + Wdh/30) mit höchstens
+   15 Wdh (1 Wdh = das Gewicht), davon der Mittelwert. Körpergewicht-Übungen (Gerät „Körpergewicht“ in der Bibliothek,
+   ohne Eintrag: ein Satz ohne Gewicht) rechnen nicht mit Epley: ohne Zusatzgewicht der Mittelwert der Wdh, mit
+   Zusatzgewicht das schwerste Zusatzgewicht und der Mittelwert der Wdh damit. */
+const REP_CAP = 15;
+const epley = (kg, reps) => { const r = Math.min(reps, REP_CAP); return r > 1 ? kg * (1 + r / 30) : kg; };
+function isBodyweight(exId, sets){
+  const l = libOf(exById(exId));
+  if (l) return (l.geraet || []).includes("Körpergewicht");
+  return (sets || []).some(x => num(x.b) > 0 && !(num(x.a) > 0));
+}
+// sets einer Einheit → {v, top, extra, reps, bw} oder null (ohne gültigen Satz)
+function unitValue(exId, sets, bw){
+  const ok = sets.filter(x => num(x.b) > 0);
+  if (!ok.length) return null;
+  const mean = xs => xs.reduce((t, x) => t + x, 0) / xs.length;
+  const top = Math.max(0, ...ok.map(x => num(x.a))), at = ok.filter(x => num(x.a) === top);
+  if (bw){ const reps = mean(at.map(x => num(x.b))); return {v:reps, top, extra:top, reps, bw:true}; }
+  if (!(top > 0)) return null;
+  return {v:mean(at.map(x => epley(top, num(x.b)))), top, extra:0, reps:mean(at.map(x => num(x.b))), bw:false};
+}
+// Einheiten einer Übung, nach Datum: {date, id, sets}
+const exRuns = exId => S.workouts.map(w => ({date:w.date, id:w.id, sets:(w.entries.find(e => e.exId === exId) || {}).sets})).filter(r => r.sets && r.sets.length);
+
+/* Fortschrittskurve einer Übung: ein Wert pro Einheit (Idee 76, Regel des trainings-experte).
+   Kraft: Einheitswert (geschätztes Maximum als Schnitt der Arbeitssätze); Körpergewicht: Wdh im Schnitt, bei jedem
+   Wechsel des Zusatzgewichts beginnt ein neuer, beschrifteter Abschnitt; Ausdauer: Tempo in min/km (kleiner ist besser);
+   nur Zeit: Minuten der Einheit. Jeder Punkt trägt Datum, Training (id) und Sätze; seg trennt Abschnitte. */
 function exSeries(exId){
   const type = exType(exId), pts = [], sum = (sets, f) => sets.reduce((t, s) => t + num(s[f]), 0);
-  const runs = S.workouts.map(w => ({date:w.date, sets:(w.entries.find(e => e.exId === exId) || {}).sets})).filter(r => r.sets && r.sets.length);
+  const runs = exRuns(exId);
   if (type === "kraft"){
-    const weighted = runs.some(r => r.sets.some(s => num(s.a) > 0));
-    const e1rm = s => num(s.b) > 1 ? num(s.a) * (1 + num(s.b) / 30) : num(s.a);
-    runs.forEach(r => {
-      const v = weighted ? Math.max(0, ...r.sets.filter(s => num(s.a) > 0 && num(s.b) > 0).map(e1rm)) : Math.max(0, ...r.sets.map(s => num(s.b)));
-      if (v > 0) pts.push({date:r.date, v});
-    });
-    return weighted ? {pts, label:"Geschätztes Maximum für 1 Wdh", fmt:v => `${fmtNum(Math.round(v * 2) / 2)} kg`}
-                    : {pts, label:"Meiste Wiederholungen in einem Satz", fmt:v => `${Math.round(v)} Wdh`};
+    const bw = isBodyweight(exId, runs.flatMap(r => r.sets));
+    runs.forEach(r => { const u = unitValue(exId, r.sets, bw); if (u) pts.push({date:r.date, id:r.id, sets:r.sets, v:u.v, seg:bw ? u.extra : 0}); });
+    return bw ? {pts, bw:true, label:"Wiederholungen im Schnitt", fmt:v => `${fmtNum(Math.round(v * 10) / 10)} Wdh`}
+              : {pts, label:"Geschätztes Maximum (Schnitt der Arbeitssätze)", fmt:v => `≈ ${fmtNum(Math.round(v * 2) / 2)} kg`};
   }
   if (type === "ausdauer"){
     // nur Einträge mit Minuten und km, sonst zählen Läufe ohne Strecke ins Tempo hinein
-    runs.forEach(r => { const both = r.sets.filter(s => num(s.a) > 0 && num(s.b) > 0), min = sum(both, "a"), km = sum(both, "b"); if (min > 0 && km > 0) pts.push({date:r.date, v:min / km}); });
+    runs.forEach(r => { const both = r.sets.filter(s => num(s.a) > 0 && num(s.b) > 0), min = sum(both, "a"), km = sum(both, "b"); if (min > 0 && km > 0) pts.push({date:r.date, id:r.id, sets:r.sets, v:min / km, seg:0}); });
     return {pts, label:"Tempo (oben ist schneller)", lowerIsBetter:true, fmt:v => `${fmtPace(v)} min/km`};
   }
-  runs.forEach(r => { const min = sum(r.sets, "a"); if (min > 0) pts.push({date:r.date, v:min}); });
+  runs.forEach(r => { const min = sum(r.sets, "a"); if (min > 0) pts.push({date:r.date, id:r.id, sets:r.sets, v:min, seg:0}); });
   return {pts, label:"Minuten pro Einheit", fmt:v => `${fmtNum(v)} min`};
 }
-// Linie der letzten 20 Einheiten, gleichmäßig verteilt; oben ist immer besser. Ab zwei Einheiten.
+/* Bestwerte einer Übung (Idee 75, Regel des trainings-experte). Kraft: schwerster Satz (bei Gleichstand die meisten Wdh,
+   Datum des ersten Mals), bestes geschätztes Maximum (höchster Einheitswert, wie die Bestwert-Linie der Kurve) und die
+   besten Wdh der vier schwersten Gewichte (ein Gewicht fällt weg, wenn ein schwereres mindestens gleich viele Wdh hat).
+   Körpergewicht: meiste Wdh in einem Satz, bester Wdh-Schnitt, mit Zusatzgewicht das schwerste und die Wdh je Stufe.
+   Ausdauer: längste Strecke, schnellstes Tempo ab 1 km, ohne km die meisten Minuten. Nur Zeit: längster Satz und
+   meiste Minuten einer Einheit. */
+function vBests(exId){
+  const type = exType(exId), runs = exRuns(exId);
+  if (!runs.length) return "";
+  const d = t => fmtDate(t), rows = [];
+  const sum = (sets, f) => sets.reduce((t, x) => t + num(x[f]), 0);
+  if (type === "kraft"){
+    const bw = isBodyweight(exId, runs.flatMap(r => r.sets));
+    const sets = runs.flatMap(r => r.sets.filter(x => num(x.b) > 0).map(x => ({kg:num(x.a) > 0 ? num(x.a) : 0, reps:num(x.b), date:r.date})));
+    if (!sets.length) return "";
+    // beste Wdh je Gewicht, die vier schwersten, ohne Gewichte, die ein schwereres mit mindestens gleich vielen Wdh schlägt
+    const byKg = new Map(); sets.forEach(x => byKg.set(x.kg, Math.max(byKg.get(x.kg) || 0, x.reps)));
+    let maxReps = 0; const ladder = [];
+    [...byKg.keys()].sort((a, b) => b - a).forEach(kg => { const r = byKg.get(kg); if (r > maxReps){ ladder.push([kg, r]); maxReps = r; } });
+    const kgLabel = kg => kg > 0 ? `${fmtNum(kg)} kg` : "ohne";
+    const ladderRow = ladder.length > 1 ? ladder.slice(0, 4).map(([kg, r]) => `${bw && kg > 0 ? "+" : ""}${kgLabel(kg)}: ${fmtNum(r)}`).join(" · ") : "";
+    if (bw){
+      const most = sets.reduce((a, b) => b.reps > a.reps ? b : a);
+      const bestU = runs.map(r => ({r, u:unitValue(exId, r.sets, true)})).filter(x => x.u && !x.u.extra).reduce((a, b) => !a || b.u.reps > a.u.reps ? b : a, null);
+      rows.push(["Meiste Wdh", `${fmtNum(most.reps)} Wdh${most.kg ? ` mit +${fmtNum(most.kg)} kg` : ""} · ${d(most.date)}`]);
+      if (bestU) rows.push(["Bester Schnitt", `${fmtNum(Math.round(bestU.u.reps * 10) / 10)} Wdh · ${d(bestU.r.date)}`]);
+      const heavy = sets.filter(x => x.kg > 0).reduce((a, b) => !a || b.kg > a.kg || (b.kg === a.kg && b.reps > a.reps) ? b : a, null);
+      if (heavy) rows.push(["Schwerstes Zusatzgewicht", `+${fmtNum(heavy.kg)} kg × ${fmtNum(heavy.reps)} · ${d(heavy.date)}`]);
+      if (ladderRow && heavy) rows.push(["Beste Wdh je Gewicht", ladderRow]);
+    } else {
+      const heavy = sets.reduce((a, b) => b.kg > a.kg || (b.kg === a.kg && b.reps > a.reps) ? b : a);
+      if (!(heavy.kg > 0)) return "";
+      const bestU = runs.map(r => ({r, u:unitValue(exId, r.sets, false)})).filter(x => x.u).reduce((a, b) => !a || b.u.v > a.u.v ? b : a, null);
+      rows.push(["Schwerster Satz", `${fmtNum(heavy.kg)} kg × ${fmtNum(heavy.reps)} · ${d(heavy.date)}`]);
+      if (bestU) rows.push(["Geschätztes Maximum", `≈ ${fmtNum(Math.round(bestU.u.v * 2) / 2)} kg · ${d(bestU.r.date)}`]);
+      if (ladderRow) rows.push(["Beste Wdh je Gewicht", ladderRow]);
+    }
+  } else if (type === "ausdauer"){
+    const u = runs.map(r => ({date:r.date, km:sum(r.sets, "b"), min:sum(r.sets, "a"), both:r.sets.filter(x => num(x.a) > 0 && num(x.b) > 0)}));
+    const far = u.reduce((a, b) => b.km > a.km ? b : a);
+    if (far.km > 0){
+      rows.push(["Längste Strecke", `${fmtNum(far.km)} km · ${d(far.date)}`]);
+      const fast = u.map(x => ({date:x.date, km:sum(x.both, "b"), min:sum(x.both, "a")})).filter(x => x.km >= 1 && x.min > 0).reduce((a, b) => !a || b.min / b.km < a.min / a.km ? b : a, null);
+      if (fast) rows.push(["Schnellstes Tempo", `${fmtPace(fast.min / fast.km)} min/km über ${fmtNum(fast.km)} km · ${d(fast.date)}`]);
+    } else { const long = u.reduce((a, b) => b.min > a.min ? b : a); if (long.min > 0) rows.push(["Meiste Minuten", `${fmtNum(long.min)} min · ${d(long.date)}`]); }
+  } else {
+    const one = runs.every(r => r.sets.length === 1);
+    const unit = runs.map(r => ({date:r.date, min:sum(r.sets, "a")})).reduce((a, b) => b.min > a.min ? b : a);
+    if (!one){ const set = runs.flatMap(r => r.sets.map(x => ({date:r.date, min:num(x.a)}))).reduce((a, b) => b.min > a.min ? b : a); if (set.min > 0) rows.push(["Längster Satz", `${fmtNum(set.min)} min · ${d(set.date)}`]); }
+    if (unit.min > 0) rows.push(["Meiste Minuten", `${fmtNum(unit.min)} min · ${d(unit.date)}`]);
+  }
+  return rows.length ? `<h2>Bestwerte</h2><div class="list bests" style="padding:0">${rows.map(([k, v]) => `<div class="li row between"><span class="muted">${k}</span><b>${esc(v)}</b></div>`).join("")}</div>` : "";
+}
+/* Kraftentwicklung (Idee 73, Regel des trainings-experte): je Kraftübung der beste Einheitswert der letzten 42 Tage gegen
+   den der 42 Tage davor, je mindestens 3 Einheiten. steigt: Δ ≥ +2 % oder die neueste Einheit ist schwerer als jeder
+   Satz im alten Fenster; fällt: Δ ≤ −2 % und die neueste ist nicht schwerer; sonst gleich. Körpergewicht ohne
+   Zusatzgewicht: Δ = (30 + Wdh neu) / (30 + Wdh alt) − 1; mit Zusatzgewicht zuerst das Zusatzgewicht, bei gleichem die Wdh.
+   Nach einer Lücke ab 35 Tagen zählen nur die Einheiten danach („nach Pause“, wenn das nicht reicht). „gleich seit
+   X Wochen“: Wochen seit dem höchsten Einheitswert der letzten 84 Tage, bei gleich und fällt ab 6 Wochen. */
+const TREND_DAYS = 42, TREND_MIN = 3, TREND_STEP = .02;
+function strengthTrend(){
+  const now = Date.now(), mid = now - TREND_DAYS * 864e5, old = now - 2 * TREND_DAYS * 864e5, out = [];
+  S.exercises.filter(e => (e.type || "kraft") === "kraft").forEach(e => {
+    let runs = exRuns(e.id);
+    if (!runs.length || runs[runs.length - 1].date < mid) return;   // gerade nicht im Training
+    const bw = isBodyweight(e.id, runs.flatMap(r => r.sets));
+    let cut = -1; runs.forEach((r, i) => { if (i && r.date - runs[i - 1].date >= PAUSE_DAYS * 864e5) cut = i; });
+    const paused = cut >= 0 && runs[cut].date > old;
+    if (cut >= 0) runs = runs.slice(cut);
+    const us = runs.map(r => ({date:r.date, u:unitValue(e.id, r.sets, bw)})).filter(x => x.u);
+    const nw = us.filter(x => x.date >= mid), ol = us.filter(x => x.date >= old && x.date < mid);
+    if (nw.length < TREND_MIN || ol.length < TREND_MIN){ out.push({e, state:paused ? "pause" : "few", n:nw.length}); return; }
+    // Körpergewicht: zuerst das Zusatzgewicht, dann die Wdh
+    const score = x => bw ? x.u.extra * 1000 + x.u.reps : x.u.v;
+    const newest = nw[nw.length - 1].u, best = xs => xs.reduce((a, b) => score(b) > score(a) ? b : a);
+    let delta, heavier = false, val;
+    if (bw){
+      const xNew = Math.max(...nw.map(x => x.u.extra)), xOld = Math.max(...ol.map(x => x.u.extra));
+      const repsAt = (xs, x) => Math.max(...xs.filter(y => y.u.extra === x).map(y => y.u.reps));
+      if (xNew !== xOld){ delta = xNew > xOld ? 1 : -1; heavier = xNew > xOld; }
+      else delta = (30 + repsAt(nw, xNew)) / (30 + repsAt(ol, xOld)) - 1;
+      val = `${xNew ? `+${fmtNum(xNew)} kg · ` : ""}Ø ${fmtNum(Math.round(repsAt(nw, xNew) * 10) / 10)} Wdh`;
+    } else {
+      const bn = best(nw).u.v, bo = best(ol).u.v;
+      delta = bn / bo - 1;
+      heavier = newest.top > Math.max(...runs.filter(r => r.date >= old && r.date < mid).flatMap(r => r.sets.map(x => num(x.a))));
+      val = `≈ ${fmtNum(Math.round(bn))} kg`;
+    }
+    const state = delta >= TREND_STEP || heavier ? "up" : delta <= -TREND_STEP ? "down" : "same";
+    let since = 0;
+    if (state !== "up"){ const recent = us.filter(x => x.date >= now - 84 * 864e5); if (recent.length){ const pk = best(recent); since = Math.floor((now - pk.date) / (7 * 864e5)); } }
+    out.push({e, state, delta, val, since:since >= 6 ? since : 0});
+  });
+  return out;
+}
+function vStrengthTrend(all){
+  const t = strengthTrend(), rated = t.filter(x => ["up", "same", "down"].includes(x.state));
+  if (!rated.length) return "";
+  const cnt = st => rated.filter(x => x.state === st).length;
+  const pct = d => `${d > 0 ? "+" : "−"}${fmtNum(Math.round(Math.abs(d) * 1000) / 10)} %`;
+  const row = x => `<button class="li row between" data-act="rec-ex" data-id="${x.e.id}"><span>${esc(x.e.name)}<span class="muted" style="display:block">${x.val ? esc(x.val) : x.state === "pause" ? "nach Pause" : "zu wenig Einheiten"}</span></span>
+    <span class="trend-${x.state}">${x.state === "up" ? `steigt${x.delta > 0 && x.delta < 1 ? ` ${pct(x.delta)}` : ""}` : x.state === "down" ? `fällt${x.delta > -1 ? ` ${pct(x.delta)}` : ""}` : x.state === "same" ? "gleich" : ""}${x.since ? `<span class="muted" style="display:block">seit ${x.since} Wochen</span>` : ""}</span></button>`;
+  const stuck = rated.filter(x => x.state !== "up").sort((a, b) => (a.state === "down" ? 0 : 1) - (b.state === "down" ? 0 : 1) || b.since - a.since);
+  const ups = rated.filter(x => x.state === "up").sort((a, b) => b.delta - a.delta);
+  const shown = [...stuck, ...ups.slice(0, 3)], rest = [...ups.slice(3), ...t.filter(x => !rated.includes(x))];
+  return `<h2>Kraft, letzte 6 Wochen</h2>
+    <p class="trend-sum"><span class="trend-up">Steigt ${cnt("up")}</span> · <span class="trend-same">gleich ${cnt("same")}</span> · <span class="trend-down">fällt ${cnt("down")}</span></p>
+    <div class="list" style="padding:0">${shown.map(row).join("")}${all ? rest.map(row).join("") : ""}</div>
+    ${rest.length ? `<button class="small ghost accent" style="padding-left:0" data-act="trend-all">${all ? "Weniger zeigen" : `Alle zeigen (${t.length})`}</button>` : ""}
+    <p class="muted mus-note">Bester Schnitt der Arbeitssätze der letzten 6 Wochen gegen die 6 Wochen davor, je mindestens 3 Einheiten. Ab ±2 % steigt oder fällt eine Übung.</p>`;
+}
+/* Bestleistung bei gleichem Gewicht (Idee 74, Regel des trainings-experte): Ein Satz mit Gewicht hat mehr Wdh als jeder
+   frühere Satz der Übung mit gleichem oder höherem Gewicht (Wdh über 15 zählen als 15) und es gibt einen solchen Satz.
+   Das Gewicht muss mindestens 85 % des schwersten Satzes der letzten drei Einheiten erreichen oder höchstens einen
+   Gewichtsschritt darunter liegen (was niedriger ist). Ohne Gewicht gibt es keine Bestleistung (dort ist es ein Rekord).
+   prior: frühere Sätze [{kg, reps}], recentTop: schwerster Satz der letzten drei Einheiten. Ergebnis {kg, reps, prev, prevKg}. */
+function bestEffort(exId, set, prior, recentTop){
+  const kg = num(set.a), reps = Math.min(num(set.b), REP_CAP);
+  if (!(kg > 0) || !(reps > 0) || !recentTop) return null;
+  if (kg < Math.min(recentTop * .85, recentTop - stepSize(exId, false, recentTop))) return null;
+  const same = prior.filter(x => x.kg >= kg);
+  if (!same.length) return null;
+  const top = same.reduce((a, b) => Math.min(b.reps, REP_CAP) > Math.min(a.reps, REP_CAP) || (Math.min(b.reps, REP_CAP) === Math.min(a.reps, REP_CAP) && b.kg < a.kg) ? b : a);
+  return reps > Math.min(top.reps, REP_CAP) ? {kg, reps:num(set.b), prev:top.reps, prevKg:top.kg} : null;
+}
+// frühere Sätze einer Übung vor dem Zeitpunkt before und der schwerste Satz der letzten drei Einheiten davor
+function priorSets(exId, before = Infinity){
+  const runs = exRuns(exId).filter(r => r.date < before);
+  return {prior:runs.flatMap(r => r.sets.map(x => ({kg:num(x.a), reps:num(x.b)}))).filter(x => x.kg > 0 && x.reps > 0),
+          recentTop:Math.max(0, ...runs.slice(-3).flatMap(r => r.sets.map(x => num(x.a))))};
+}
+const fmtBest = b => `${fmtNum(b.reps)} Wdh mit ${fmtNum(b.kg)} kg (bisher ${fmtNum(b.prev)}${b.prevKg !== b.kg ? ` mit ${fmtNum(b.prevKg)} kg` : ""})`;
+/* Kurve (Idee 76): Zeitraum 3 Monate, 1 Jahr oder alles (ui.chartRange, Vorgabe 3 Monate, mindestens die letzten 6
+   Einheiten), x nach Datum; oben ist immer besser. Unterbrochen bei Lücken ab 35 Tagen und (Körpergewicht) bei einem
+   Wechsel des Zusatzgewichts. Einheiten mit einem Rekord sind goldene Punkte. Ein Tipp auf die Kurve wählt den nächsten
+   Punkt (ui.chartPick) und zeigt Datum, Sätze und Wert. Ab zwei Einheiten. */
+const CHART_RANGES = [["3m", "3 Mon.", 91], ["1y", "1 Jahr", 365], ["all", "Alles", 0]];
 function vChart(exId){
-  const c = exSeries(exId), pts = c.pts.slice(-20);
-  if (pts.length < 2) return "";
-  const W = 320, H = 112, top = 10, bottom = 8, vals = pts.map(p => p.v);
+  const c = exSeries(exId);
+  if (c.pts.length < 2) return "";
+  const range = CHART_RANGES.find(r => r[0] === ui.chartRange) || CHART_RANGES[0];
+  let pts = range[2] ? c.pts.filter(p => p.date >= Date.now() - range[2] * 864e5) : c.pts;
+  if (pts.length < 6) pts = c.pts.slice(-6);
+  if (pts.length < 2) pts = c.pts.slice(-2);
+  const recIds = new Set((g => Object.keys(g).filter(id => g[id].records.some(r => r.exId === exId)))(gainsById()));
+  const W = 320, H = 112, top = 12, bottom = 8, vals = pts.map(p => p.v);
   let lo = Math.min(...vals), hi = Math.max(...vals);
   if (hi - lo < 1e-6){ lo -= 1; hi += 1; }
-  const x = i => 6 + (W - 12) * i / (pts.length - 1);
+  const t0 = pts[0].date, t1 = pts[pts.length - 1].date, span = Math.max(1, t1 - t0);
+  const x = p => 6 + (W - 12) * (p.date - t0) / span;
   const y = v => { const t = (v - lo) / (hi - lo); return top + (H - top - bottom) * (c.lowerIsBetter ? t : 1 - t); };
-  const line = pts.map((p, i) => `${x(i).toFixed(1)},${y(p.v).toFixed(1)}`).join(" ");
-  const best = c.lowerIsBetter ? Math.min(...vals) : Math.max(...vals), lastP = pts[pts.length - 1];
+  // Abschnitte: neue Linie nach einer Lücke ab PAUSE_DAYS oder bei anderem Zusatzgewicht
+  const segs = [];
+  pts.forEach((p, i) => { const prev = pts[i - 1];
+    if (!prev || p.date - prev.date >= PAUSE_DAYS * 864e5 || p.seg !== prev.seg) segs.push([p]); else segs[segs.length - 1].push(p); });
+  const line = seg => seg.map(p => `${x(p).toFixed(1)},${y(p.v).toFixed(1)}`).join(" ");
+  const best = c.lowerIsBetter ? Math.min(...c.pts.map(p => p.v)) : Math.max(...c.pts.map(p => p.v)), lastP = pts[pts.length - 1];
+  const pick = pts.find(p => p.id === ui.chartPick && p.date >= t0) || null;
+  const segLabels = c.bw && segs.length > 1 || (c.bw && segs[0][0].seg) ? segs.map(sg => `<text class="chart-seg" x="${x(sg[0]).toFixed(1)}" y="9">${sg[0].seg ? `+${fmtNum(sg[0].seg)} kg` : "ohne"}</text>`).join("") : "";
+  const rangeBtns = `<div class="chart-range">${CHART_RANGES.map(r => `<button class="chip${r === range ? " on" : ""}" data-act="chart-range" data-r="${r[0]}" aria-pressed="${r === range}">${r[1]}</button>`).join("")}</div>`;
   return `<div class="chart">
     <div class="row between"><span class="muted">${c.label}</span><span class="chart-now">${c.fmt(lastP.v)}</span></div>
-    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(c.label)} der letzten ${pts.length} Einheiten, zuletzt ${esc(c.fmt(lastP.v))}, Bestwert ${esc(c.fmt(best))}">
+    ${rangeBtns}
+    <svg viewBox="0 0 ${W} ${H}" data-act="chart-pick" data-ex="${exId}" role="img" aria-label="${esc(c.label)}: ${pts.length} Einheiten, zuletzt ${esc(c.fmt(lastP.v))}, Bestwert ${esc(c.fmt(best))}">
       <defs><linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--ki);stop-opacity:.35"/><stop offset="1" style="stop-color:var(--ki);stop-opacity:0"/></linearGradient></defs>
-      <line class="chart-best" x1="0" x2="${W}" y1="${y(best).toFixed(1)}" y2="${y(best).toFixed(1)}"/>
-      <polygon fill="url(#chart-fill)" points="${x(0).toFixed(1)},${H} ${line} ${x(pts.length - 1).toFixed(1)},${H}"/>
-      <polyline class="chart-line" points="${line}"/>
-      ${pts.map((p, i) => `<circle class="${i === pts.length - 1 ? "chart-last" : "chart-dot"}" cx="${x(i).toFixed(1)}" cy="${y(p.v).toFixed(1)}" r="${i === pts.length - 1 ? 5 : 3}"/>`).join("")}
+      ${best >= Math.min(lo, hi) && best <= Math.max(lo, hi) ? `<line class="chart-best" x1="0" x2="${W}" y1="${y(best).toFixed(1)}" y2="${y(best).toFixed(1)}"/>` : ""}
+      ${segs.map(sg => sg.length > 1 ? `<polygon fill="url(#chart-fill)" points="${x(sg[0]).toFixed(1)},${H} ${line(sg)} ${x(sg[sg.length - 1]).toFixed(1)},${H}"/><polyline class="chart-line" points="${line(sg)}"/>` : "").join("")}
+      ${segLabels}
+      ${pick ? `<line class="chart-cursor" x1="${x(pick).toFixed(1)}" x2="${x(pick).toFixed(1)}" y1="0" y2="${H}"/>` : ""}
+      ${pts.map(p => { const last = p === lastP, rec = recIds.has(p.id);
+        return `<circle class="${last ? "chart-last" : rec ? "chart-rec" : "chart-dot"}${p === pick ? " chart-sel" : ""}" cx="${x(p).toFixed(1)}" cy="${y(p.v).toFixed(1)}" r="${last || rec || p === pick ? 5 : 3}"/>`; }).join("")}
     </svg>
-    <div class="row between muted chart-foot"><span>${fmtDate(pts[0].date)}</span><span>Bestwert ${c.fmt(best)}</span><span>${fmtDate(lastP.date)}</span></div>
+    ${pick ? `<div class="chart-pickinfo"><b>${new Date(pick.date).toLocaleDateString("de-DE", {weekday:"short", day:"2-digit", month:"2-digit"})}</b> · ${esc(fmtSets(exType(exId), pick.sets))} · <b>${c.fmt(pick.v)}</b>${recIds.has(pick.id) ? ` <span class="w-rec">★</span>` : ""}</div>`
+      : `<div class="row between muted chart-foot"><span>${fmtDate(pts[0].date)}</span><span>Bestwert ${c.fmt(best)}</span><span>${fmtDate(lastP.date)}</span></div>`}
+    ${segLabels ? `<p class="muted chart-foot" style="margin:4px 0 0">Ein neuer Abschnitt beginnt bei jedem anderen Zusatzgewicht; mit mehr Gewicht sind weniger Wdh normal.</p>` : ""}
   </div>`;
 }
 
@@ -1123,6 +1324,8 @@ function workoutGain(w, bests){
   });
   return {power, volume, records};
 }
+// Kampfkraft und Rekorde je Training (id → workoutGain), einmal über alle Trainings wie in progress(); nur berechnet
+function gainsById(){ const out = {}, bests = {}; S.workouts.forEach(w => { out[w.id] = workoutGain(w, bests); }); return out; }
 const WEEK = 7 * 864e5;
 const weekStart = t => { const d = new Date(t); d.setHours(0,0,0,0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d.getTime(); };   // Montag der Woche
 // Gesamtstand über alle Trainings (list ist nach Datum aufsteigend sortiert).
@@ -1171,23 +1374,45 @@ function vLevel(p){
     <span class="xp"><i style="width:${Math.round(100 * (p.power - from) / (to - from))}%"></i></span>`;
 }
 // Monatskalender, Trainingstage als leuchtende Kugeln. offset 0 = aktueller Monat, −1 = Vormonat usw.
-function vCalendar(offset){
+/* Monatskalender (Idee 78): Trainingstage als Kugeln; ein Tipp auf einen Trainingstag (sel) zeigt darunter die Trainings
+   des Tages mit „Im Verlauf ansehen“. Die Monatszeile nennt Trainings, Sätze und Rekorde, darunter den Vormonat. */
+function vCalendar(offset, sel){
   const now = new Date(), first = new Date(now.getFullYear(), now.getMonth() + offset, 1);
   const next = new Date(first.getFullYear(), first.getMonth() + 1, 1), days = new Date(next - 864e5).getDate();
-  const trained = new Set(S.workouts.map(w => dayStart(w.date))), today = dayStart(Date.now());
-  const n = S.workouts.filter(w => w.date >= first.getTime() && w.date < next.getTime()).length;
+  const prev = new Date(first.getFullYear(), first.getMonth() - 1, 1);
+  const trained = new Set(S.workouts.map(w => dayStart(w.date))), today = dayStart(Date.now()), gains = gainsById();
+  const month = (from, to) => { const ws = S.workouts.filter(w => w.date >= from.getTime() && w.date < to.getTime());
+    return {n:ws.length, sets:ws.reduce((t, w) => t + w.entries.reduce((u, e) => u + e.sets.length, 0), 0), rec:ws.reduce((t, w) => t + gains[w.id].records.length, 0)}; };
+  const m = month(first, next), pm = month(prev, first);
   const cells = Array.from({length:(first.getDay() + 6) % 7}, () => `<span></span>`);   // Woche beginnt am Montag
   for (let d = 1; d <= days; d++){
-    const t = new Date(first.getFullYear(), first.getMonth(), d).getTime();
-    cells.push(`<span class="cal-day${trained.has(t) ? " on" : ""}${t === today ? " today" : ""}">${d}</span>`);
+    const t = new Date(first.getFullYear(), first.getMonth(), d).getTime(), on = trained.has(t);
+    const day = `<span class="cal-day${on ? " on" : ""}${t === today ? " today" : ""}${t === sel ? " sel" : ""}">${d}</span>`;
+    cells.push(on ? `<button class="cal-hit" data-act="cal-day" data-t="${t}" aria-label="Training am ${d}. anzeigen" aria-pressed="${t === sel}">${day}</button>` : `<span class="cal-hit">${day}</span>`);
   }
+  const dayWs = sel ? S.workouts.filter(w => dayStart(w.date) === sel) : [];
+  const plural = (n, a, b) => `${fmtInt(n)} ${n === 1 ? a : b}`;
   return `<div class="cal">
     <div class="row between"><button class="small ghost" data-act="cal" data-d="-1" aria-label="Vorheriger Monat">‹</button>
       <b class="cal-month">${first.toLocaleDateString("de-DE", {month:"long", year:"numeric"})}</b>
       <button class="small ghost" data-act="cal" data-d="1" ${offset >= 0 ? "disabled" : ""} aria-label="Nächster Monat">›</button></div>
     <div class="cal-grid">${["Mo","Di","Mi","Do","Fr","Sa","So"].map(d => `<span class="cal-wd">${d}</span>`).join("")}${cells.join("")}</div>
-    <p class="muted cal-sum">${n === 1 ? "1 Training" : `${n} Trainings`} in diesem Monat</p>
+    ${dayWs.length ? `<div class="cal-dayinfo">${dayWs.map(w => { const n = w.entries.reduce((t, e) => t + e.sets.length, 0), mins = w.end ? Math.max(1, Math.round((w.end - w.date) / 60000)) : 0, r = gains[w.id].records.length;
+        return `<button class="li row between" data-act="to-workout" data-id="${w.id}"><span><b>${esc(w.name)}</b><span class="muted" style="display:block">${mins ? `${mins} min · ` : ""}${plural(n, "Satz", "Sätze")}${r ? ` · <span class="w-rec">★ ${plural(r, "Rekord", "Rekorde")}</span>` : ""}</span></span><span class="muted">Im Verlauf ›</span></button>`; }).join("")}</div>` : ""}
+    <p class="muted cal-sum">${plural(m.n, "Training", "Trainings")} · ${plural(m.sets, "Satz", "Sätze")}${m.rec ? ` · ${plural(m.rec, "Rekord", "Rekorde")}` : ""}${pm.n ? `<br>Vormonat: ${plural(pm.n, "Training", "Trainings")} · ${plural(pm.sets, "Satz", "Sätze")}` : ""}</p>
   </div>`;
+}
+// Die letzten Rekorde (Idee 77): neueste zuerst, je Übung, Wert, vorher und wann; ein Tipp öffnet das Übungs-Sheet
+function vRecentRecords(all){
+  const gains = gainsById(), list = [];
+  S.workouts.forEach(w => gains[w.id].records.forEach(r => list.push({...r, date:w.date})));
+  if (!list.length) return "";
+  const show = list.slice(-(all ? 30 : 5)).reverse(), unit = u => u === "Wdh" ? " Wdh" : ` ${u}`;
+  return `<h2 id="recs">Letzte Rekorde</h2>
+    <div class="list" style="padding:0">${show.map(r => { const d = relDay(r.date);
+      return `<button class="li row between" data-act="rec-ex" data-id="${r.exId}"${exById(r.exId) ? "" : " disabled"}><span>${esc(r.name)}<span class="muted" style="display:block">${d[0].toLowerCase() + d.slice(1)}</span></span>
+        <span><b class="w-rec">${fmtNum(r.v)}${unit(r.unit)}</b> <span class="muted">vorher ${fmtNum(r.old)}</span></span></button>`; }).join("")}</div>
+    ${list.length > 5 ? `<button class="small ghost accent" style="padding-left:0" data-act="recs-all">${all ? "Weniger zeigen" : `Alle zeigen (${Math.min(list.length, 30)})`}</button>` : ""}`;
 }
 // Diese Woche (ab Montag) im Vergleich zum Schnitt der vier Wochen davor, dazu Sätze pro Kategorie der letzten 7 Tage
 function vWeekCompare(){
@@ -1477,8 +1702,7 @@ function entryBrief(e){
   return `${exName(e.exId)}${v ? ` ${v}` : ""}`;
 }
 function vHistory(){
-  const gains = {}, bests = {};
-  S.workouts.forEach(w => { gains[w.id] = workoutGain(w, bests); });
+  const gains = gainsById();
   const thisYear = new Date().getFullYear();
   const card = w => {
     const open = ui.open === w.id, g = gains[w.id];
@@ -1609,13 +1833,14 @@ function vSheet(s){
       const en = S.active && S.active.entries[s.i], plan = en && en.exId === d.id ? entryPlan(en) : null;
       return `${head}<div class="ex-sheet-name">${esc(d.name)}</div>
       <h2>Letzte Einheiten</h2>${vHist(hist.slice(0, 3))}
+      ${vBests(d.id)}
       ${plan ? `<div class="plan">Programm: ${esc(libDose(plan))}</div>` : ""}
       ${vTech}${fNote}
       ${chart ? `<h2>Entwicklung</h2>${chart}` : ""}
       <h2>Übung bearbeiten</h2>${fName}${fCat}${fType}${fLink}`;
     }
     return `${head}${fName}${fCat}${fType}${fLink}${fNote}${vTech}
-    ${d.isNew ? "" : `${chart ? `<h2>Entwicklung</h2>${chart}` : ""}
+    ${d.isNew ? "" : `${vBests(d.id)}${chart ? `<h2>Entwicklung</h2>${chart}` : ""}
       <h2>Letzte Einheiten</h2>
       ${vHist(hist)}
       ${hist.length ? `<button class="block ghost" style="margin-top:14px" data-act="ex-transfer">Verlauf übertragen auf …</button>` : ""}
@@ -1654,10 +1879,12 @@ function vSheet(s){
       <div class="stat"><b>${fmtInt(p.n)}</b><span>Trainings</span></div>
       <div class="stat"><b>${fmtInt(p.sets)}</b><span>Sätze</span></div>
       <div class="stat"><b>${weeks(p.streak)}</b><span>Serie, längste: ${weeks(p.bestStreak)}</span></div>
-      <div class="stat"><b>${fmtInt(p.records)}</b><span>Rekorde</span></div>
+      <button class="stat" data-act="to-recs"><b>${fmtInt(p.records)}</b><span>Rekorde ›</span></button>
     </div>
-    <h2>Kalender</h2>${vCalendar(s.cal || 0)}
+    <h2>Kalender</h2>${vCalendar(s.cal || 0, s.day)}
+    ${vStrengthTrend(s.allTrend)}
     ${vWeekCompare()}
+    ${vRecentRecords(s.allRec)}
     <h2>Erfolge (${got.length} von ${ACHIEVEMENTS.length})</h2>
     <div class="list" style="padding:0">${ACHIEVEMENTS.map(a => vBadge(a, got.includes(a))).join("")}</div>
     <p class="muted" style="margin-top:14px">Kampfkraft gibt es für jeden gespeicherten Satz. Mehr Gewicht, Wiederholungen, Minuten oder Kilometer bringen mehr. Die Serie zählt die Wochen in Folge mit mindestens einem Training.</p>`;
@@ -1856,7 +2083,16 @@ const actions = {
     if (open && !(await ask(`${open} ${open === 1 ? "Satz ist" : "Sätze sind"} nicht abgehakt und werden nicht gespeichert. Trotzdem beenden?`, "Beenden"))) return;
     const w = {id:a.id, date:a.date, end:Date.now(), name:a.name, entries};
     // Vergleich mit dem letzten Mal: vor dem Speichern, solange lastFor() noch die vorige Einheit liefert
-    const better = a.entries.map(e => { const sets = e.sets.filter(s => s.done); return sets.length ? betterThanLast({exId:e.exId, sets}, entryPlan(e)) : null; }).filter(Boolean);
+    const better = a.entries.map(e => { const sets = e.sets.filter(s => s.done); if (!sets.length) return null;
+      const bt = betterThanLast({exId:e.exId, sets}, entryPlan(e));
+      // Bestleistung (Idee 74): bei mehreren die mit dem höchsten Gewicht
+      const ps = exType(e.exId) === "kraft" ? priorSets(e.exId) : null;
+      const bests = ps ? sets.map(x => bestEffort(e.exId, x, ps.prior, ps.recentTop)).filter(Boolean) : [];
+      const be = bests.length ? bests.reduce((p, q) => q.kg > p.kg || (q.kg === p.kg && q.reps > p.reps) ? q : p) : null;
+      if (!be) return bt;
+      const label = `Bestleistung ${fmtNum(be.kg)} kg × ${fmtNum(be.reps)}`;
+      return bt ? {...bt, label:`${bt.label} · ${label}`} : {name:exName(e.exId), label};
+    }).filter(Boolean);
     const before = progress(S.workouts);
     S.workouts.push(w); S.active = null; stopTimer(); save({put:w.id});
     // Belohnung: was dieses Training gebracht hat
@@ -1896,6 +2132,12 @@ const actions = {
       const type = exType(en.exId), [unit, v] = setMark(type, s), best = (progress(S.workouts).bests[en.exId] || {})[unit] || 0;
       const today = Math.max(0, ...en.sets.filter(x => x !== s && x.done).map(x => { const m = setMark(type, x); return m[0] === unit ? m[1] : 0; }));
       if (best > 0 && v > best && v > today) toast(`Neuer Rekord: ${fmtNum(v)} ${unit} bei ${exName(en.exId)}`);
+      else if (type === "kraft"){
+        // Bestleistung (Idee 74): frühere Trainings und die schon abgehakten Sätze heute; einmal pro Übung und Training
+        const ps = priorSets(en.exId), earlier = en.sets.filter(x => x !== s && x.done).map(x => ({kg:num(x.a), reps:num(x.b)})).filter(x => x.kg > 0 && x.reps > 0);
+        const b = bestEffort(en.exId, s, [...ps.prior, ...earlier], ps.recentTop);
+        if (b && !en.sets.some(x => x !== s && x.done && bestEffort(en.exId, x, ps.prior, ps.recentTop))) toast(`Bestleistung: ${fmtBest(b)} bei ${exName(en.exId)}`);
+      }
     }
   },
   "step-up": el => {
@@ -2078,7 +2320,7 @@ const actions = {
     save();
     // Neu aus dem Auswahl-Sheet angelegt: gleich dort übernehmen, wohin ausgewählt wurde (Training, Vorlage, Bearbeiten)
     if (s.back && s.back.kind === "picker"){ ui.sheet = s.back; actions.picked({dataset:{id:e.id}}); return; }
-    ui.sheet = null; render();
+    ui.sheet = s.back || null; render();   // z. B. zurück in den Fortschritt
   },
   "del-ex": async () => {
     const d = ui.sheet.draft;
@@ -2175,7 +2417,28 @@ const actions = {
   "dlg-yes": () => closeDlg(true),
   "dlg-no": () => closeDlg(false),
   progress: () => { ui.sheet = {kind:"progress"}; render(); },
-  cal: el => { if (ui.sheet && ui.sheet.kind === "progress"){ ui.sheet.cal = Math.min(0, (ui.sheet.cal || 0) + +el.dataset.d); render(); } },
+  cal: el => { if (ui.sheet && ui.sheet.kind === "progress"){ ui.sheet.cal = Math.min(0, (ui.sheet.cal || 0) + +el.dataset.d); ui.sheet.day = null; render(); } },
+  "chart-range": el => { ui.chartRange = el.dataset.r; ui.chartPick = null; render(); },
+  // Tipp auf die Kurve: nächster Punkt nach der x-Position; ein zweiter Tipp auf denselben Punkt hebt die Wahl auf
+  "chart-pick": (el, e) => {
+    const r = el.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width;
+    const c = exSeries(el.dataset.ex), range = CHART_RANGES.find(x => x[0] === ui.chartRange) || CHART_RANGES[0];
+    let pts = range[2] ? c.pts.filter(p => p.date >= Date.now() - range[2] * 864e5) : c.pts;
+    if (pts.length < 6) pts = c.pts.slice(-6);
+    if (pts.length < 2) return;
+    const t0 = pts[0].date, span = Math.max(1, pts[pts.length - 1].date - t0), at = t0 + span * ((fx * 320 - 6) / 308);
+    const p = pts.reduce((a, b) => Math.abs(b.date - at) < Math.abs(a.date - at) ? b : a);
+    ui.chartPick = ui.chartPick === p.id ? null : p.id; render();
+  },
+  "cal-day": el => { const t = +el.dataset.t; ui.sheet.day = ui.sheet.day === t ? null : t; render(); },
+  // Training aus dem Kalender im Verlauf zeigen: Gruppe aufklappen, Karte aufklappen und ins Bild holen
+  "to-workout": el => { const w = S.workouts.find(x => x.id === el.dataset.id); if (!w) return;
+    ui.sheet = null; ui.tab = "verlauf"; ui.histFilter = null; ui.open = w.id; ui.openGroups.add(histGroup(w.date).key); render();
+    const c = document.querySelector(`[data-act="toggle-w"][data-id="${CSS.escape(w.id)}"]`); if (c) c.closest(".card").scrollIntoView({block:"start"}); },
+  "to-recs": () => { const h = $("#recs"); if (h) h.scrollIntoView({behavior:"smooth", block:"start"}); },
+  "trend-all": () => { ui.sheet.allTrend = !ui.sheet.allTrend; render(); },
+  "recs-all": () => { ui.sheet.allRec = !ui.sheet.allRec; render(); },
+  "rec-ex": el => { const e = exById(el.dataset.id); if (e) exSheet({...e}, {back:ui.sheet}); },
   reload: () => { saveNow(); location.reload(); }
 };
 

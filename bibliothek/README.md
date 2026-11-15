@@ -277,6 +277,49 @@ Die App-Voreinstellung von 90 s passt damit gut zu Isolationsübungen; für schw
 - Sätze und Wiederholungen für Copenhagen und Nordic sind übliche Werte zum Einstieg, nicht die genauen Protokolle der Studien.
 - Die Technik-Hinweise zu den Padel-Schlägen sind allgemeines Fachwissen.
 
+## Regeln für Auswertungen
+
+Diese Regeln gelten für Werte, die die App aus den gespeicherten Trainings nur berechnet (Fortschritt, Übungs-Sheet, Hinweise beim Abhaken). Zahlen ohne Studiengrundlage sind Praxis.
+
+**Regel: Einheitswert (geschätztes Maximum).** Ein Wert pro Einheit einer Kraftübung, gemeinsam genutzt von Kraftentwicklung, Bestwerten und Fortschrittskurve.
+- Mit Gewicht: nur die Sätze mit dem schwersten Gewicht der Einheit; pro Satz Epley kg × (1 + Wdh/30), bei 1 Wdh das Gewicht selbst, Wdh über 15 zählen als 15; der Einheitswert ist der Mittelwert dieser Sätze.
+- Mittelwert statt bester Satz: Bei doppelter Progression erreicht der erste Satz die obere Grenze zuerst, die übrigen holen auf. Beispiel 4 × 80 kg, erst 8, 7, 7, 6, Wochen später 8, 8, 8, 8 Wdh: bester Satz beide Male ≈ 101,3 kg, Mittelwert 98,7 → 101,3 kg.
+- Grenze 15 Wdh: Schätzformeln sind bis etwa 10 Wdh am genauesten (Reynolds 2006), darüber hängt die Beziehung stärker von Übung und Person ab (Nuzzo 2024). Bis 15 Wdh liegt Epley nahe an der NSCA-Tabelle (15 Wdh ≈ 65 % des Maximums, Epley 67 %). Die Programme nutzen Bereiche bis 15; mit einer Grenze von 12 wäre zwischen 12 und 15 Wdh kein Fortschritt zu sehen. Der Wert taugt für den Verlauf derselben Übung, nicht für Vergleiche zwischen Übungen.
+- Körpergewicht-Übung: `geraet` der Bibliothek enthält `Körpergewicht`; ohne Bibliothekseintrag eine Übung, bei der im betrachteten Zeitraum ein Satz ohne Gewicht vorkommt. Einheitswert ohne Zusatzgewicht: Mittelwert der Wdh aller Sätze, ohne Grenze. Mit Zusatzgewicht (kg-Feld): das schwerste Zusatzgewicht der Einheit und der Mittelwert der Wdh damit. Epley mit dem Zusatzgewicht allein ergibt keinen sinnvollen Wert, weil die App das Körpergewicht nicht kennt.
+
+**Regel: Kraftentwicklung.** Status pro Kraftübung: steigt, gleich oder fällt.
+- Fenster: die letzten 42 Tage gegen die 42 Tage davor, für alle Übungen gleich. Im Arnold-Split kommt außer Seitheben jede Übung nur einmal pro Woche vor, weil die Einheiten A und B verschiedene Übungen haben; 4 Wochen wären nur 4 Einheiten.
+- Mindestens 3 Einheiten der Übung in jedem Fenster, sonst keine Bewertung („zu wenig Einheiten“).
+- Pause: Liegen zwischen zwei Einheiten der Übung 35 Tage oder mehr (Schwelle wie beim Wiedereinstieg), zählen nur die Einheiten danach. Reicht das für eines der Fenster nicht, steht die Übung als „nach Pause“ außen vor.
+- Mit Gewicht: Δ = bester Einheitswert im neuen Fenster / bester im alten − 1.
+  - steigt: Δ ≥ +2 % oder der schwerste Satz der neuesten Einheit ist schwerer als jeder Satz im alten Fenster (nach einer Steigerung liegt der Wert kurz darunter, z. B. 4 × 80 kg × 8 ≈ 101,3 kg, danach 82,5 kg × 7, 7, 6, 6 ≈ 100,4 kg)
+  - fällt: Δ ≤ −2 % und die neueste Einheit ist nicht schwerer als das alte Fenster
+  - sonst gleich
+- Ohne Gewicht: Δ = (30 + Wdh neu) / (30 + Wdh alt) − 1 aus den besten Wdh-Mittelwerten der Fenster (Epley bei gleichem Körpergewicht, das Gewicht kürzt sich heraus), Schwellen wie oben. Mit Zusatzgewicht zuerst das Zusatzgewicht vergleichen (bestes Fenster = höchstes Zusatzgewicht, darunter höchster Wdh-Mittelwert): höher heißt steigt, niedriger fällt, gleich weiter wie ohne Gewicht.
+- Keine eigene Schwelle für Isolationsübungen: Eine Wdh mehr ändert den Epley-Wert um 1/(30 + Wdh), also um 2,2 bis 3,2 %, unabhängig vom Gewicht. Grobe Gewichtsschritte (1 kg auf 8 kg sind 12,5 %) deckt die Regel für das schwerere Gewicht ab.
+- Grundlage der 2 %: Ein 1RM-Test schwankt von Tag zu Tag im Median um 4,2 % (Variationskoeffizient, Grgic 2020); Sätze mit Wdh in Reserve eher mehr. Der beste Wert aus mindestens 3 Einheiten glättet das. 2 % entsprechen bei 3 bis 4 Sätzen etwa 2 bis 3 Wdh mehr über alle Sätze. Die Schwelle selbst ist Praxis.
+- „gleich seit X Wochen“: ganze Wochen seit der Einheit mit dem höchsten Einheitswert der letzten 84 Tage; nur bei gleich und fällt und erst ab 6 Wochen.
+
+**Regel: Bestleistung.** Mehr Wdh als je zuvor bei diesem oder höherem Gewicht.
+- Nur Kraftsätze mit Gewicht (auch Zusatzgewicht). Ohne Gewicht gibt es keine, dort sind die meisten Wdh schon ein Rekord.
+- Maßstab sind die Wdh, nicht das geschätzte Maximum: Ein Satz mit kg und Wdh ist eine Bestleistung, wenn alle früheren Sätze der Übung mit mindestens diesem Gewicht weniger Wdh hatten und es mindestens einen solchen Satz gibt (sonst ist es ein Gewichtsrekord). Nach Epley würde ein leichter Satz einen schweren schlagen (70 kg × 14 ≈ 102,7 kg gegen 80 kg × 8 ≈ 101,3 kg) und leichtes Training belohnen; die Wdh passen zur doppelten Progression.
+- Wdh über 15 zählen als 15, auch bei den früheren Sätzen.
+- Untergrenze: Gewicht mindestens 85 % des schwersten Satzes der letzten drei Einheiten vor diesem Training oder höchstens einen Gewichtsschritt darunter, was niedriger ist. Damit zählen das aktuelle und das vorige Arbeitsgewicht, nicht aber Aufwärmsätze (50 bis 70 % im Programm) und leichte Zusatzsätze.
+- Nicht in der ersten Einheit einer Übung. Verglichen wird mit allen früheren Trainings, auch vor einer langen Pause.
+- „bisher“ nennt die bisher meisten Wdh bei mindestens diesem Gewicht, mit dem Gewicht, wenn es ein anderes war („bisher 9 mit 82,5 kg“). Gibt es in einem Training mehrere, zählt die mit dem höchsten Gewicht.
+
+**Regel: Bestwerte.** Über alle Trainings der Übung, je mit Datum.
+- Kraft mit Gewicht: schwerster Satz (bei Gleichstand die meisten Wdh, Datum der ersten Einheit damit); bestes geschätztes Maximum = höchster Einheitswert; beste Wdh je Gewicht für die vier schwersten Gewichte, bei denen kein schwereres Gewicht mindestens gleich viele Wdh hat, mit den tatsächlichen Wdh.
+- Körpergewicht: meiste Wdh in einem Satz und bester Wdh-Mittelwert einer Einheit; mit Zusatzgewicht dazu schwerstes Zusatzgewicht und beste Wdh je Zusatzgewicht wie oben, „ohne“ als niedrigste Stufe.
+- Ausdauer: längste Strecke einer Einheit (Summe der km) und schnellstes Tempo (Summe der Minuten durch Summe der km aus Einträgen mit beiden Werten) aus Einheiten ab 1 km, mit Strecke angezeigt; ohne km die meisten Minuten einer Einheit.
+- Nur Zeit: längster Satz (z. B. Plank) und meiste Minuten einer Einheit; hat jede Einheit nur einen Satz (Padel), nur eine Zeile.
+
+**Regel: Fortschrittskurve.**
+- Kraft mit Gewicht: Einheitswert wie oben, Bestwert-Linie beim höchsten Einheitswert, Bezeichnung „Geschätztes Maximum (Schnitt der Arbeitssätze)“.
+- Körpergewicht: Wdh-Mittelwert; mit Zusatzgewicht beginnt bei jedem Wechsel des Zusatzgewichts ein neuer, beschrifteter Linienabschnitt („+5 kg“), Einheiten ohne Zusatzgewicht bleiben in der Kurve.
+- Ausdauer und nur Zeit wie bisher (Tempo, Minuten).
+- Liegen zwischen zwei Punkten 35 Tage oder mehr, ist die Linie dort unterbrochen.
+
 ## Quellen
 
 Gelesen wurde jeweils, was in Klammern steht.
@@ -300,8 +343,12 @@ Gelesen wurde jeweils, was in Klammern steht.
 - Harøy J, Clarsen B, Wiger EG, Øyen MG, Serner A, Thorborg K, Hölmich P, Andersen TE, Bahr R: The Adductor Strengthening Programme prevents groin problems among male football players: a cluster-randomised controlled trial. British Journal of Sports Medicine 53(3), 2019, S. 150–157. (Abstract)
 - van Dyk N, Behan FP, Whiteley R: Including the Nordic hamstring exercise in injury prevention programmes halves the rate of hamstring injuries: a systematic review and meta-analysis of 8459 athletes. British Journal of Sports Medicine 53(21), 2019, S. 1362–1370. (Abstract)
 - StrongLifts: Stronglifts 5×5 Workout Program, Quick Start Guide, stronglifts.com. (Webseite; Praxisquelle, keine Studie)
+- Reynolds JM, Gordon TJ, Robergs RA: Prediction of One Repetition Maximum Strength from Multiple Repetition Maximum Testing and Anthropometry. Journal of Strength and Conditioning Research 20(3), 2006, S. 584–592. (Auszüge aus dem Abstract)
+- Nuzzo JL, Pinto MD, Nosaka K, Steele J: Maximal Number of Repetitions at Percentages of the One Repetition Maximum: A Meta-Regression and Moderator Analysis of Sex, Age, Training Status, and Exercise. Sports Medicine 54(2), 2024, S. 303–321. (Auszüge aus dem Abstract, Zusammenfassung des Erstautors in seinem Blog)
+- Grgic J, Lazinica B, Schoenfeld BJ, Pedisic Z: Test–Retest Reliability of the One-Repetition Maximum (1RM) Strength Assessment: a Systematic Review. Sports Medicine – Open 6, 2020, Artikel 31. (Abstract)
+- National Strength and Conditioning Association: Tabelle Wiederholungen zu Prozent des Maximums, in Haff GG, Triplett NT (Hrsg.): Essentials of Strength Training and Conditioning, 4. Auflage, 2016. (nicht das Buch, sondern Wiedergaben der Tabelle bei ACE und in einem Lernportal)
 
-Allgemeines Fachwissen ohne eigene Quelle: Auswahl und Namen der Übungen, Technik-Hinweise, Zuordnung der Muskeln, Aufteilung der Splits einschließlich des Arnold-Splits und seiner Paarung von Brust und Rücken, Aufwärmsätze, Tempolauf, langer Lauf und Steigerungsläufe, die Padel-Technik.
+Allgemeines Fachwissen ohne eigene Quelle: Auswahl und Namen der Übungen, Technik-Hinweise, Zuordnung der Muskeln, Aufteilung der Splits einschließlich des Arnold-Splits und seiner Paarung von Brust und Rücken, Aufwärmsätze, Tempolauf, langer Lauf und Steigerungsläufe, die Padel-Technik, die Schwellen und Fenster der Regeln für Auswertungen (2 %, 42 Tage, 3 Einheiten, 85 %).
 
 ## Gesundheit
 

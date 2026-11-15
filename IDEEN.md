@@ -4,6 +4,26 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 ## Vorschläge
 
+### 83. Rudergerät in Metern mit Tempo pro 500 m (aus Fachprüfung: Ausdauer)
+- Nutzen: hoch (mit Monitor) · Aufwand: M · Datenformat: nein (optionales Feld `unit: "m500"`)
+
+**Wartet auf Klärung (15.11.2026):** Das Rudergerät des Nutzers hat kein Display, misst also keine Strecke. Sinnvoll nur für Geräte mit Monitor (z. B. Concept2): Eingabe in Metern, Tempo „1:52,5 /500 m“, dazu ≈ Watt (2,80 / (s/m)³); gespeichert weiter km.
+
+### 84. Auswertungen fürs Rudern (aus Fachprüfung: Ausdauer)
+- Nutzen: mittel · Aufwand: M · Datenformat: nein
+
+**Wartet auf Klärung, wie 83.** Bestzeit über Standardstrecken (500 m bis 10 km), meiste Meter in 30 min, „Besser als letztes Mal“ bei gleicher Strecke über die Zeit, Kurve als Tempo pro 500 m.
+
+### 85. Programm „Rudern Einstieg“ und Dauer in Programmen anzeigen (aus Fachprüfung: Ausdauer)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+**Wartet auf Klärung, wie 83.** Sechs Einheiten nach den Concept2-Einsteiger-Workouts bis zum 30-min-Test; Schlagzahlen setzen einen Monitor voraus. Unabhängig davon: `libDose()` zeigt `dauerSek`, `streckeKm` und `intensitaet` nicht (Plank erscheint als „3 × · Pause 1:00 min“).
+
+### 86. Eintrag-Anleitung im Technik-Hinweis des Rudergeräts (aus Fachprüfung: Ausdauer)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+**Wartet auf Klärung, wie 83.** Hinweis zu km-Feld und Damper 3 bis 5; ohne Monitor entfällt der km-Teil.
+
 ### 43. Ton nach dem Neuladen mit jedem Tipp freigeben und fehlenden Ton anzeigen (aus Funktionsvergleich: Pausen-Timer)
 - Nutzen: mittel · Aufwand: S · Datenformat: nein
 
@@ -143,6 +163,28 @@ Vorerst nicht gebraucht (14.11.2026):
 Vorbild ist Strong: Ein Tipp auf die Satznummer öffnet Aufwärmen, Drop und Versagen, und Aufwärmsätze zählen nicht in Diagramme und Kennzahlen; Hevy und JEFIT machen es ähnlich. Heute verfälschen Aufwärmsätze Rekorde, Kampfkraft und Fortschrittskurve, und sie verhindern den Steigerungsvorschlag, weil der in allen Sätzen dasselbe Gewicht verlangt. Skizze: Ein Tipp auf die Satznummer (Fläche auf 44 × 48 px vergrößern) schaltet ein goldenes „A“ um, gespeichert als `w:1` am Satz. `finish()` und `newEntry()` übernehmen das Feld, ab dem zweiten Training kostet es also keinen Tipp mehr. `stepUp`, `exSeries`, `progress()`, die Rekord-Meldung und „Letztes Mal“ überspringen bzw. kennzeichnen A-Sätze, und die CSV bekommt eine Spalte. Migration: Ein Satz ohne das Feld gilt als Arbeitssatz; alte Daten und Backups bleiben gültig, alte Spielwerte bleiben unverändert.
 
 ## Erledigt
+
+Umgesetzt am 15.11.2026 (Fachprüfung Ausdauer durch den trainings-experte; Vorschlag 9, Schlagzahl und Watt erfassen, vorerst nicht):
+
+### 79. Meter im km-Feld erkennen (aus Fachprüfung: Ausdauer)
+- Nutzen: sehr hoch · Aufwand: S · Datenformat: nein
+
+Vom `trainings-experte` (15.11.2026): Wer am Rudergerät „2000“ ins km-Feld schreibt, verfälscht Kampfkraft, Stufe, den Erfolg „Marathon“ und die Wochen-km um den Faktor 1000. Bei Ausdauer gilt eine Zahl ab 100 im km-Feld als Meter und wird durch 1000 geteilt, mit Hinweis und Rückgängig (`meterFix()`).
+
+### 80. Zeit als Minuten und Sekunden eingeben (aus Fachprüfung: Ausdauer)
+- Nutzen: hoch · Aufwand: M · Datenformat: nein
+
+Vom `trainings-experte`: Geräte und Uhren zeigen 7:45, die App wollte 7,75. Ausdauer und „nur Zeit“ haben im Training zwei Felder „min“ und „s“; gespeichert wird weiter Dezimalminuten, angezeigt m:ss (`joinMin()`, `minPart()`, `fmtMin()`).
+
+### 81. Pausen-Timer auch bei Ausdauer und „nur Zeit“ (aus Fachprüfung: Ausdauer)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Vom `trainings-experte`: Programme geben Pausen für Intervalle, Lauf-Geh-Wechsel, Plank und Seilspringen vor, der Timer lief aber nur bei Kraft. Jetzt startet er, wenn das Programm `pauseSek` hat, außer nach dem letzten Satz.
+
+### 82. Fahrrad in km/h und gerechter gewertet (aus Fachprüfung: Ausdauer)
+- Nutzen: mittel · Aufwand: S–M · Datenformat: nein (optionales Feld `unit` in der Bibliothek)
+
+Vom `trainings-experte`: Die km am Studio-Rad sind virtuell, üblich ist km/h. Mit `unit: "kmh"` (Fahrradergometer in der Bibliothek) zeigt die App km/h, die km zählen in der Kampfkraft ein Drittel und nicht zu „Marathon“ und Wochen-km (`kmhOf()`).
 
 Umgesetzt am 15.11.2026 (Runde Fortschritt & Rekorde; Regeln vom trainings-experte in bibliothek/README.md, „Regeln für Auswertungen“; gym-tester ohne kritischen Fund, Warnungen behoben: Sprung zu „Letzte Rekorde“ unter der Kopfzeile, größere Abschnittsbeschriftung mit Erklärung, Kurvenwert ohne Umbruch):
 

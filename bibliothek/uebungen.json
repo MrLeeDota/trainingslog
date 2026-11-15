@@ -786,6 +786,7 @@
       "name": "Fahrradergometer",
       "cat": "Ausdauer",
       "type": "ausdauer",
+      "unit": "kmh",
       "geraet": ["Fahrradergometer"],
       "muskeln": [],
       "grunduebung": false,

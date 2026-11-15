@@ -90,6 +90,8 @@ Weitere Gerätewerte dürfen ergänzt werden, wenn sie gleichzeitig in diese Tab
 
 **`muskeln`:** `Brust`, `vordere Schulter`, `seitliche Schulter`, `hintere Schulter`, `Rotatorenmanschette`, `Trizeps`, `Bizeps`, `Unterarme`, `Latissimus`, `oberer Rücken`, `unterer Rücken`, `Bauch`, `seitliche Bauchmuskeln`, `Hüftbeuger`, `Gesäß`, `Quadrizeps`, `Beinbeuger`, `Adduktoren`, `Waden`. Das Feld ist für Auswertungen gedacht, z. B. Sätze pro Muskelgruppe und Woche.
 
+**`unit`** (optional, nur bei `type: "ausdauer"`): `"kmh"` zeigt das Tempo als Geschwindigkeit in km/h statt in min/km (Fahrradergometer, dessen km virtuell sind). Gespeichert werden weiter Minuten und km. Die App wertet die km solcher Übungen in der Kampfkraft mit einem Drittel und zählt sie nicht zum Erfolg „Marathon“ und zu den Wochen-km (Faustregel: etwa 3 Rad-km entsprechen einem Lauf-km). Fehlt das Feld, gilt min/km. Eine eigene Übung kann `unit` selbst tragen; sonst gilt der Wert aus der Bibliothek.
+
 ### Beispiel
 
 ```json

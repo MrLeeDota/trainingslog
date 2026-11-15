@@ -115,6 +115,17 @@ button.hero{display:block;width:100%;text-align:left}
 .tpl-group{margin:18px 2px 8px;font-size:14px;font-weight:700;color:var(--text);overflow-wrap:anywhere}
 .tpl-group .muted{font-weight:400}
 .tpl-slot{display:block;font-size:12px;margin-top:2px}
+/* Programmzeile über dem Namen einer Dran-Karte; rechts bleibt Platz für das Dran-Schild */
+.tpl-prog{font-size:13px;font-weight:700;color:var(--ki);padding-right:64px;overflow-wrap:anywhere}
+.tpl-prog .nw{white-space:nowrap;font-weight:400}
+/* Übrige Vorlagen auf dem Startbildschirm als einzeilige Knöpfe (Idee 51) */
+.tpl-row{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:52px;text-align:left;
+  background:var(--card);padding:8px 14px 8px 22px;margin-bottom:8px;border:2px solid var(--ink);border-radius:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 3px 0 var(--ink)}
+.tpl-row:active{box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 0 var(--ink)}
+.tpl-row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:linear-gradient(180deg,var(--accent-hi),var(--accent-deep))}
+.tpl-row .t{font-family:var(--display);font-stretch:condensed;font-style:italic;font-weight:900;font-size:19px;line-height:1.1;overflow-wrap:anywhere;min-width:0}
+.tpl-row .muted{font-size:13px;white-space:nowrap;flex-shrink:0}
+.prog-taken{display:block;font-size:13px;color:var(--scan);margin-top:2px}
 .tpl-foot .muted{font-size:13px}
 /* Vorlage, die am längsten her ist */
 .tpl.due{border-color:var(--accent);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 4px 0 var(--ink),0 0 18px rgba(255,138,31,.35)}
@@ -1161,57 +1172,63 @@ function orb(n, lit){
     ${pts.map(p => `<path transform="translate(${p[0].toFixed(1)} ${p[1].toFixed(1)})" d="${star}" fill="${lit ? "#e03131" : "#141c5c"}"/>`).join("")}
     ${lit ? `<ellipse cx="-8" cy="-10" rx="7" ry="3.6" transform="rotate(-35 -8 -10)" fill="#fff" opacity=".6"/>` : ""}</svg>`;
 }
-/* Wann jede Vorlage zuletzt trainiert wurde (erkannt am Trainingsnamen, umbenannte Vorlagen verlieren ihre alten Trainings)
-   und welche „dran“ ist: von den schon einmal trainierten Vorlagen die, die am längsten her ist, sofern nicht heute. */
 /* „Zuletzt“ und „Dran“ für die Vorlagen (erkannt am Trainingsnamen).
    Vorlagen aus einem Bibliotheks-Programm (Feld lib) bilden je Programm eine Gruppe in Programm-Reihenfolge (Idee 44):
    Dran ist die erste nie trainierte Einheit, sonst die am längsten nicht trainierte; so kommt bei fester Reihenfolge
    immer die nächste, und eine übersprungene Einheit wird nachgeholt. Programme mit dauerWochen (Laufplan Woche für
-   Woche) bekommen kein Dran. Eigene Vorlagen bekommen Dran nur nach der alten Regel (die am längsten nicht trainierte
-   von mindestens zwei trainierten), wenn es keine Programm-Gruppe gibt; ebenso, solange die Bibliothek nicht geladen ist.
+   Woche) bekommen kein Dran. Dran steht bei jedem Programm, das in den letzten 14 Tagen trainiert wurde (Idee 49);
+   ist keins so aktiv, nur beim zuletzt trainierten. Eigene Vorlagen bekommen Dran nur nach der alten Regel (die am
+   längsten nicht trainierte von mindestens zwei trainierten), wenn es keine Programm-Gruppe mit Reihenfolge gibt;
+   ebenso, solange die Bibliothek nicht geladen ist.
    Ergebnis: last (Name → letztes Datum), due (Set der Vorlagen-IDs mit „Dran“), groups [{p, tpls, rotation, due, recent,
-   week}] und own (Vorlagen ohne Programm-Gruppe). */
+   week, n14}] in Bibliotheks-Reihenfolge, own (Vorlagen ohne Programm-Gruppe) und tops (Gruppen mit Dran, wichtigste zuerst:
+   heute noch nicht trainiert, dann die meisten Einheiten in 14 Tagen, dann zuletzt trainiert). */
 function templateDays(){
-  const last = {}, today = dayStart(Date.now()), monday = weekStart(Date.now());
+  const last = {}, today = dayStart(Date.now()), monday = weekStart(Date.now()), since = today - 13 * 864e5;
   S.workouts.forEach(w => { last[w.name] = Math.max(last[w.name] || 0, w.date); });
   const groups = [];
   if (lib.state === "ready") lib.progs.forEach(p => {
     const tpls = (p.einheiten || []).map(u => S.templates.find(t => t.lib === u.id)).filter(Boolean);
     if (!tpls.length) return;
-    const rotation = !p.dauerWochen;
+    const rotation = !p.dauerWochen, names = new Set(tpls.map(t => t.name));
     const due = rotation ? tpls.find(t => !last[t.name]) || tpls.reduce((a, b) => last[b.name] < last[a.name] ? b : a) : null;
-    const week = new Set(S.workouts.filter(w => w.date >= monday && tpls.some(t => t.name === w.name)).map(w => w.name)).size;
+    const week = new Set(S.workouts.filter(w => w.date >= monday && names.has(w.name)).map(w => w.name)).size;
     groups.push({p, tpls, rotation, due:due && !(last[due.name] >= today && tpls.every(t => last[t.name] >= today)) ? due : null,
-      recent:Math.max(0, ...tpls.map(t => last[t.name] || 0)), week});
+      recent:Math.max(0, ...tpls.map(t => last[t.name] || 0)), week, n14:S.workouts.filter(w => w.date >= since && names.has(w.name)).length});
   });
   const inGroup = new Set(groups.flatMap(g => g.tpls)), own = S.templates.filter(t => !inGroup.has(t));
-  // Nur ein „Dran“: die nächste Einheit des zuletzt trainierten Programms; dessen Gruppe kommt zuerst
-  const lead = groups.filter(g => g.due).sort((a, b) => b.recent - a.recent)[0] || null;
-  if (lead) groups.splice(groups.indexOf(lead), 1), groups.unshift(lead);
-  const due = new Set(lead ? [lead.due.id] : []);
+  let tops = groups.filter(g => g.due && g.n14).sort((a, b) => (a.recent >= today) - (b.recent >= today) || b.n14 - a.n14 || b.recent - a.recent);
+  if (!tops.length) tops = groups.filter(g => g.due).sort((a, b) => b.recent - a.recent).slice(0, 1);
+  const due = new Set(tops.map(g => g.due.id));
   if (!groups.some(g => g.rotation)){
     const done = own.filter(t => last[t.name]);
     const oldest = done.length >= 2 ? done.reduce((a, b) => last[b.name] < last[a.name] ? b : a) : null;
     if (oldest && dayStart(last[oldest.name]) < today) due.add(oldest.id);
   }
-  return {last, due, groups, own, top:lead ? lead.due : null};
+  return {last, due, groups, own, tops};
 }
-// Vorlagen auf dem Startbildschirm (Idee 45): Mit Programm-Vorlagen steht die nächste Einheit (Dran) des zuletzt
-// trainierten Programms oben, darunter je Programm die übrigen Einheiten in Programm-Reihenfolge, zuletzt die eigenen
-// Vorlagen. Ohne Programm-Vorlagen (oder solange die Bibliothek lädt) bleibt die Liste in der angelegten Reihenfolge.
+const weekOf = g => `diese Woche ${g.week} von ${g.tpls.length}`;
+// Vorlagen auf dem Startbildschirm (Ideen 45, 49, 51): Oben die Dran-Karten groß mit Übungen, bei Programmen mit einer
+// Zeile „Programm · diese Woche X von N“. Alle übrigen Vorlagen sind einzeilige Knöpfe: zuerst die Programme mit Dran
+// (in der Reihenfolge der Karten), dann die anderen Programme, zuletzt die eigenen Vorlagen. Ohne Programm-Vorlagen
+// (oder solange die Bibliothek lädt) stehen die übrigen Vorlagen in der angelegten Reihenfolge.
 function vTplList(td){
-  const card = t => { const seen = td.last[t.name], due = td.due.has(t.id), ago = seen ? relDay(seen) : "";
-    return `<button class="tpl${due ? " due" : ""}" data-act="start" data-id="${t.id}">
-      <span class="t">${esc(t.name)}</span>${due ? `<span class="due-tag">Dran</span>` : ""}
+  const ago = t => { const seen = td.last[t.name], r = seen ? relDay(seen) : "Noch nie"; return r[0].toLowerCase() + r.slice(1); };
+  const card = (t, prog) => `<button class="tpl due" data-act="start" data-id="${t.id}">
+      ${prog ? `<span class="tpl-prog">${esc(prog.p.name)} · <span class="nw">${weekOf(prog)}</span></span>` : ""}<span class="t">${esc(t.name)}</span><span class="due-tag">Dran</span>
       <span class="muted">${t.ex.map(exName).map(esc).join(" · ") || "Keine Übungen"}</span>
-      <span class="tpl-foot"><span class="go">Starten</span><span class="muted">${seen ? `Zuletzt ${ago[0].toLowerCase() + ago.slice(1)}` : "Noch nie trainiert"}</span></span></button>`; };
-  if (!td.groups.length) return S.templates.map(card).join("");
-  const top = td.top;
-  const head =(title, sub) => `<div class="tpl-group">${esc(title)}${sub ? ` <span class="muted">· ${sub}</span>` : ""}</div>`;
-  return (top ? card(top) : "")
-    + td.groups.map(g => { const rest = g.tpls.filter(t => t !== top);
-        return rest.length ? head(g.p.name, g.rotation ? `diese Woche ${g.week} von ${g.tpls.length}` : "") + rest.map(card).join("") : ""; }).join("")
-    + (td.own.length ? head("Eigene Vorlagen") + td.own.map(card).join("") : "");
+      <span class="tpl-foot"><span class="go">Starten</span><span class="muted">${td.last[t.name] ? `Zuletzt ${ago(t)}` : "Noch nie trainiert"}</span></span></button>`;
+  const row = t => `<button class="tpl-row" data-act="start" data-id="${t.id}"><span class="t">${esc(t.name)}</span><span class="muted">${ago(t)}</span></button>`;
+  const head = (title, sub) => `<div class="tpl-group">${esc(title)}${sub ? ` <span class="muted">· ${sub}</span>` : ""}</div>`;
+  const topIds = new Set(td.tops.map(g => g.due.id));
+  const cards = td.tops.map(g => card(g.due, g)).join("")
+    + S.templates.filter(t => td.due.has(t.id) && !topIds.has(t.id)).map(t => card(t)).join("");
+  const rest = list => list.filter(t => !td.due.has(t.id));
+  if (!td.groups.length) return cards + rest(S.templates).map(row).join("");
+  const order = [...td.tops, ...td.groups.filter(g => !td.tops.includes(g))];
+  return cards
+    + order.map(g => { const r = rest(g.tpls); return r.length ? head(g.p.name, td.tops.includes(g) || !g.rotation ? "" : weekOf(g)) + r.map(row).join("") : ""; }).join("")
+    + (rest(td.own).length ? head("Eigene Vorlagen") + rest(td.own).map(row).join("") : "");
 }
 function vTraining(){
   const a = S.active;
@@ -1299,13 +1316,17 @@ function vEditEntry(en, i){
     <div class="row" style="margin-top:10px"><button class="small" data-act="ew-add-set" data-i="${i}">+ Satz</button></div>
   </div>`;
 }
+// Tab Vorlagen (Idee 52): Anlegen oben, darunter die Vorlagen wie auf dem Startbildschirm nach Programmen gegliedert,
+// aber immer in Programm-Reihenfolge und ohne Dran
 function vTemplates(){
-  return `<h1>Vorlagen</h1>
-  ${S.templates.map(t => `<button class="tpl" data-act="edit-tpl" data-id="${t.id}">
+  const item = t => `<button class="tpl" data-act="edit-tpl" data-id="${t.id}">
     <span class="t">${esc(t.name)}</span>
-    <span class="muted">${t.ex.length} ${t.ex.length === 1 ? "Übung" : "Übungen"} · ${t.ex.map(exName).map(esc).join(", ") || "leer"}</span></button>`).join("")}
-  <button class="block" data-act="new-tpl">+ Neue Vorlage</button>
-  <button class="block" style="margin-top:8px" data-act="programs">+ Programm aus der Bibliothek</button>`;
+    <span class="muted">${t.ex.length} ${t.ex.length === 1 ? "Übung" : "Übungen"} · ${t.ex.map(exName).map(esc).join(", ") || "leer"}</span></button>`;
+  const td = templateDays(), head = t => `<div class="tpl-group">${esc(t)}</div>`;
+  return `<h1>Vorlagen</h1>
+  <div class="grid2" style="margin-bottom:6px"><button data-act="new-tpl">+ Neue Vorlage</button><button data-act="programs">+ Aus der Bibliothek</button></div>
+  ${!td.groups.length ? S.templates.map(item).join("")
+    : td.groups.map(g => head(g.p.name) + g.tpls.map(item).join("")).join("") + (td.own.length ? head("Eigene Vorlagen") + td.own.map(item).join("") : "")}`;
 }
 function vExercises(){
   return `<h1>Übungen</h1>
@@ -1406,7 +1427,7 @@ function vSheet(s){
     return head + `<p class="muted">Jede Einheit lässt sich als Vorlage übernehmen. Fehlende Übungen kommen dabei in deine Liste. Sätze, Wiederholungen und Pausen stehen hier als Richtwert.</p>
     ${lib.progs.map(p => { const open = s.open === p.id, days = (p.tageProWoche || []).join(" oder ");
       return `<div class="card prog"><button class="li row between" data-act="prog-open" data-id="${esc(p.id)}" aria-expanded="${open}">
-        <span class="grow"><span class="ex-name" style="display:block">${esc(p.name)}</span><span class="muted">${days ? `${days} Tage pro Woche · ` : ""}${esc((p.erfahrung || []).join(", "))}</span></span>
+        <span class="grow"><span class="ex-name" style="display:block">${esc(p.name)}</span><span class="muted">${days ? `${days} Tage pro Woche · ` : ""}${esc((p.erfahrung || []).join(", "))}</span>${(n => n ? `<span class="prog-taken">✓ ${n} von ${p.einheiten.length} übernommen</span>` : "")(p.einheiten.filter(u => S.templates.some(t => t.lib === u.id)).length)}</span>
         <span class="muted">${open ? "▾" : "▸"}</span></button>
         ${open ? `<p class="muted prog-desc">${esc(p.beschreibung || "")}</p>${p.einheiten.map(u => vUnit(p, u)).join("")}` : ""}</div>`; }).join("")}`;
   }
@@ -1787,13 +1808,30 @@ const actions = {
   "tpl-move": el => { const ex = ui.sheet.draft.ex, k = +el.dataset.k, j = k + +el.dataset.d; [ex[k], ex[j]] = [ex[j], ex[k]]; render(); },
   "tpl-swap": el => { retryLib(); ui.sheet = {kind:"picker", target:"tpl-swap", k:+el.dataset.k, back:ui.sheet}; render(); },
   "tpl-rm": el => { ui.sheet.draft.ex.splice(+el.dataset.k, 1); render(); },
-  "save-tpl": () => {
-    const d = ui.sheet.draft;
+  "save-tpl": async () => {
+    const s = ui.sheet, d = s.draft;
     if (!d.name.trim()){ toast("Bitte einen Namen eingeben"); return; }
     const {isNew, ...rest} = d;   // übrige Felder (z. B. lib) bleiben erhalten
-    const t = {...rest, name:d.name.trim(), ex:d.ex}, k = S.templates.findIndex(x => x.id === d.id);
+    const t = {...rest, name:d.name.trim(), ex:d.ex}, cur = S.templates.find(x => x.id === d.id);
+    // Umbenennen (Idee 50): „Zuletzt“, „Dran“ und der Programm-Richtwert hängen am Trainingsnamen. Nach Rückfrage
+    // bekommen die gespeicherten Trainings mit dem alten Namen den neuen; nicht, wenn eine andere Vorlage noch so heißt.
+    const old = cur ? cur.name : null, renamed = old !== null && old !== t.name;
+    const sole = renamed && !S.templates.some(x => x.id !== d.id && x.name === old);   // nur diese Vorlage hieß so
+    const mine = sole ? S.workouts.filter(w => w.name === old) : [];
+    let carry = false;
+    if (mine.length){
+      // Gibt es den neuen Namen schon (andere Vorlage oder Trainings), laufen die Verläufe zusammen: das sagen
+      const taken = S.templates.some(x => x.id !== d.id && x.name === t.name) || S.workouts.some(w => w.name === t.name);
+      carry = await ask(`${mine.length === 1 ? "1 Training heißt" : `${mine.length} Trainings heißen`} „${old}“. Auch umbenennen?`
+        + (taken ? ` „${t.name}“ gibt es schon, die Verläufe werden dann zusammengelegt.` : ""), "Umbenennen", false, "Nur die Vorlage");
+      if (ui.sheet !== s) return;
+    }
+    const k = S.templates.findIndex(x => x.id === d.id);   // nach der Rückfrage neu bestimmen
     if (k >= 0) S.templates[k] = t; else S.templates.push(t);
-    save(); ui.sheet = null; render(); toast(`Vorlage „${t.name}“ gesichert`);
+    if (carry) mine.forEach(w => { w.name = t.name; save({put:w.id}); });
+    if (sole && S.active && S.active.name === old) S.active.name = t.name;   // laufendes Training behält seinen Richtwert
+    save(); ui.sheet = null; render();
+    toast(carry ? `Vorlage und ${mine.length === 1 ? "1 Training" : `${mine.length} Trainings`} umbenannt` : `Vorlage „${t.name}“ gesichert`);
   },
   "del-tpl": async () => { const d = ui.sheet.draft; if (await ask(`Vorlage „${d.name}“ löschen?`, "Löschen", true)){ S.templates = S.templates.filter(t => t.id !== d.id); save(); ui.sheet = null; render(); } },
   "new-ex": () => { ui.sheet = {kind:"exercise", draft:{isNew:true, id:uid(), name:"", cat:"", type:"kraft"}}; render(); },

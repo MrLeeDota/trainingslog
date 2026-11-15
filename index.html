@@ -222,6 +222,8 @@ button.goal-btn:active{transform:skewX(-10deg) translateY(2px)}
 /* Verlauf (Ideen 64, 65, 67) */
 .w-gain{display:block;font-size:13px;color:var(--muted);margin-top:2px}
 .w-gain b{color:var(--ki);font-weight:700}
+.w-brief{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
+.w-rec{color:var(--ki);font-weight:700}
 .hist-head{margin:18px 2px 8px;font-size:14px;font-weight:700}
 .hist-head .muted{font-weight:400}
 button.hist-group{width:100%;min-height:52px;margin-bottom:10px;text-align:left;background:var(--card);border:2px solid var(--ink);border-radius:12px;padding:10px 14px;font-size:15px}
@@ -317,6 +319,7 @@ button.li:active{transform:none;opacity:.6}
 /* Hinweis unten, oberhalb von Pausen-Timer und Tab-Leiste; ausgeblendet nur durchsichtig, damit er nichts verdeckt */
 #toast.low{top:auto;bottom:calc(184px + env(safe-area-inset-bottom));transform:translate(-50%,16px);opacity:0;pointer-events:none;transition:transform .25s,opacity .25s;padding:12px 18px}
 #toast.low.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
+#toast.low.notimer{bottom:calc(84px + env(safe-area-inset-bottom))}   /* ohne Pausen-Timer direkt über der Tab-Leiste, damit er keine Karten verdeckt */
 .status{display:flex;gap:8px;align-items:flex-start;font-size:14px;color:var(--muted);margin-bottom:12px}
 .status i{flex:none;width:9px;height:9px;border-radius:50%;margin-top:5px;background:var(--muted)}
 .status.ok i{background:var(--scan)}.status.warn i{background:#ffb341}
@@ -439,8 +442,8 @@ function fmtSets(type, sets){
   // Zahl und Einheit mit geschütztem Leerzeichen, damit sie in schmalen Zeilen zusammenbleiben
   if (type === "ausdauer") return sets.map(s => `${s.a || "–"} min${s.b ? ` · ${s.b} km` : ""}${paceOf(s) ? ` · ${paceOf(s)} min/km` : ""}`).join(" | ");
   if (type === "zeit") return sets.map(s => `${s.a || "–"} min`).join(" | ");
-  const w = s => s.a ? `${s.a} kg` : "KG";
-  const weights = new Set(sets.map(s => String(s.a)));
+  const w = s => num(s.a) > 0 ? `${s.a} kg` : "KG";   // „0“ ist kein Gewicht: Körpergewicht
+  const weights = new Set(sets.map(s => num(s.a) > 0 ? String(s.a) : ""));
   if (sets.length > 1 && weights.size === 1) return `${w(sets[0])} × ${sets.map(s => s.b || "–").join(", ")}`;
   return sets.map(s => `${w(s)} × ${s.b || "–"}`).join(", ");
 }
@@ -912,6 +915,7 @@ function flush(){
 let ui = {tab:"training", sheet:null, open:null, next:null, openGroups:new Set(), histFilter:null};   // openGroups, histFilter: Verlauf (Ideen 64, 67)   // next: der als Nächstes markierte Satz (Idee 37)
 let bootErr = null;   // gesetzt, wenn die Daten beim Start nicht geladen werden konnten
 const timer = {end:0, total:0, rang:false, by:null, prev:null, src:null};
+let undoDel = null;   // zuletzt gelöschtes Training, solange „Rückgängig“ angeboten wird (Idee 71)
 let undoSet = null;   // zuletzt mit „− Satz“ entfernter Satz, solange er sich zurückholen lässt
 let undoVals = null;   // Werte vor „Steigern“, „Entlasten“ oder „Ziel eintragen“, solange sie sich zurückholen lassen
 // Ein Feld (f: "a" = kg, "b" = Wdh) in allen offenen Sätzen setzen, val(j) liefert den Wert für Satz j;
@@ -1081,6 +1085,7 @@ let toastT = null;
 // low: unten über Timer und Tab-Leiste statt oben, für Hinweise zu einer Aktion, die der Daumen gerade unten gemacht hat
 function toast(msg, act, low){
   const t = $("#toast"); t.textContent = msg;
+  t.classList.toggle("notimer", !!low && !$("#timer").classList.contains("show"));
   if (act) t.dataset.act = act; else delete t.dataset.act;
   t.classList.toggle("low", !!low);
   t.classList.add("show"); clearTimeout(toastT);
@@ -1112,7 +1117,7 @@ function workoutGain(w, bests){
       if (v > (top[unit] || 0)) top[unit] = v;
     });
     Object.keys(top).forEach(unit => {
-      if (b[unit] > 0 && top[unit] > b[unit]) records.push({name:exName(en.exId), unit, v:top[unit], old:b[unit]});   // der erste Wert einer Übung ist noch kein Rekord
+      if (b[unit] > 0 && top[unit] > b[unit]) records.push({name:exName(en.exId), exId:en.exId, unit, v:top[unit], old:b[unit]});   // der erste Wert einer Übung ist noch kein Rekord
       if (top[unit] > (b[unit] || 0)) b[unit] = top[unit];
     });
   });
@@ -1456,29 +1461,55 @@ function histGroup(t){
   const mon = new Date(wk), sun = new Date(wk + 6 * 864e5), m = x => x.toLocaleDateString("de-DE", {month:"short"});
   return {key:"w" + wk, title:`${mon.getDate()}.${mon.getMonth() === sun.getMonth() ? "" : ` ${m(mon)}`}–${sun.getDate()}. ${m(sun)}${year ? ` ${sun.getFullYear()}` : ""}`};
 }
+// Kurzfassung einer Übung für die zugeklappte Verlaufskarte (Idee 69): Kraft der schwerste Satz („82,5 × 8“, ohne Gewicht
+// die meisten Wdh), Ausdauer Strecke und Tempo, „nur Zeit“ die Minuten
+function entryBrief(e){
+  const type = exType(e.exId), sets = e.sets, sum = f => sets.reduce((t, x) => t + num(x[f]), 0);
+  let v = "";
+  if (type === "kraft"){
+    const kg = Math.max(0, ...sets.map(x => num(x.a)));
+    if (kg > 0){ const reps = Math.max(0, ...sets.filter(x => num(x.a) === kg).map(x => num(x.b))); v = `${fmtNum(kg)}${reps ? ` × ${fmtNum(reps)}` : " kg"}`; }
+    else { const reps = Math.max(0, ...sets.map(x => num(x.b))); v = reps ? `${fmtNum(reps)} Wdh` : ""; }
+  } else {
+    const min = sum("a"), km = type === "ausdauer" ? sum("b") : 0;
+    v = km ? `${fmtNum(km)} km${min ? ` · ${fmtPace(min / km)} min/km` : ""}` : min ? `${fmtNum(min)} min` : "";
+  }
+  return `${exName(e.exId)}${v ? ` ${v}` : ""}`;
+}
 function vHistory(){
   const gains = {}, bests = {};
   S.workouts.forEach(w => { gains[w.id] = workoutGain(w, bests); });
   const thisYear = new Date().getFullYear();
   const card = w => {
-    const open = ui.open === w.id, n = w.entries.reduce((s, e) => s + e.sets.length, 0), g = gains[w.id];
+    const open = ui.open === w.id, g = gains[w.id];
+    // Satzzahl nur, wenn Kraftübungen dabei sind; ein Lauf ist kein „1 Satz“
+    const n = w.entries.filter(e => exType(e.exId) === "kraft").reduce((s, e) => s + e.sets.length, 0);
+    const recs = new Map(g.records.map(r => [r.exId, r]));
     const mins = w.end ? Math.max(1, Math.round((w.end - w.date) / 60000)) : 0;
     const date = fmtDateLong(w.date) + (new Date(w.date).getFullYear() !== thisYear ? ` ${new Date(w.date).getFullYear()}` : "");
     const rec = g.records.length;
     return `<div class="card">
       <button class="li row between" style="padding:0" data-act="toggle-w" data-id="${w.id}">
         <span class="grow"><span class="ex-name" style="display:block">${esc(w.name)}</span>
-        <span class="muted">${date}${mins ? ` · ${mins} min` : ""} · ${n} ${n === 1 ? "Satz" : "Sätze"}</span>
+        <span class="muted">${date}${mins ? ` · ${mins} min` : ""}${n ? ` · ${n} ${n === 1 ? "Satz" : "Sätze"}` : ""}</span>
+        ${open ? "" : `<span class="w-brief">${esc(w.entries.map(entryBrief).join(" · "))}</span>`}
         <span class="w-gain">+${fmtInt(g.power)} Kampfkraft${rec ? ` · <b>★ ${rec} ${rec === 1 ? "Rekord" : "Rekorde"}</b>` : ""}</span></span>
         <span class="muted">${open ? "▾" : "▸"}</span></button>
-      ${open ? `<div style="margin-top:8px">${w.entries.map(e => { const bt = exById(e.exId) ? betterThanLast(e, null, w.date) : null;
-          return `<div class="li"><div class="row between"><b>${esc(exName(e.exId))}</b>${bt ? `<span class="better">${esc(bt.label)}</span>` : ""}</div><div class="muted">${esc(fmtSets(exType(e.exId), e.sets))}</div></div>`; }).join("")}
+      ${open ? `<div style="margin-top:8px">${w.entries.map(e => { const bt = exById(e.exId) ? betterThanLast(e, null, w.date) : null, rc = recs.get(e.exId);
+          // Rekord (Idee 70): goldener Stern vor dem Vergleich, ohne Vergleich mit dem alten Bestwert
+          const unit = rc && (rc.unit === "Wdh" ? " Wdh" : ` ${rc.unit}`);
+          const right = rc && !bt ? `<span class="w-rec">★ ${fmtNum(rc.v)}${unit} (vorher ${fmtNum(rc.old)})</span>`
+            : bt ? `<span class="better">${rc ? `<span class="w-rec">★</span> ` : ""}${esc(bt.label)}</span>` : "";
+          return `<div class="li"><div class="row between"><b>${esc(exName(e.exId))}</b>${right}</div><div class="muted">${esc(fmtSets(exType(e.exId), e.sets))}</div></div>`; }).join("")}
         <div class="row between" style="margin-top:6px"><button class="small" data-act="edit-w" data-id="${w.id}">Bearbeiten</button>
         <button class="small ghost danger" data-act="del-w" data-id="${w.id}">Training löschen</button></div></div>` : ""}
     </div>`;
   };
   // Filter nach Einheit (Idee 67): Namen der Trainings aus den letzten 8 Wochen, der zuletzt trainierte zuerst
-  const names = [...new Set([...S.workouts].reverse().filter(w => w.date >= Date.now() - 56 * 864e5).map(w => w.name))];
+  // Die Einheiten mit „Dran“ kommen zuerst (Idee 72), man sieht sie vor dem Training nach
+  const recent = [...new Set([...S.workouts].reverse().filter(w => w.date >= Date.now() - 56 * 864e5).map(w => w.name))];
+  const dueNames = (td => S.templates.filter(t => td.due.has(t.id)).map(t => t.name))(templateDays()).filter(nm => recent.includes(nm));
+  const names = [...new Set([...dueNames, ...recent])];
   const f = ui.histFilter && S.workouts.some(w => w.name === ui.histFilter) ? ui.histFilter : null;
   const chips = names.length > 1 || f ? `<div class="cat-chips hist-filter">${[...new Set(f ? [...names, f] : names)].map(nm => `<button class="chip${nm === f ? " on" : ""}" data-act="hist-filter" data-name="${esc(nm)}" aria-pressed="${nm === f}">${esc(nm)}</button>`).join("")}</div>` : "";
   const ws = [...S.workouts].reverse();
@@ -1795,7 +1826,7 @@ function applyImport(text){
   ask(`Backup mit ${d.workouts.length} Trainings laden? Die aktuellen Daten werden ersetzt.`, "Laden", true).then(ok => {
     if (!ok) return;
     const before = new Set(S.workouts.map(w => w.id));
-    S = normalize(d); S.active = null; stopTimer();   // eine laufende Pause gehört zum ersetzten Training
+    S = normalize(d); S.active = null; stopTimer(); undoDel = null;   // eine laufende Pause gehört zum ersetzten Training
     // Ältere Backups kennen settings.lastBackup noch nicht: Die geladenen Daten sind auf dem Stand ihres Exports gesichert.
     if (!S.settings.lastBackup && Date.parse(d.exportedAt) > 0) S.settings.lastBackup = Date.parse(d.exportedAt);
     const now = new Set(S.workouts.map(w => w.id));
@@ -2058,7 +2089,10 @@ const actions = {
   },
   "hist-group": el => { const k = el.dataset.key; if (ui.openGroups.has(k)) ui.openGroups.delete(k); else ui.openGroups.add(k); render(); },
   // Die Knöpfe bleiben an ihrer Stelle; die Leiste wischt man seitlich, ihre Position übersteht das Neuzeichnen
-  "hist-filter": el => { ui.histFilter = ui.histFilter === el.dataset.name ? null : el.dataset.name; render(); window.scrollTo(0, 0); },
+  "hist-filter": el => { ui.histFilter = ui.histFilter === el.dataset.name ? null : el.dataset.name; render();
+    const on = $(".hist-filter .on"), bar = $(".hist-filter");   // aktiven Knopf in den Blick holen, nur die Leiste seitlich
+    if (on && bar && (on.offsetLeft < bar.scrollLeft || on.offsetLeft + on.offsetWidth > bar.scrollLeft + bar.clientWidth)) bar.scrollLeft = on.offsetLeft - 16;
+    window.scrollTo(0, 0); },
   "to-settings": () => { const h = $("#settings"); if (h) h.scrollIntoView({behavior:"smooth", block:"start"}); },
   "toggle-w": el => { ui.open = ui.open === el.dataset.id ? null : el.dataset.id; render(); },
   "edit-w": el => {
@@ -2102,10 +2136,24 @@ const actions = {
     const card = document.querySelector(`[data-act="toggle-w"][data-id="${CSS.escape(w.id)}"]`);
     if (card) card.closest(".card").scrollIntoView({block:"center"});
   },
+  // Löschen nennt das Training und lässt sich bis zum nächsten Tipp an anderer Stelle zurücknehmen (Idee 71)
   "del-w": async el => {
-    if (!(await ask("Dieses Training endgültig löschen?", "Löschen", true))) return;
-    const id = el.dataset.id;
-    S.workouts = S.workouts.filter(w => w.id !== id); S.deleted.push(id); save({del:id}); render();
+    const id = el.dataset.id, w = S.workouts.find(x => x.id === id);
+    if (!w) return;
+    const n = w.entries.reduce((t, e) => t + e.sets.length, 0);
+    if (!(await ask(`„${w.name}“ vom ${fmtDateLong(w.date)} löschen? ${n} ${n === 1 ? "Satz" : "Sätze"}`, "Löschen", true))) return;
+    if (!S.workouts.includes(w)) return;
+    S.workouts = S.workouts.filter(x => x !== w); S.deleted.push(id); save({del:id});
+    undoDel = w; render();
+    toast(`„${w.name}“ gelöscht · Rückgängig`, "undo-del-w", true);
+    setTimeout(() => { if (undoDel === w) undoDel = null; }, 10500);   // nach dem Hinweis verfällt das Rückgängig
+  },
+  "undo-del-w": () => {
+    const w = undoDel; undoDel = null;
+    if (!w || S.workouts.some(x => x.id === w.id)) return;
+    S.workouts.push(w); S.workouts.sort((x, y) => x.date - y.date);
+    S.deleted = S.deleted.filter(id => id !== w.id);
+    save({put:w.id}); ui.openGroups.add(histGroup(w.date).key); render(); toast(`„${w.name}“ wiederhergestellt`, null, true);
   },
   "exp-json": async () => {
     const at = Date.now(), r = await offerFile(`trainingslog-backup-${stamp()}.json`, backupJson(at), "application/json", "Backup (JSON)", at);

@@ -201,6 +201,13 @@ button.ex-info{background:none;box-shadow:none;border-radius:6px;text-align:left
 button.ex-info::after{content:" ›";color:var(--muted);font-style:normal;font-weight:400}
 button.ex-info:active{opacity:.7}
 .ex-type{padding:10px 0;font-size:17px}
+/* Kategorie mit einem Tipp (Idee 62) */
+.cat-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+button.chip{min-height:44px;padding:8px 14px;font-size:14px;border-radius:22px;background:var(--well);border:2px solid var(--line);box-shadow:none}
+button.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+/* Übungs-Sheet aus dem Training (Idee 59): Name groß oben, laufende Pause in der Kopfzeile */
+.ex-sheet-name{font-family:var(--display);font-stretch:condensed;font-style:italic;font-weight:900;font-size:24px;line-height:1.1;margin:4px 0 2px;overflow-wrap:anywhere}
+#sheet-rest.resting{color:var(--ki)}
 .lib-link{gap:8px;margin-top:10px;font-size:14px}
 .lib-link .muted{overflow-wrap:anywhere}
 /* Ziel eintragen: goldene Umrandung, zwischen „Steigern“ (gefüllt) und „Entlasten“ (orange umrandet) */
@@ -1491,27 +1498,42 @@ function vSheet(s){
     ${d.isNew ? "" : `<button class="block ghost danger" style="margin-top:14px" data-act="del-tpl">Vorlage löschen</button>`}`;
   }
   if (s.kind === "exercise"){
-    const d = s.draft, cats = [...new Set(S.exercises.map(e => e.cat).filter(Boolean))].sort();
+    const d = s.draft, cats = [...new Set(S.exercises.map(e => e.cat).filter(Boolean))].sort((a, b) => a.localeCompare(b, "de"));
     const hist = d.isNew ? [] : S.workouts.filter(w => w.entries.some(e => e.exId === d.id)).slice(-10).reverse();
     const chart = d.isNew ? "" : vChart(d.id);
     if (lib.state === "idle") loadLib();
     const tech = libOf(d);   // Technik-Hinweise aus der Bibliothek, falls die Übung dort steht (gespeicherte ID oder gleicher Name)
     const inTraining = s.from === "training";   // aus dem Training geöffnet (Idee 53): Erfassungsart nur als Text, kein Löschen
-    return `<div class="sheet-head"><button class="ghost" data-act="close">Abbrechen</button><b>${d.isNew ? "Neue Übung" : "Übung"}</b><button class="ghost accent" data-act="save-ex">Sichern</button></div>
-    <label class="lbl">Name</label><input data-draft="name" value="${esc(d.name)}" placeholder="z. B. Bankdrücken" autocomplete="off">
-    <label class="lbl">Kategorie</label><input data-draft="cat" list="cats" value="${esc(d.cat)}" placeholder="z. B. Brust" autocomplete="off">
+    // Kategorie mit einem Tipp (Idee 62): vorhandene Kategorien als Knöpfe, das Feld bleibt für neue
+    const fCat = `<label class="lbl">Kategorie</label><input data-draft="cat" list="cats" value="${esc(d.cat)}" placeholder="z. B. Brust" autocomplete="off">
     <datalist id="cats">${cats.map(c => `<option value="${esc(c)}">`).join("")}</datalist>
-    <label class="lbl">Erfassung</label>${inTraining ? `<div class="ex-type">${esc((TYPES[d.type] || TYPES.kraft).label)}</div>`
-      : `<select data-draft="type">${Object.entries(TYPES).map(([k, t]) => `<option value="${k}" ${d.type === k ? "selected" : ""}>${t.label}</option>`).join("")}</select>`}
-    ${lib.state === "ready" ? `<div class="lib-link row between"><span class="muted grow">${tech ? `Bibliothek: ${esc([tech.name, ...(tech.geraet || []).slice(0, 1), ...(tech.muskeln || []).slice(0, 1)].join(" · "))}` : "Nicht mit der Bibliothek verknüpft"}</span>
-      <button class="small ghost accent" data-act="ex-link">${tech ? "Ändern" : "Verknüpfen"}</button></div>` : ""}
-    <label class="lbl">Notiz (steht im Training unter dem Namen)</label><input data-draft="note" value="${esc(d.note || "")}" placeholder="z. B. Sitz Stufe 4, enger Griff" maxlength="140" autocomplete="off">
-    ${tech && tech.hinweise && tech.hinweise.length ? `<h2>Technik</h2><ul class="hints">${tech.hinweise.map(h => `<li>${esc(h)}</li>`).join("")}</ul>` : ""}
+    ${cats.length ? `<div class="cat-chips">${cats.map(c => `<button class="chip${c === String(d.cat || "").trim() ? " on" : ""}" data-act="cat-pick" data-cat="${esc(c)}" aria-pressed="${c === String(d.cat || "").trim()}">${esc(c)}</button>`).join("")}</div>` : ""}`;
+    const fName = `<label class="lbl">Name</label><input data-draft="name" value="${esc(d.name)}" placeholder="z. B. Bankdrücken" autocomplete="off">`;
+    const fType = `<label class="lbl">Erfassung</label>${inTraining ? `<div class="ex-type">${esc((TYPES[d.type] || TYPES.kraft).label)}</div>`
+      : `<select data-draft="type">${Object.entries(TYPES).map(([k, t]) => `<option value="${k}" ${d.type === k ? "selected" : ""}>${t.label}</option>`).join("")}</select>`}`;
+    const fLink = lib.state === "ready" ? `<div class="lib-link row between"><span class="muted grow">${tech ? `Bibliothek: ${esc([tech.name, ...(tech.geraet || []).slice(0, 1), ...(tech.muskeln || []).slice(0, 1)].join(" · "))}` : "Nicht mit der Bibliothek verknüpft"}</span>
+      <button class="small ghost accent" data-act="ex-link">${tech ? "Ändern" : "Verknüpfen"}</button></div>` : "";
+    const fNote = `<label class="lbl">Notiz (steht im Training unter dem Namen)</label><input data-draft="note" value="${esc(d.note || "")}" placeholder="z. B. Sitz Stufe 4, enger Griff" maxlength="140" autocomplete="off">`;
+    const vTech = tech && tech.hinweise && tech.hinweise.length ? `<h2>Technik</h2><ul class="hints">${tech.hinweise.map(h => `<li>${esc(h)}</li>`).join("")}</ul>` : "";
+    const vHist = list => list.length ? `<div class="list" style="padding:0">${list.map(w => `<div class="li"><div class="muted">${fmtDate(w.date)} · ${esc(w.name)}</div><div>${esc(fmtSets(exType(d.id), w.entries.find(e => e.exId === d.id).sets))}</div></div>`).join("")}</div>` : `<p class="muted">Noch nicht trainiert.</p>`;
+    const head = `<div class="sheet-head"><button class="ghost" data-act="close">Abbrechen</button><b${inTraining ? ` id="sheet-rest"${restLabel() !== "Übung" ? ` class="resting"` : ""}` : ""}>${inTraining ? restLabel() : d.isNew ? "Neue Übung" : "Übung"}</b><button class="ghost accent" data-act="save-ex">Sichern</button></div>`;
+    if (inTraining){
+      // Aus dem Training (Idee 59): zuerst, was man zwischen zwei Sätzen nachsieht – letzte Einheiten, Richtwert, Technik,
+      // Notiz, Kurve –, die Stammdaten am Ende. Die Kopfzeile zeigt die laufende Pause (tick()).
+      const en = S.active && S.active.entries[s.i], plan = en && en.exId === d.id ? entryPlan(en) : null;
+      return `${head}<div class="ex-sheet-name">${esc(d.name)}</div>
+      <h2>Letzte Einheiten</h2>${vHist(hist.slice(0, 3))}
+      ${plan ? `<div class="plan">Programm: ${esc(libDose(plan))}</div>` : ""}
+      ${vTech}${fNote}
+      ${chart ? `<h2>Entwicklung</h2>${chart}` : ""}
+      <h2>Übung bearbeiten</h2>${fName}${fCat}${fType}${fLink}`;
+    }
+    return `${head}${fName}${fCat}${fType}${fLink}${fNote}${vTech}
     ${d.isNew ? "" : `${chart ? `<h2>Entwicklung</h2>${chart}` : ""}
       <h2>Letzte Einheiten</h2>
-      ${hist.length ? `<div class="list" style="padding:0">${hist.map(w => `<div class="li"><div class="muted">${fmtDate(w.date)} · ${esc(w.name)}</div><div>${esc(fmtSets(exType(d.id), w.entries.find(e => e.exId === d.id).sets))}</div></div>`).join("")}</div>` : `<p class="muted">Noch nicht trainiert.</p>`}
-      ${inTraining ? "" : `${hist.length ? `<button class="block ghost" style="margin-top:14px" data-act="ex-transfer">Verlauf übertragen auf …</button>` : ""}
-      <button class="block ghost danger" style="margin-top:${hist.length ? 4 : 14}px" data-act="del-ex">Übung löschen</button>`}`}`;
+      ${vHist(hist)}
+      ${hist.length ? `<button class="block ghost" style="margin-top:14px" data-act="ex-transfer">Verlauf übertragen auf …</button>` : ""}
+      <button class="block ghost danger" style="margin-top:${hist.length ? 4 : 14}px" data-act="del-ex">Übung löschen</button>`}`;
   }
   if (s.kind === "programs"){
     const head = `<div class="sheet-head"><button class="ghost" data-act="close">Fertig</button><b>Programme</b><span style="width:60px"></span></div>`;
@@ -1625,8 +1647,11 @@ function keepAwake(){
     .finally(() => { wakeBusy = false; if (!(S && S.active)) keepAwake(); });   // Training inzwischen beendet: gleich wieder freigeben
 }
 
+// Titel des Übungs-Sheets aus dem Training (Idee 59): die laufende Pause, sonst „Übung“
+function restLabel(){ const rem = Math.ceil((timer.end - Date.now()) / 1000); return timer.end && rem > 0 ? `Pause ${Math.floor(rem/60)}:${String(rem%60).padStart(2,"0")}` : "Übung"; }
 function tick(){
-  const el = $("#elapsed");
+  const el = $("#elapsed"), sr = $("#sheet-rest");
+  if (sr){ const t = restLabel(); if (sr.textContent !== t){ sr.textContent = t; sr.classList.toggle("resting", t !== "Übung"); } }
   if (el && S.active){ const m = Math.floor((Date.now() - S.active.date) / 60000); el.textContent = m < 60 ? `${m} min` : `${Math.floor(m/60)} h ${m%60} min`; }
   const tb = $("#timer");
   if (!timer.end){ tb.classList.remove("show","over"); return; }
@@ -1889,12 +1914,18 @@ const actions = {
   },
   // „Neu“ übernimmt das Suchwort als Namen (Idee 55)
   "new-ex-inline": () => { const q = (ui.sheet.q || "").trim().replace(/\s+/g, " "), name = q ? q[0].toUpperCase() + q.slice(1) : "";
-    exSheet({isNew:true, id:uid(), name, cat:"", type:"kraft"}, {back:ui.sheet}); },
+    // Kategorie vorwählen (Idee 62): die der getauschten Übung, sonst eine Kategorie, die im Suchwort steckt („schulter“ → Schultern)
+    const s = ui.sheet, cats = [...new Set(S.exercises.map(e => e.cat).filter(Boolean))];
+    const swapped = s.target === "swap" ? S.active && S.active.entries[s.i] : s.target === "tpl-swap" ? {exId:s.back.draft.ex[s.k]} : null;
+    const words = q.toLowerCase().split(" ").filter(w => w.length >= 4);
+    const cat = (swapped && (exById(swapped.exId) || {}).cat) || cats.find(c => words.some(w => c.toLowerCase().startsWith(w) || w.startsWith(c.toLowerCase()))) || "";
+    exSheet({isNew:true, id:uid(), name, cat, type:"kraft"}, {back:s}); },
+  "cat-pick": el => { ui.sheet.draft.cat = el.dataset.cat; render(); },
   "ex-transfer": () => { ui.sheet = {kind:"picker", target:"transfer", back:ui.sheet}; render(); },
   "ex-link": () => { retryLib(); ui.sheet = {kind:"picker", target:"link", back:ui.sheet}; render(); },
   // Übungsname im Training öffnet das Übungs-Sheet (Idee 53)
   "ex-info": el => { const en = S.active && S.active.entries[+el.dataset.i], e = en && exById(en.exId);
-    if (e) exSheet({...e}, {from:"training"}); },
+    if (e) exSheet({...e}, {from:"training", i:+el.dataset.i}); },
   close: async () => {
     const s = ui.sheet;
     // Geänderten Entwurf eines gespeicherten Trainings nicht aus Versehen (z. B. Tipp neben das Sheet) verwerfen
@@ -2108,7 +2139,10 @@ document.addEventListener("input", e => {
   } else if (t.dataset.ef && ui.sheet?.kind === "edit-w"){
     const s = ui.sheet.draft.entries[+t.dataset.ei]?.sets[+t.dataset.ej];
     if (s) s[t.dataset.ef] = t.value;
-  } else if (t.dataset.draft && ui.sheet?.draft){ ui.sheet.draft[t.dataset.draft] = t.value; }
+  } else if (t.dataset.draft && ui.sheet?.draft){ ui.sheet.draft[t.dataset.draft] = t.value;
+    // Kategorie getippt: die Markierung der Kategorie-Knöpfe folgt (Idee 62)
+    if (t.dataset.draft === "cat") document.querySelectorAll(".cat-chips .chip").forEach(b => { const on = b.dataset.cat === t.value.trim(); b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+  }
   else if (t.id === "pick-q"){ if (ui.sheet) ui.sheet.q = t.value; filterPick(t.value); }
 });
 document.addEventListener("change", e => {

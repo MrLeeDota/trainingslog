@@ -1777,11 +1777,13 @@ const actions = {
     const s = ui.sheet;
     // Geänderten Entwurf eines gespeicherten Trainings nicht aus Versehen (z. B. Tipp neben das Sheet) verwerfen
     if (s && s.kind === "edit-w" && JSON.stringify(s.draft) !== s.orig && !(await ask("Änderungen an diesem Training verwerfen?", "Verwerfen", true, "Weiter bearbeiten"))) return;
+    if (s && s.kind === "template" && s.orig && JSON.stringify(s.draft) !== s.orig && !(await ask("Änderungen an dieser Vorlage verwerfen?", "Verwerfen", true, "Weiter bearbeiten"))) return;
     if (ui.sheet !== s) return;
     ui.sheet = s && s.back || null; render();
   },
-  "new-tpl": () => { ui.sheet = {kind:"template", draft:{isNew:true, id:uid(), name:"", ex:[]}}; render(); },
-  "edit-tpl": el => { const t = S.templates.find(x => x.id === el.dataset.id); ui.sheet = {kind:"template", draft:{...t, ex:[...t.ex]}}; render(); },
+  // orig: Ausgangsstand des Entwurfs, damit „Abbrechen“ oder ein Tipp neben das Sheet nach Änderungen nachfragt
+  "new-tpl": () => { const draft = {isNew:true, id:uid(), name:"", ex:[]}; ui.sheet = {kind:"template", draft, orig:JSON.stringify(draft)}; render(); },
+  "edit-tpl": el => { const t = S.templates.find(x => x.id === el.dataset.id), draft = {...t, ex:[...t.ex]}; ui.sheet = {kind:"template", draft, orig:JSON.stringify(draft)}; render(); },
   "tpl-move": el => { const ex = ui.sheet.draft.ex, k = +el.dataset.k, j = k + +el.dataset.d; [ex[k], ex[j]] = [ex[j], ex[k]]; render(); },
   "tpl-swap": el => { retryLib(); ui.sheet = {kind:"picker", target:"tpl-swap", k:+el.dataset.k, back:ui.sheet}; render(); },
   "tpl-rm": el => { ui.sheet.draft.ex.splice(+el.dataset.k, 1); render(); },
@@ -1791,7 +1793,7 @@ const actions = {
     const {isNew, ...rest} = d;   // übrige Felder (z. B. lib) bleiben erhalten
     const t = {...rest, name:d.name.trim(), ex:d.ex}, k = S.templates.findIndex(x => x.id === d.id);
     if (k >= 0) S.templates[k] = t; else S.templates.push(t);
-    save(); ui.sheet = null; render();
+    save(); ui.sheet = null; render(); toast(`Vorlage „${t.name}“ gesichert`);
   },
   "del-tpl": async () => { const d = ui.sheet.draft; if (await ask(`Vorlage „${d.name}“ löschen?`, "Löschen", true)){ S.templates = S.templates.filter(t => t.id !== d.id); save(); ui.sheet = null; render(); } },
   "new-ex": () => { ui.sheet = {kind:"exercise", draft:{isNew:true, id:uid(), name:"", cat:"", type:"kraft"}}; render(); },

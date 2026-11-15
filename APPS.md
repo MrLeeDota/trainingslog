@@ -128,8 +128,14 @@ Quellen:
 - **Fitbod:** plant nach dem Erholungsstand pro Muskelgruppe [Suche, erste Ideenrunde].
 - **Boostcamp:** Programme mit bis zu 18 Wochen und bis zu 7 Trainingstagen pro Woche, als „Repeating Weeks“ (jede Woche gleich) oder „Periodized Weeks“ (Woche 1 bis N verschieden); Wochen und Tage lassen sich duplizieren, Tage umsortieren [gelesen]. In laufenden Programmen von Coaches lassen sich kommende Einheiten bearbeiten und Übungen tauschen; automatische Steigerung („Auto Progression“) nur mit Pro [gelesen]. Laut einem Nutzer auf Reddit gibt Boostcamp einfach die nächste Einheit der Reihe vor, statt am Sonntag eine neue Woche zu beginnen [Suche, Seite gesperrt]; laut einer Programmseite lassen sich Einheiten verschieben [Suche]. Wie die nächste Einheit angezeigt wird, beschreiben die gelesenen Seiten nicht.
 - **JEFIT:** Eigene Pläne mit Zahl der Tage pro Woche, Ziel und Schwierigkeit; jeder Tag wird einzeln mit Übungen gefüllt und lässt sich umbenennen, einem Wochentag zuordnen, kopieren oder löschen. Ein neuer Plan wird auf dem iPhone sofort zum aktiven Plan (Blog vom 02.05.2022) [gelesen]. Seit 08/2026 gibt es mit Elite Periodisierung für eigene Pläne: Übungen, Tage und Reihenfolge bleiben, in Blöcken von etwa 4 Wochen ändern sich Gewichte und Wdh je Phase, die vierte Phase ist eine Entlastung, und die Phasen wechseln am eingestellten Wochenbeginn (Blog vom 08.09.2026) [gelesen]. Wie JEFIT den nächsten Trainingstag bestimmt, war nicht zu belegen; ein Beispielplan läuft standardmäßig mit 2 Tagen Training und 1 Tag Pause [Suche].
+- **Ergänzungen aus dem Funktionsvergleich Vorlagen** (`funktions-tester`, 14.11.2026):
+  - **Hevy:** Ein Training verweist laut inoffiziellen Beschreibungen der Hevy-API über das Feld `routine_id` auf die Routine, aus der es stammt; Umbenennen trennt es also vermutlich nicht von der Routine [Suche; die offizielle API-Dokumentation war nicht lesbar]. Dass Routinen in der Liste anzeigen, wann sie zuletzt trainiert wurden, war nicht zu belegen; die Hilfe verweist für Trainingstage auf den Kalender [Suche].
+  - **Strong:** Eine Anzeige „zuletzt trainiert“ an Vorlagen war auch diesmal nicht zu finden. In einem Forumsbeitrag startet jemand ein Training aus dem Verlauf neu („perform again“) und bekommt so die Werte der Vorwoche; laut derselben Quelle gibt es in der kostenlosen Version keine eigenen Vorlagen (widerspricht der Hilfe von 2021 mit höchstens 3, nicht geprüft) [Suche, Mumsnet].
+  - **Boostcamp:** Eine offizielle Beschreibung, wie Boostcamp mit verpassten Einheiten umgeht, war auch diesmal nicht zu finden [Suche].
+  - **Bevel** (Nebenbefund): Auf der Wunschliste baten Nutzer darum, Vorlagen in eine zur Trainingswoche passende Reihenfolge zu bringen, statt in der Anlege-Reihenfolge; einer verwies auf das Umsortieren per langem Druck in Strong (30 Stimmen, umgesetzt in Version 2.1.0, 04/2025). Ein zweiter Wunsch (16 Stimmen) ergänzt Ordner, Archiv und Sortierung; umgesetzt am 30.09.2026 in 3.2.0 über angeheftete Vorlagen, die man per Ziehen ordnet [gelesen].
+  - **Hybrid Calisthenics** (Nebenbefund): Ein Nutzer beschreibt, dass die App den Plan nach einem verpassten Tag nach Kalender weiterschiebt; laut Support gibt es keine Einstellung, um „dort weiterzumachen, wo man aufgehört hat“, man soll die verpasste Einheit einfach als Nächstes machen [Suche, Seite mit Fehler 403].
 
-Stand: 14.11.2026, `produkt-scout` (Ideenrunde Vorlagen: MCI erneut, Strong-Hilfe zu Vorlagen, Hevy Routinen und Trainer, Boostcamp, JEFIT); davor am selben Tag `produkt-scout` (MCI, Supersätze, Teilen).
+Stand: 14.11.2026, `produkt-scout` (Ideenrunde Vorlagen: MCI erneut, Strong-Hilfe zu Vorlagen, Hevy Routinen und Trainer, Boostcamp, JEFIT); davor am selben Tag `produkt-scout` (MCI, Supersätze, Teilen). Am selben Tag vom `funktions-tester` (Prüfung Vorlagen) ergänzt: Hevy `routine_id`, Strong und Hevy ohne belegte „zuletzt“-Anzeige, Boostcamp, Bevel und Hybrid Calisthenics als Nebenbefunde.
 
 Quellen:
 - MCI-Website (FAQ): https://mcisolutions.de
@@ -158,6 +164,12 @@ Quellen:
 - JEFIT Blog, „How To Create Custom Workout Plans“ (02.05.2022): https://www.jefit.com/blog/how-to-create-custom-workout-plans
 - JEFIT Blog, „What's New in August 2026: Periodization Feature“ (08.09.2026): https://www.jefit.com/blog/periodization-on-your-own-plan
 - JEFIT, Beispielplan „4 Day Split“: https://www.jefit.com/my-jefit/workouts/56287/4-day-split (nur Suche)
+- Inoffizielle Hevy-API-Referenz, Workout-Objekt (`routine_id`): https://www.mintlify.com/imalfect/hevy-http-mcp/api-reference/types/workouts (nur Suche, Fehler 410)
+- Hevy Public API Docs: https://api.hevyapp.com/docs/ (nur der Titel lesbar)
+- Mumsnet, „What workout tracking app do you use“ (Strong „perform again“): https://www.mumsnet.com/talk/the_weights_room/5531867-what-workout-tracking-app-do-you-use (nur Suche)
+- Bevel Feature Requests, „Reorder workout plans“: https://feedback.bevel.health/feature-requests/p/reorder-workout-plans
+- Bevel Feature Requests, „Ability to reorder workout plan“: https://feedback.bevel.health/feature-requests/p/ability-to-reorder-workout-plan
+- Hybrid Calisthenics Support, Thema 1735: https://support.hybridcalisthenics.com/1735 (nur Suche, Fehler 403)
 
 ## Übungsverwaltung
 

@@ -67,7 +67,7 @@ In `.claude/agents/` liegen fünf Subagenten. Sie liefern Ideen oder prüfen; um
   2. Ich wähle aus, umgesetzt wird wie oben (mit `gym-tester`, bei fachlichen Regeln vorher `trainings-experte`).
   3. Danach läuft der `funktions-tester` einmal über diese Funktion. Er nutzt die Recherche aus `APPS.md` und gibt das Urteil in `VERGLEICH.md` und höchstens 5 Verbesserungen.
   4. Seine Vorschläge, die ich auswähle, werden umgesetzt und nur noch mit dem `gym-tester` geprüft, ohne zweiten Durchlauf des `funktions-tester`. Danach ist die nächste Funktion dran.
-- Erledigt nach diesem Ablauf: Satz-Erfassung und „Letztes Mal“ (beide noch vor der Einführung des Ablaufs). Pausen-Timer: komplett am 14.11.2026 (Ideen 36–38, `funktions-tester` „gleichauf“, 42 abgelehnt, 43 zurückgestellt). Vorlagen: Scout-Runde und Umsetzung (Ideen 44–46) am 14.11.2026, der `funktions-tester` steht noch aus. Das Auswahl-Sheet hat eine feste Höhe, damit das Suchfeld beim Tippen nicht wandert.
+- Erledigt nach diesem Ablauf: Satz-Erfassung und „Letztes Mal“ (beide noch vor der Einführung des Ablaufs). Pausen-Timer: komplett am 14.11.2026 (Ideen 36–38, `funktions-tester` „gleichauf“, 42 abgelehnt, 43 zurückgestellt). Vorlagen: Scout-Runde, Umsetzung (Ideen 44–46) und `funktions-tester` (Urteil „gleichauf“) am 14./15.11.2026; seine Vorschläge 49–52 warten auf meine Auswahl. Das Vorlagen-Sheet fragt jetzt wie das Bearbeiten eines Trainings nach, bevor geänderte Entwürfe verworfen werden. Das Auswahl-Sheet hat eine feste Höhe, damit das Suchfeld beim Tippen nicht wandert.
 
 ## Nächste Schritte
 1. Erledigt: Aus dem Prototyp eine echte PWA machen: `manifest.webmanifest`, App-Icons (inkl. `apple-touch-icon` 180×180), Service Worker für den Offline-Betrieb.

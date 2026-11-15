@@ -7,7 +7,7 @@ Wie gut ist jede Funktion des Trainingslogs im Vergleich zu führenden Fitness-A
 | Satz-Erfassung | gleichauf | Keine Aufwärmsätze (Idee 14); ob das Markieren beim Antippen auf dem iPhone hält, ist ungeprüft | 14.11.2026 |
 | „Letztes Mal“ | vorne | „Ziel heute“ ist nur Text: Das Ziel zu schaffen kostet 8–11 Tipps pro Übung, mit Übernahme per Tipp wären es 4–5 (Idee 31) | 14.11.2026 |
 | Pausen-Timer | gleichauf | Das Pausenende meldet nur ein Piepton (still bei Stummschalter, im Hintergrund abgesagt) und 8 s Gold. Nach Neuladen oder Tab-Wechsel steht das Training oben statt beim markierten Satz (Ideen 42, 43) | 14.11.2026 |
-| Vorlagen | offen | – | – |
+| Vorlagen | gleichauf | Ein zweites Programm übernimmt „Dran“: Nach einem Lauf aus der Bibliothek zeigte „Dran“ einen zweiten Lauf, die nächste Arnold-Einheit stand unmarkiert bei y 1323. Umbenennen löscht „Zuletzt“ und „Dran“ (Ideen 49, 50) | 14.11.2026 |
 | Übungsverwaltung | offen | – | – |
 | Verlauf | offen | – | – |
 | Fortschritt & Rekorde | offen | – | – |
@@ -16,6 +16,72 @@ Wie gut ist jede Funktion des Trainingslogs im Vergleich zu führenden Fitness-A
 | Backup & Export | offen | – | – |
 
 ## Befunde
+
+### Vorlagen
+
+Erste Prüfung am 14.11.2026, nach den Ideen 44–46. Getestet in Chrome am PC im Handy-Rahmen (390 × 844, Gegenprobe 375 × 667) auf localhost, mit echten Klicks und Tastatureingaben. Die fünf Arnold-Einheiten waren schon als Vorlagen da, dazu Push, Pull, Legs, Ausdauer und Padel. Zwei Test-Vorlagen früherer Durchläufe („Oberkörper Test“, „Push (Push/Pull/Legs)“) habe ich vorübergehend herausgenommen. Die 23 vorhandenen Testtrainings habe ich per Skript durch 16 Testtrainings ersetzt (`save({all:true})`): Arnold-Split vom 26.10. bis 13.11.2026, in der letzten Woche ohne den Mittwoch (Beine erst am Freitag), dazu Padel am 01.11. und 12.11. und Ausdauer am 05.11. Über die Oberfläche habe ich ein Training „Brust & Rücken B“ gespeichert. Danach habe ich drei Einheiten aus „Laufen an 3 Tagen“ übernommen und das Training per Skript durch einen Lauf am 14.11. um 08:00 ersetzt. Außerdem habe ich „Beine“ umbenannt (per Skript zurückbenannt), in „Schultern & Arme A“ eine Übung getauscht und die Vorlage „Padel-Prävention“ angelegt und wieder gelöscht. Zwei Trainings wurden gestartet und verworfen, eins davon versehentlich durch einen Klick nach geänderter Vergrößerung des Rahmens. Am Ende war der alte Stand wiederhergestellt: 23 Trainings, 36 Übungen, 12 Vorlagen, Einstellungen und Löschliste, nach dem Neuladen zeichengleich mit dem Stand vor dem Test.
+
+**Tipps pro Ablauf**
+
+| Ablauf | Trainingslog | Strong / Hevy |
+|---|---|---|
+| Nächste Arnold-Einheit starten | 1. „Dran“ steht oben (y 351–490) und war richtig: Mittwoch ausgefallen, Freitag Beine nachgeholt, Samstag „Brust & Rücken B“. Nach dem Speichern rückte es auf „Schultern & Arme B“, „diese Woche 3 von 5“ wurde „4 von 5“ | Vorlage selbst wählen. Strong: Vorschau, dann Start (2*). Hevy: „Start Routine“ (1–2*). „Next Workout“ gibt es nur mit Hevy Trainer (Pro) |
+| Dasselbe nach einem Lauf am Morgen (drei Einheiten aus „Laufen an 3 Tagen“ übernommen) | 1 + 2 Wischer. „Dran“ zeigt „Intervalle 4 × 4“, also einen zweiten Lauf. Die Überschrift „Arnold-Split“ steht bei y 806, „Brust & Rücken B“ bei y 1323 und ist nicht markiert | – |
+| Andere Arnold-Einheit starten (Schultern & Arme A) | 1 + 1 Wischer | – |
+| Eigene Vorlage „Padel“ starten | 1 + 2–3 Wischer (y 1810, mit Lauf-Einheiten y 2278; Seite 2188 bzw. 2806 px hoch) | – |
+| Drei Einheiten eines Programms übernehmen | 6 + 3 Wischer (Tab, Programm, Programm aufklappen, 3 × Übernehmen) | Hevy: „Save Program“ für das ganze Programm (gelesen) |
+| Übung in der Vorlage tauschen, Programmwerte bleiben | 5 + 1 Wischer (Tab, Vorlage, ⇄, Ersatz, Sichern) | Hevy ersetzt Übungen in Routinen (gelesen), Tipps nicht belegt |
+| Übung 1 Platz nach oben | 4 (Tab, Vorlage, ↑, Sichern), jeder weitere Platz 1 Tipp; der Knopf wandert dabei je Schritt 72 px nach oben | Ziehen* |
+| Neue Vorlage mit 3 Übungen | 13 Tipps + 34 Tasten (Name, je Übung „+ Übung“, Suchfeld, Suchwort, Wahl) | nicht belegt |
+| Vorlage umbenennen | 4 + Tasten; danach „Noch nie trainiert“ (siehe unten) | – |
+| Vorlage löschen | 4 mit Rückfrage | Strong: „…“ → Löschen (gelesen) |
+
+\* Allgemeines Wissen, nicht nachgelesen.
+
+**Bedienung (Messwerte in App-Pixeln bei 390 px)**
+- „Dran“ (Idee 44): Ohne Trainings war „Brust & Rücken A“ dran („Noch nie trainiert“, „diese Woche 0 von 5“). Mit Verlauf wurde die ausgefallene Einheit nachgeholt, und nach jedem gespeicherten Training rückte „Dran“ richtig weiter. Es gibt immer nur ein „Dran“, beim Programm, das zuletzt trainiert wurde. Nach einem Lauf aus „Laufen an 3 Tagen“ zeigte die App deshalb „Intervalle 4 × 4“ als nächstes Training, am selben Tag wie der Lauf. Die nächste Arnold-Einheit war in ihrer Gruppe nicht markiert und stand an vierter Stelle (Programm-Reihenfolge).
+- Ordnung auf dem Startbildschirm (Idee 45): Dran-Karte, Programm-Überschrift mit „diese Woche X von N“, übrige Einheiten, „Eigene Vorlagen“. Die Karten sind 120–158 px hoch, weil jede alle Übungen aufzählt. Bei 10 Vorlagen ist die Seite 2188 px hoch, mit drei Lauf-Einheiten 2806 px (3,3 Bildschirme). Die eigenen Vorlagen stehen in der Anlege-Reihenfolge, die nicht mehr genutzten Push, Pull und Legs also vor Ausdauer und Padel.
+- Tauschen in der Vorlage (Idee 46): ⇄ zeigt „Statt Schulterdrücken“ mit Arnold-Drücken und Kurzhantel-Schulterdrücken. Danach steht im Sheet „Programmplatz Schulterdrücken · 4 × 6-8 Wdh · Pause 3:00 min“ (12 px, in der schmalen Spalte neben den vier Knöpfen auf 3 Zeilen umbrochen). Im Training zeigt die Karte „Programm wie Schulterdrücken: 4 × 6-8 Wdh · Pause 3:00 min“, dazu 4 Sätze und 180 s Pause.
+- Umbenennen: „Zuletzt“, „Dran“ und „diese Woche“ hängen am Trainingsnamen (`templateDays()`, Zeile 1176), der Programm-Richtwert im laufenden Training ebenso (`planFor`, Zeile 678). Aus „Beine“ wurde „Beine (Arnold)“. Die tags zuvor trainierte Einheit stand danach als „Noch nie trainiert“ da und wurde zur nächsten Arnold-Einheit, „diese Woche“ fiel von 3 auf 2 von 5. Die App weist nicht darauf hin.
+- Tab Vorlagen: alle Vorlagen flach in der Anlege-Reihenfolge, ohne Programm und ohne „Zuletzt“. Die Arnold-Einheiten beginnen bei y 600, „+ Neue Vorlage“ und „+ Programm aus der Bibliothek“ liegen bei y 1287 und 1341, also erst nach dem Scrollen. Im Programm-Sheet sieht man erst nach dem Aufklappen, welche Einheiten schon übernommen sind; das Aufklappen scrollt die Einheiten nicht ins Bild.
+- Tap-Flächen: Vorlagen-Karten 343 × 120–158 (die ganze Karte startet), ↑ ↓ ⇄ ✕ je 44 × 44 mit nur 4 px Abstand (✕ entfernt ohne Rückfrage, aber nur im Entwurf). „Sichern“ misst 78 × 44, „Abbrechen“ 97 × 44, „Als Vorlage übernehmen“ 176 × 44, das Namensfeld 328 × 47, „Vorlage löschen“ 328 × 44.
+- Daumen: Die Dran-Karte liegt in der Bildschirmmitte (y 351–490 von 844, auf dem SE 400–520 von 667), gut erreichbar. „Sichern“ und „Abbrechen“ stehen oben (y 99–143), das betrifft aber nur die Pflege zu Hause.
+- Lesbarkeit: Vorlagenname 25 px (Kontrast 13,8 : 1), Übungsliste 14 px und „Zuletzt …“ 13 px blassblau (7,3 : 1), Programm-Überschrift 14 px. Der Trainingstitel bricht bei „Brust & Rücken B“ so um, dass das „B“ allein in der zweiten Zeile steht. Bei 375 px läuft nichts über.
+- Rückmeldung: Übernehmen meldet „Vorlage „…“ angelegt“ und zeigt „✓ als …“. Nach „Sichern“ und nach dem Löschen kommt keine Meldung, das Ergebnis sieht man aber in der Liste. Ein Tipp neben das Vorlagen-Sheet (abgedunkelter Bereich oben, 94 px) oder auf „Abbrechen“ verwirft Änderungen ohne Rückfrage. Im Test war so ein Tausch weg, anders als beim Bearbeiten im Verlauf („Weiter bearbeiten“).
+- Konsole: keine Meldungen (die Aufzeichnung lief erst ab der Mitte des Tests und nach einem Neuladen).
+
+**Was die anderen besser machen**
+- Pflege und Ordnung: Strong und Hevy sortieren Vorlagen per Ziehen und in Ordnern, Strong hat ein Archiv, Hevy dupliziert Routinen und speichert ein Programm als Ordner. Beide sichern ein vergangenes Training als Vorlage (alles gelesen). Bei uns ist die Reihenfolge der Vorlagen fest, Übungen wandern schrittweise mit ↑ ↓. Nutzer von Bevel wünschten sich Vorlagen in einer Reihenfolge, die zur Trainingswoche passt, dazu Ordner und ein Archiv; einer verwies auf das Umsortieren per langem Druck in Strong. Bevel hat das 2025 und 2026 umgesetzt.
+- Bindung an die Routine: Ein Hevy-Training verweist laut inoffiziellen API-Beschreibungen über `routine_id` auf seine Routine (nur Suche). Bei uns hängt alles am Namen, Umbenennen trennt die Vorlage von ihren Trainings.
+- Eine klare Planung: MCI führt einen aktiven Plan („Switch“) und zeigt im Wochenstreifen Trainings verschiedener Art nebeneinander, JEFIT einen aktiven Plan mit Wochentagen, Hevy Trainer „Next Workout“. Bei uns können mehrere Programme nebeneinander laufen, „Dran“ gibt es aber nur für eines.
+- Routinen mit eigenen Zielen, Pausen und Supersätzen (Hevy); bei uns gibt es das nur über Programme.
+
+**Was wir besser machen**
+- Die nächste Einheit kommt ohne Abo und ohne Kalender: „Dran“ folgt der Reihenfolge des Programms und holt Ausfälle nach. Hevy kann das nur mit Pro (Trainer), Strongs Hilfe nennt so etwas nicht. Im Forum einer anderen App wünschten sich Nutzer genau das, nach einem verpassten Tag dort weiterzumachen, wo sie aufgehört haben (nur Suche).
+- Ein Tipp vom Startbildschirm startet die richtige Einheit, und an jeder Karte stehen „Zuletzt vor X Tagen“ und „diese Woche X von N“. Für Strong und Hevy war eine solche Anzeige nicht zu belegen.
+- Wer in der Vorlage tauscht, behält Sätze, Wdh, Pause und die Steigerungsschwelle des Programmplatzes. Programme lassen sich einheitenweise übernehmen, Vorlagen gibt es unbegrenzt (Strong kostenlos höchstens 3, Hilfe-Artikel von 2021), alles offline.
+
+**Urteil: gleichauf.** Mit einem Programm ist die App im Studio vorne: Sie öffnet mit der richtigen nächsten Einheit, startet mit einem Tipp und holt Ausfälle nach, ohne Abo. Bei Hevy gibt es das nur im Pro-Abo, bei Strong nicht. Diese Führung ist aber nicht robust. Sobald ein zweites Programm aus der Bibliothek dazukommt, und der Nutzer läuft und spielt Padel, zeigt „Dran“ nach jeder Einheit des anderen Programms auf dieses. Die nächste Kraft-Einheit steht dann unmarkiert zwei Bildschirme tiefer. Ein Umbenennen setzt „Zuletzt“ und „Dran“ ohne Hinweis zurück. Beim Ordnen und Pflegen liegen Strong und Hevy vorne (Ziehen, Ordner, Duplizieren, Vorlage aus dem Verlauf); das zählt im Studio weniger. Mit den Ideen 49 und 50 wäre die Funktion vorne.
+
+**Lücken, die nicht vorgeschlagen werden:** Ordner und Archiv berühren die abgelehnte Idee 48, die Programm-Überschriften ordnen schon. Ganze Programme mit einem Tipp übernehmen ist Idee 47 (abgelehnt), die Vorlage nach dem Training anpassen Idee 7 (abgelehnt). Eigene Pausen und Ziele in eigenen Vorlagen berühren Idee 8 (abgelehnt), Supersätze Idee 39. Ziehen statt ↑ ↓, Duplizieren, eine Vorlage aus dem Verlauf und eine Mehrfachauswahl im Auswahl-Sheet kommen beim Nutzer selten vor, weil er mit Programm-Vorlagen trainiert. Feste Wochentage und einen Ruhetag-Hinweis schlage ich nicht vor. Der gefundene Beleg spricht eher für die Reihenfolge: Nutzer wollen nach einem Ausfall weitermachen statt nach Kalender. Der Wochenplan des Arnold-Splits sagt das ebenso.
+
+**Nebenbefunde für die Hauptsitzung** (Fehlersuche gehört zum `gym-tester`)
+- Ein Tipp auf den abgedunkelten Bereich (`index.html` Zeile 1489, `data-act="close"`) oder „Abbrechen“ verwirft einen geänderten Vorlagen-Entwurf ohne Rückfrage. Die Aktion `close` (Zeile 1776–1782) fragt nur beim Bearbeiten eines Trainings nach.
+- „Sichern“ (`save-tpl`, Zeile 1788) und „Vorlage löschen“ melden nichts. Klein, weil man das Ergebnis in der Liste sieht.
+- In den Testdaten enthielt die Vorlage „Oberkörper Test“ Langhantelrudern zweimal. Über die Oberfläche ließ sich das nicht nachstellen, beide Auswahlwege prüfen auf Doppelte. Vermutlich stammt es aus einem früheren Skript-Test.
+
+**Quellen**
+- Selbst gelesen (diese Prüfung):
+  - Bevel Feature Requests, „Reorder workout plans“ (2024–2025, verweist auf Strong): https://feedback.bevel.health/feature-requests/p/reorder-workout-plans
+  - Bevel Feature Requests, „Ability to reorder workout plan“ (2025–2026, Reihenfolge passend zur Woche, Ordner, Archiv): https://feedback.bevel.health/feature-requests/p/ability-to-reorder-workout-plan
+- Nur aus Suchergebnissen:
+  - Hybrid Calisthenics Support, Thema 1735 (nach einem verpassten Tag weitermachen; Fehler 403): https://support.hybridcalisthenics.com/1735
+  - Inoffizielle Hevy-API-Referenz zum Workout-Objekt (`routine_id`; Fehler 410): https://www.mintlify.com/imalfect/hevy-http-mcp/api-reference/types/workouts
+  - Hevy Public API Docs (nur der Titel lesbar): https://api.hevyapp.com/docs/
+  - Mumsnet, „What workout tracking app do you use“ (Strong: Training aus dem Verlauf „noch einmal“): https://www.mumsnet.com/talk/the_weights_room/5531867-what-workout-tracking-app-do-you-use
+  - Eine Anzeige „zuletzt trainiert“ an Vorlagen war weder für Strong noch für Hevy zu finden. Echte Reddit-Threads zu Vorlagen waren auch diesmal nicht lesbar.
+- Vom `produkt-scout` am selben Tag gelesen (Einzelheiten in `APPS.md`, Abschnitt „Vorlagen“): Strong-Hilfe zu Vorlagen, Ordnern, Bearbeiten, Supersätzen und Teilen; Hevy „Gym Routines“, „Gym Workout Routines“, „Workout Plan Generator“, „Supersets“; MCI (Website, Roadmap, Wunschliste, App Store, ScreensDesign, WorldsApps); Boostcamp „Program Builder“ und „Personalized Programs“; JEFIT-Blog zu eigenen Plänen und Periodisierung.
+- Allgemeines Wissen, nicht nachgelesen: Strong startet eine Vorlage über eine Vorschau mit „Start“, Hevy über „Start Routine“ an der Routine; Übungen in Routinen und Vorlagen sortiert man dort per Ziehen.
 
 ### Pausen-Timer
 

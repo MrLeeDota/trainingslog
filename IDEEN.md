@@ -7,22 +7,22 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 ### 83. Rudergerät in Metern mit Tempo pro 500 m (aus Fachprüfung: Ausdauer)
 - Nutzen: hoch (mit Monitor) · Aufwand: M · Datenformat: nein (optionales Feld `unit: "m500"`)
 
-**Wartet auf Klärung (15.11.2026):** Das Rudergerät des Nutzers hat kein Display, misst also keine Strecke. Sinnvoll nur für Geräte mit Monitor (z. B. Concept2): Eingabe in Metern, Tempo „1:52,5 /500 m“, dazu ≈ Watt (2,80 / (s/m)³); gespeichert weiter km.
+**Zurückgestellt (15.11.2026):** Das Rudergerät des Nutzers hat kein Display, misst also keine Strecke; auf seinen Wunsch steht das Rudergerät in der Bibliothek jetzt als „nur Zeit“. Erst wieder aufgreifen, wenn er an einem Gerät mit Monitor rudert. Sinnvoll nur für Geräte mit Monitor (z. B. Concept2): Eingabe in Metern, Tempo „1:52,5 /500 m“, dazu ≈ Watt (2,80 / (s/m)³); gespeichert weiter km.
 
 ### 84. Auswertungen fürs Rudern (aus Fachprüfung: Ausdauer)
 - Nutzen: mittel · Aufwand: M · Datenformat: nein
 
-**Wartet auf Klärung, wie 83.** Bestzeit über Standardstrecken (500 m bis 10 km), meiste Meter in 30 min, „Besser als letztes Mal“ bei gleicher Strecke über die Zeit, Kurve als Tempo pro 500 m.
+**Zurückgestellt, wie 83.** Bestzeit über Standardstrecken (500 m bis 10 km), meiste Meter in 30 min, „Besser als letztes Mal“ bei gleicher Strecke über die Zeit, Kurve als Tempo pro 500 m.
 
 ### 85. Programm „Rudern Einstieg“ und Dauer in Programmen anzeigen (aus Fachprüfung: Ausdauer)
 - Nutzen: mittel · Aufwand: S · Datenformat: nein
 
-**Wartet auf Klärung, wie 83.** Sechs Einheiten nach den Concept2-Einsteiger-Workouts bis zum 30-min-Test; Schlagzahlen setzen einen Monitor voraus. Unabhängig davon: `libDose()` zeigt `dauerSek`, `streckeKm` und `intensitaet` nicht (Plank erscheint als „3 × · Pause 1:00 min“).
+**Zurückgestellt, wie 83.** Sechs Einheiten nach den Concept2-Einsteiger-Workouts bis zum 30-min-Test; Schlagzahlen setzen einen Monitor voraus. Unabhängig davon: `libDose()` zeigt `dauerSek`, `streckeKm` und `intensitaet` nicht (Plank erscheint als „3 × · Pause 1:00 min“).
 
 ### 86. Eintrag-Anleitung im Technik-Hinweis des Rudergeräts (aus Fachprüfung: Ausdauer)
 - Nutzen: mittel · Aufwand: S · Datenformat: nein
 
-**Wartet auf Klärung, wie 83.** Hinweis zu km-Feld und Damper 3 bis 5; ohne Monitor entfällt der km-Teil.
+**Zurückgestellt, wie 83.** Hinweis zu km-Feld und Damper 3 bis 5; ohne Monitor entfällt der km-Teil.
 
 ### 43. Ton nach dem Neuladen mit jedem Tipp freigeben und fehlenden Ton anzeigen (aus Funktionsvergleich: Pausen-Timer)
 - Nutzen: mittel · Aufwand: S · Datenformat: nein

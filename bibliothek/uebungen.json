@@ -799,13 +799,14 @@
       "id": "rudergeraet",
       "name": "Rudergerät",
       "cat": "Ausdauer",
-      "type": "ausdauer",
+      "type": "zeit",
       "geraet": ["Rudergerät"],
       "muskeln": [],
       "grunduebung": false,
       "hinweise": [
         "Beim Zug erst die Beine, dann der Oberkörper, dann die Arme; zurück in umgekehrter Reihenfolge.",
-        "Die meiste Kraft kommt aus den Beinen, der Rücken bleibt gerade."
+        "Die meiste Kraft kommt aus den Beinen, der Rücken bleibt gerade.",
+        "Erfasst wird nur die Zeit, weil Geräte ohne Anzeige keine Strecke messen. Fortschritt über längere Dauer, Intervalle (z. B. 4 × 5 min) und eine höhere Widerstandsstufe; die Stufe in die Notiz der Übung schreiben."
       ]
     },
     {

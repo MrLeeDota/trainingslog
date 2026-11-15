@@ -9,13 +9,76 @@ Wie gut ist jede Funktion des Trainingslogs im Vergleich zu führenden Fitness-A
 | Pausen-Timer | gleichauf | Das Pausenende meldet nur ein Piepton (still bei Stummschalter, im Hintergrund abgesagt) und 8 s Gold. Nach Neuladen oder Tab-Wechsel steht das Training oben statt beim markierten Satz (Ideen 42, 43) | 14.11.2026 |
 | Vorlagen | gleichauf | Ein zweites Programm übernimmt „Dran“: Nach einem Lauf aus der Bibliothek zeigte „Dran“ einen zweiten Lauf, die nächste Arnold-Einheit stand unmarkiert bei y 1323. Umbenennen löscht „Zuletzt“ und „Dran“ (Ideen 49, 50) | 14.11.2026 |
 | Übungsverwaltung | gleichauf | Technik nur als Text, ohne Bild oder Video (alle vier Vorbilder zeigen eins). Im Training liegen die letzten Einheiten im Übungs-Sheet erst nach 1–2 Wischern, und das Sheet verdeckt den Timer (Ideen 59, 60) | 15.11.2026 |
-| Verlauf | offen | – | – |
+| Verlauf | gleichauf | Zugeklappte Karten zeigen nur Datum, Dauer, Satzzahl und Kampfkraft, nicht was trainiert wurde (Lauf: „1 Satz“); nur eine Karte ist zugleich offen. Die Einheit, die als Nächste dran ist, steht im Filter immer an fünfter Stelle außerhalb des Bildschirms (Ideen 69, 72) | 15.11.2026 |
 | Fortschritt & Rekorde | offen | – | – |
 | Spielelemente | offen | – | – |
 | Ausdauer-Erfassung | offen | – | – |
 | Backup & Export | offen | – | – |
 
 ## Befunde
+
+### Verlauf
+
+Erste Prüfung am 15.11.2026, nach den Ideen 64, 65 und 67 (66 und 68 abgelehnt). Getestet in Chrome am PC im Handy-Rahmen (390 × 844, Gegenprobe 375 × 667) auf localhost, mit echten Klicks und Tastatureingaben. Ausgangsstand: 39 Übungen, 12 Vorlagen, 23 Trainings, kein laufendes Training (vorher gesichert). Die 23 Trainings habe ich per Skript durch 95 Testtrainings ersetzt (`save({all:true})`): Arnold-Split vom 14.07. bis 13.11.2026 (Mo B&R A, Di S&A A, Mi Beine, Do B&R B, Fr S&A B), rund 8 % ausgefallene Tage, eine Urlaubswoche (17.–23.08.), Gewichte alle drei Wochen eine Stufe höher, dazu Padel jeden zweiten Sonntag und alle drei Wochen samstags ein Lauf (Vorlage „Ausdauer“). Über die Oberfläche habe ich Trainings auf- und zugeklappt, gefiltert, Wochen und den Monat Juli geöffnet, im Training „Beine“ vom 11.11. einen Satz korrigiert (5 → 6 Wdh), dieses Training danach gelöscht und die Pausendauer auf 2:00 gestellt. Danach habe ich Übungen, Vorlagen, Trainings, laufendes Training, Einstellungen und Löschliste per Skript zurückgesetzt (`save({all:true})`); nach dem Neuladen war alles zeichengleich mit dem Stand vor dem Test.
+
+**Tipps pro Ablauf** (Start im Tab Training)
+
+| Ablauf | Trainingslog | Strong / Hevy |
+|---|---|---|
+| Letzte Einheit dieser Woche ansehen (S&A A vom Dienstag) | 2 (Tab, Karte), die Karte liegt ohne Wischen bei y 403; alle 6 Übungen erst nach 1 Wischer (Karte 562 px hoch) | 2 (Tab, Training)* |
+| Vorige „Brust & Rücken A“ ansehen, bevor sie wieder dran ist | 3 + 1 seitlicher Wischer (Tab, Leiste wischen, Filter, Karte); ohne Filter 2 + 1–2 Wischer | Hevy: Liste scrollen oder Kalender, Filter nach Routine nicht belegt |
+| Dieselbe Übung über zwei Einheiten vergleichen | je Karte 1 Tipp, aber immer nur eine Karte offen; das Übungs-Sheet zeigt das besser | Hevy und Strong: Verlauf pro Übung (gelesen) |
+| Training von Mitte Oktober ansehen | 3 + 2 Wischer (Tab, Woche „12.–18. Okt“, Karte) | Hevy: Kalender, Tag antippen (gelesen) |
+| Satz in einem gespeicherten Training korrigieren | 5 + 1 Taste + 0–1 Wischer (Tab, Karte, Bearbeiten, Feld, Sichern) | Strong: „…“ → Edit Workout, Hevy: „…“ → Edit Workout (gelesen), Tipps nicht belegt |
+| Training löschen | 4 + 0–1 Wischer (Tab, Karte, Training löschen, Löschen) | „…“ → Delete (Hevy gelesen) |
+| Pausendauer ändern | 4 (Tab, „↓ Einstellungen“, Auswahl, Wert) | nicht vergleichbar, dort pro Übung |
+
+\* Allgemeines Wissen, nicht nachgelesen.
+
+**Bedienung (Messwerte in App-Pixeln bei 390 px)**
+- Gliederung (Idee 64): Mit 95 Trainings über vier Monate ist die Seite 3107 px hoch, „Einstellungen“ beginnt bei y 2432. „Diese Woche · 5 Trainings · 96 Sätze“ und „Letzte Woche“ stehen offen, darunter 13 Wochen-Knöpfe und „Juli 2026 · 15 Trainings“, je 343 × 52 mit 10 px Abstand. Ein Tipp klappt die Woche sofort darunter auf, eingerückt mit Linie; aufgeklappte Wochen bleiben offen, auch beim Wechsel zwischen Filtern. Die Urlaubswoche fehlt einfach, ohne Hinweis. Ein Fehler in der Grenze zwischen Wochen und Monaten: siehe Nebenbefunde.
+- Karten (Idee 65): 343 × 98, die ganze Kopfzeile (311 × 67) klappt auf. Name 22 px, Datum, Dauer und Satzzahl 14 px blassblau (7,3 : 1), „+963 Kampfkraft“ 13 px, Rekorde gold („★ 6 Rekorde“, 29 von 95 Trainings hatten welche). Was trainiert wurde, steht erst aufgeklappt da. Bei Lauf und Padel heißt es „40 min · 1 Satz“ statt Strecke und Tempo. Auf dem SE bricht „14 Sätze“ um, die Karte wird 120 px hoch.
+- Aufgeklappt: pro Übung Name, Sätze („82.5 kg × 6, 5, 5, 5“, 14 px) und rechts in Grün der Vergleich mit der Einheit davor („+2 Wdh gesamt“, „+2 kg“, beim Lauf „+1,3 km“; 16 px, 11,4 : 1). Lange Namen wie „Kurzhantel-Schrägbankdrücken“ brechen mit dem Vergleich auf zwei Zeilen um, nichts läuft über. Welche Übung einen der „6 Rekorde“ brachte, steht nicht da; „+2 kg“ kann ein Rekord sein oder nicht. Es ist immer nur eine Karte offen (`ui.open`), die vorige klappt zu.
+- Filter (Idee 67): Sieben Knöpfe (65–155 × 44) in einer wischbaren Leiste von 375 px, Inhalt 878 px; bei 390 und 375 px sind nur die ersten zwei ganz zu sehen. Sortiert nach „zuletzt trainiert“, im Arnold-Split steht die Einheit, die als Nächste dran ist, deshalb immer an fünfter Stelle (x 554–694). Der Filter zeigt „Brust & Rücken A · 16 Trainings“ ohne Wochen, der Knopf wird orange. Klappt man danach eine Karte auf, springt die Leiste an den Anfang zurück, der aktive Knopf ist nicht mehr zu sehen; zum Aufheben wischt man wieder.
+- Bearbeiten: Das Sheet zeigt Name, Beginn (216 × 49), Dauer und Satzzeilen (Felder 97 × 48, Satz-✕ 52 × 44, Übungs-✕ 44 × 44, „+ Satz“ 63 × 44). Nach „Sichern“ kommt „Training geändert“, die Karte bleibt offen, und Vergleich und Kampfkraft rechnen sich sofort neu (Kniebeugen „+2“ → „+3 Wdh gesamt“, 2.338 → 2.349 Kampfkraft).
+- Löschen: Die Rückfrage „Dieses Training endgültig löschen?“ nennt weder Name noch Datum. Danach verschwindet die Karte ohne Meldung und ohne Rückgängig.
+- Tap-Flächen: alle mindestens 44 px hoch. „Bearbeiten“ 90 × 44 und „Training löschen“ 124 × 44 liegen 129 px auseinander. „↓ Einstellungen“ 117 × 44, Pausen-Auswahl 109 × 47.
+- Daumen: Karten und Wochen-Knöpfe liegen in der Mitte und unten, „Bearbeiten“ und „Training löschen“ nach dem Aufklappen und Scrollen meist im unteren Drittel (z. B. y 716 von 844). Oben liegen „↓ Einstellungen“ (y 25), die Filterleiste (y 86) und im Bearbeiten-Sheet „Sichern“ und „Abbrechen“ (y 99), einhändig schwer zu erreichen; im Training braucht man davon nichts.
+- Rückmeldung: Aufklappen, Filter und Sichern sind sofort sichtbar; Löschen und die Pausendauer melden nichts (die Auswahl zeigt den neuen Wert). Konsole: keine Meldungen (Aufzeichnung ab der Gegenprobe).
+
+**Was die anderen besser machen**
+- Hevy hat neben der Liste einen Jahreskalender mit Tipp auf den Tag und einen Monatsbericht mit Vergleich zu den Vormonaten und den Rekorden des Monats, ein Tipp öffnet das Training dazu (gelesen). Kalender und Wochenvergleich gibt es bei uns im Fortschritt, nicht im Verlauf (gehört zu „Fortschritt & Rekorde“).
+- Strong listet im History-Tab jedes Training mit Sätzen, Wdh, Gewicht und Volumen (Test, gelesen); dass die Karten beste Sätze und Rekord-Abzeichen zeigen, ist nur Wissen. Andere Logger markieren den Satz, der einen Rekord brachte (StrengthLog, RepCanvas, nur Suche). Bei uns sieht man zugeklappt nicht, was trainiert wurde, und aufgeklappt nicht, wo der Rekord lag.
+- Ein vergangenes Training als Routine sichern oder als neues Training kopieren (Hevy, Strong, gelesen). Für den Nutzer mit Programm-Vorlagen kaum wichtig.
+
+**Was wir besser machen**
+- „Besser als die Einheit davor“ steht bei jeder Übung jedes alten Trainings, dazu Kampfkraft und Rekorde pro Karte; für Strong und Hevy ist so ein Vergleich im Verlauf nicht belegt.
+- Der Filter nach Einheit zeigt alle „Brust & Rücken A“ untereinander (16 Trainings); einen Filter nach Routine gibt es bei Hevy nachweislich nur für die Statistik.
+- Wochen mit Summe und zugeklappte ältere Wochen halten die Seite kurz: Vier Monate sind 3,7 Bildschirme, die Einstellungen ein Tipp entfernt.
+- Bearbeiten rechnet Vergleich, Rekorde und Kampfkraft sofort neu; alles kostenlos und offline. Gelöschte Trainings sind bei Hevy auch für den Support verloren (nur Suche), bei uns ebenfalls – hier sind beide gleich.
+
+**Urteil: gleichauf.** Im Studio braucht man den Verlauf selten, weil „Letztes Mal“ im Training die letzte Einheit schon zeigt; er dient vor oder nach dem Training zum Nachsehen und Korrigieren. Dafür ist er gut gebaut: Diese Woche liegt ohne Wischen da, ältere Wochen sind einen Tipp entfernt, Korrigieren kostet 5 Tipps und rechnet alles neu, und den Vergleich mit der Einheit davor gibt es so bei Strong und Hevy nicht. Dagegen zeigen die zugeklappten Karten nicht, was trainiert wurde, ein Lauf heißt „1 Satz“, man kann nur eine Karte zugleich öffnen, und der Filter versteckt gerade die Einheit, die als Nächste dran ist. Rekorde sind gezählt, aber nicht zugeordnet. Hevy hat dazu Kalender und Monatsbericht direkt am Verlauf. Mit den Ideen 69 und 72 wäre die Funktion beim schnellen Nachsehen vorne.
+
+**Lücken, die nicht vorgeschlagen werden:** Nachtragen (Idee 66) und Notiz oder Bewertung pro Training (Idee 68) sind abgelehnt. Training als Vorlage sichern oder kopieren braucht der Nutzer mit Programm-Vorlagen kaum. Teilen als Bild ist Idee 29 (abgelehnt). Kalender und Monatsbericht gehören zu „Fortschritt & Rekorde“; ein Kalender steht dort schon. Mehrere Karten gleichzeitig offen lohnt nicht, wenn die zugeklappte Karte das Wichtigste zeigt (Idee 69) und das Übungs-Sheet den Verlauf einer Übung bündelt. Eine Suche im Verlauf bringt neben dem Filter wenig.
+
+**Nebenbefunde für die Hauptsitzung** (Fehlersuche gehört zum `gym-tester`)
+- Grenze zwischen Wochen und Monaten: Die Woche „27. Jul–2. Aug“ stand als „1 Training · 1 Satz“ da, obwohl in ihr fünf Trainings lagen; die vier vom 27.–31. Juli steckten in „Juli 2026“. `histGroup()` (`index.html` Zeile 1452–1453) schneidet am Monatsersten, nicht an einer Wochengrenze.
+- Nach dem Auf- oder Zuklappen einer Karte (`toggle-w`, Zeile 2060) springt die Filterleiste an den Anfang; nur die Aktion `hist-filter` (Zeile 2057) merkt sich `scrollLeft`.
+
+**Quellen**
+- Selbst gelesen (diese Prüfung):
+  - Hevy, „Gym Progress“ (Profil-Liste vom neuesten zum ältesten, Menü mit Routine anlegen, kopieren, bearbeiten, löschen; Kalender; Monatsbericht mit Rekorden; Zeiträume nur für die Statistik): https://www.hevyapp.com/features/gym-progress/
+  - RepReturn, „Strong App Review: The Best Strength Training Logger?“ (10.03.2026; History-Tab mit Sätzen, Wdh, Gewicht, Volumen): https://repreturn.com/strong-app-review/
+  - Strong Help Center, Kategorie „More Strong Features“ (nur Artikeltitel, u. a. „About the Records screen“): https://help.strongapp.io/category/233-history-charts-and-metrics
+- Nur aus Suchergebnissen:
+  - Hevy Help Center, „Reset Data, Duplicate Exercise, Routines and Manual Deletion“ (gelöschte Trainings nicht wiederherstellbar): https://help.hevyapp.com/hc/en-us/articles/35119576252951-Reset-Data-Duplicate-Exercise-Routines-and-Manual-Deletion
+  - Hevy Help Center, Artikel 35380117933207 (Fehler 403): https://help.hevyapp.com/hc/en-us/articles/35380117933207
+  - StrengthLog Help, „Personal records and yearly records“: https://help.strengthlog.com/help-article/personal-records-and-yearly-records
+  - RepCanvas Docs, „History and calendar“: https://repcanvas-marketing.pages.dev/docs/insights/history-and-calendar
+  - Gymkee Help, „Viewing Your Workout History and Progress“: https://gymkee.com/help/athlete/viewing-your-workout-history-and-progress-on-gymkee/
+  - Forenstimmen: Echte Reddit-Threads zum Verlauf waren auch diesmal nicht zu finden.
+- Vom `produkt-scout` am selben Tag gelesen (Einzelheiten in `APPS.md`, Abschnitt „Verlauf“): MCI (Roadmap, Wunschliste, WorldsApps, ScreensDesign), Strong-Hilfe zu Bearbeiten, Nachtragen, Notizen und Vorlage aus dem Verlauf, Hevy „Workout Log“ und „Workout Consistency & Streak“, WHOOP-Community, Wahoo-Forum.
+- Allgemeines Wissen, nicht nachgelesen: Tipps bei Strong und Hevy bis zur Trainingsansicht; Strong zeigt beste Sätze und Rekord-Abzeichen in den Karten.
 
 ### Übungsverwaltung
 

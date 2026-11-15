@@ -26,6 +26,26 @@ Hevy zeigt in der Übungsliste zuletzt genutzte Übungen oben und hat Suche und 
 
 Bei Hevy öffnet ein Tipp in der Bibliothek die Details mit Anleitung (gelesen), MCI zeigt Übungsdetails als Fenster (gelesen, Bildbeschreibungen). Bei uns übernimmt ein Tipp in „+ Aus der Bibliothek“ die Übung sofort; Technik, Muskeln und Gerät sieht man erst danach im Übungs-Sheet, und wer nur stöbert, hat danach Übungen in der Liste, die er nicht wollte. Skizze: Nur im Tab Übungen (Ziel `lib`) öffnet ein Tipp auf eine Bibliothekszeile eine Vorschau mit Gerät, Hauptmuskel, Technik und den Programmen, in denen die Übung vorkommt, unten „In meine Liste“; im Auswahl-Sheet beim Training bleibt es bei einem Tipp.
 
+### 69. Zugeklappte Verlaufskarte zeigt, was trainiert wurde (aus Funktionsvergleich: Verlauf)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Strong listet im History-Tab jedes Training mit Sätzen, Wdh und Gewicht (Test von RepReturn, gelesen), und eine MCI-Bewertung stört, dass man jeden Eintrag erst öffnen muss (gelesen). Unsere Karte zeigt zugeklappt nur Datum, Dauer, Satzzahl und Kampfkraft; wer wissen will, mit wie viel er Bankdrücken zuletzt gemacht hat, klappt jede Karte einzeln auf (immer nur eine offen, eine Arnold-Karte ist dann 562 px hoch), und ein Lauf heißt „40 min · 1 Satz“. Skizze: Unter der Datumszeile in `vHistory()` eine Zeile 13 px blassblau, höchstens zwei Zeilen mit Auslassung, je Übung der schwerste Satz in Kurzform („Bankdrücken 82,5 × 8 · Klimmzüge 10 Wdh · KH-Schrägbank 32 × 10 …“, Zahlen über `fmtNum()` mit Komma); bei Ausdauer statt „1 Satz“ Strecke und Tempo („7,3 km · 5:37 min/km“), bei „nur Zeit“ nur die Minuten. Die Karte wird etwa 18–36 px höher, im Training kostet es nichts.
+
+### 70. Rekorde in der aufgeklappten Karte der Übung zuordnen (aus Funktionsvergleich: Verlauf)
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Hevys Monatsbericht listet die Rekorde und öffnet per Tipp das Training dazu (gelesen), StrengthLog und RepCanvas markieren den Rekord-Satz (nur Suche). Bei uns steht an der Karte „★ 6 Rekorde“, aufgeklappt sieht man aber nur grüne Vergleiche wie „+2 kg“, ohne zu erkennen, welche davon Rekorde waren. Skizze: `workoutGain()` legt an jeden Rekord zusätzlich die `exId`; in der aufgeklappten Karte steht bei diesen Übungen ein goldenes „★“ vor dem Vergleich bzw. „★ 32 kg (vorher 30)“, wenn es keinen Vergleich gibt. Nur berechnet, wie heute.
+
+### 71. Löschen nennt das Training und lässt sich zurücknehmen (aus Funktionsvergleich: Verlauf)
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Die Rückfrage lautet nur „Dieses Training endgültig löschen?“, danach verschwindet die Karte ohne Meldung. Bei Hevy kann ein gelöschtes Training auch der Support nicht zurückholen (nur Suche); wir könnten es besser, wie schon bei „− Satz“ (Idee 15). Skizze: `del-w` fragt „„Beine“ vom Mittwoch, 11. November löschen? 24 Sätze“ und zeigt danach über `toast(msg, act)` „Training gelöscht · Rückgängig“ bis zum nächsten Tipp an anderer Stelle. Rückgängig setzt das gemerkte Training wieder ein, sortiert `S.workouts`, nimmt die ID aus `S.deleted` und speichert mit `save({put:id})`. Den `daten-waechter` kurz auf die Löschliste schauen lassen.
+
+### 72. Filter im Verlauf: die nächste Einheit vorne, der aktive Filter bleibt sichtbar (aus Funktionsvergleich: Verlauf)
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Im Wahoo-Forum wünschten sich Nutzer, eine Einheit mit ihren Vorgängern zu vergleichen (gelesen, Grundlage von Idee 67). Die Knöpfe sind nach „zuletzt trainiert“ sortiert; im Arnold-Split steht deshalb die Einheit, die als Nächste dran ist und die man vor dem Training nachsehen will, immer an fünfter Stelle (x 554 bei 375 px sichtbarer Breite), man muss erst wischen. Nach dem Aufklappen einer Karte springt die Leiste zurück an den Anfang, der aktive Knopf ist weg. Skizze: Die Einheit aus „Dran“ (`templateDays()`) kommt zuerst, danach die übrigen wie heute; der aktive Knopf wird nach jedem Neuzeichnen mit `scrollIntoView({inline:"nearest"})` in den Blick geholt, statt dass nur `hist-filter` die Position merkt. Das spart vor jeder Einheit einen Wischer.
+
 ## Angenommen
 
 Noch nichts.

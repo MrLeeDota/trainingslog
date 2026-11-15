@@ -223,7 +223,11 @@ Quellen:
 - **Fitbod (ergänzt 15.11.2026):** Vergangene Trainings im Tab „Log“, zum Ändern scrollt man dorthin; über „…“ Dauer ändern oder das Training löschen, im Training Sätze, Wdh und Gewicht per Tipp ändern, Übungen hinzufügen oder entfernen; über eine Übung → „History“ die früheren Einheiten samt Notizen [Suche, Hilfe-Center „Editing Workouts“]. Einen Kalender im Log nennen die Suchergebnisse nicht [Suche].
 - **Nutzerwünsche bei anderen Apps** (Nebenbefund): In der WHOOP-Community wünscht sich ein Nutzer (17.08.2026) eine eigene Verlaufsansicht „auf einen Blick“ wie in Apple Fitness, mit Filter nach Art (Kraft, Laufen …), Kalender und Wochen-, Monats- und Jahressummen, ausdrücklich einfach statt als Analyse-Dashboard; eine Antwort nennt das Pflicht [gelesen]. Im Wahoo-Forum wünschen sich Nutzer (2021) eine Ansicht aller abgeschlossenen Trainings nach Trainingsname, um eine Einheit mit den vorigen zu vergleichen [gelesen]. Bei Bevel wünschte ein Nutzer, dass Trainings den Namen ihres Plans behalten [Suche].
 
-Stand: 15.11.2026, `produkt-scout` (Runde Verlauf: MCI erneut, Strong-Hilfe zu Notizen, Nachtragen und Vorlage aus dem Verlauf, Hevy „Workout Log“, Fitbod, Nutzerwünsche); Grundangaben vom 14.11.2026.
+- **Hevy (ergänzt 15.11.2026, `funktions-tester`):** Im Profil stehen die gespeicherten Trainings vom neuesten zum ältesten, ein Tipp öffnet die Einzelheiten; „…“ bietet Routine daraus anlegen, als neues Training kopieren, bearbeiten und löschen. Der Kalender unter Profil markiert Trainingstage blau, ein Tipp öffnet das Training, oben steht die Wochenserie, auch ganze Jahre lassen sich ansehen. Ein Monatsbericht (ab dem Ersten des Folgemonats) zeigt Zahl der Trainings, Volumen und Sätze im Vergleich zu den Vormonaten, listet die Rekorde des Monats (ein Tipp öffnet das Training, in dem sie fielen), dazu aktive Tage, Volumen nach Körperteil und die häufigsten Übungen. Die Zeiträume 30 Tage, 3 Monate, Jahr, alles gelten nur für die Statistik, nicht für die Liste; was eine Trainingskarte im Profil zeigt, steht dort nicht [gelesen, „Gym Progress“]. Ein gelöschtes Training kann auch der Support nicht wiederherstellen [Suche, Hilfe-Center „Reset Data …“]. Ein Filter oder eine Suche im Verlauf nach Routine ist weiter nicht belegt [Suche].
+- **Strong (ergänzt 15.11.2026, `funktions-tester`):** Ein Test vom 10.03.2026 beschreibt den Tab History als Liste aller Trainings mit Sätzen, Wdh, Gewicht und Volumen und lobt vor allem den Verlauf pro Übung bis zur ersten Einheit; Rekord-Kennzeichen, Kalender, Bearbeiten und Löschen erwähnt er nicht [gelesen, RepReturn]. In der Hilfe gibt es „About the Records screen“ und „Can I reset my workout history?“ (nur Titel gelesen). Dass Strong im Verlauf beste Sätze und Rekord-Abzeichen zeigt, bleibt [Wissen].
+- **Andere Apps, Rekorde im Verlauf** (Nebenbefund): StrengthLog markiert den Satz mit einem Rekord mit „PR!“ bzw. „YR!“, RepCanvas hebt Rekord-Sätze in der Trainingsansicht hervor und nennt die Zahl der Rekorde im Kopf, Gymkee hebt den besten Satz jeder Übung hervor [Suche].
+
+Stand: 15.11.2026, `funktions-tester` (Hevy „Gym Progress“, Strong-Test von RepReturn, Löschen bei Hevy, Rekord-Kennzeichen anderer Apps); davor `produkt-scout` (Runde Verlauf: MCI erneut, Strong-Hilfe zu Notizen, Nachtragen und Vorlage aus dem Verlauf, Hevy „Workout Log“, Fitbod, Nutzerwünsche); Grundangaben vom 14.11.2026.
 
 Quellen:
 - MCI-Roadmap: https://roadmap.mcisolutions.de/de-de/roadmap
@@ -244,6 +248,12 @@ Quellen:
 - WHOOP Community, „Feature Request: A dedicated Workout History & Overview“: https://www.community.whoop.com/t/feature-request-a-dedicated-workout-history-overview/15921
 - Wahoo-Forum, „Reviewing completed workouts“: https://wahoox.forum.wahoofitness.com/t/reviewing-completed-workouts/12505
 - Bevel Feature Requests, „Workout plan name in Activity history“: https://feedback.bevel.health/feature-requests/p/workout-plan-name-in-activity-history (nur Suche)
+- Hevy, „Gym Progress“ (Profil-Liste, Kalender, Monatsbericht): https://www.hevyapp.com/features/gym-progress/
+- Hevy Help Center, „Reset Data, Duplicate Exercise, Routines and Manual Deletion“: https://help.hevyapp.com/hc/en-us/articles/35119576252951-Reset-Data-Duplicate-Exercise-Routines-and-Manual-Deletion (nur Suche)
+- RepReturn, „Strong App Review: The Best Strength Training Logger?“ (10.03.2026): https://repreturn.com/strong-app-review/
+- StrengthLog Help, „Personal records and yearly records“: https://help.strengthlog.com/help-article/personal-records-and-yearly-records (nur Suche)
+- RepCanvas Docs, „History and calendar“: https://repcanvas-marketing.pages.dev/docs/insights/history-and-calendar (nur Suche)
+- Gymkee Help, „Viewing Your Workout History and Progress“: https://gymkee.com/help/athlete/viewing-your-workout-history-and-progress-on-gymkee/ (nur Suche)
 
 ## Fortschritt & Rekorde
 

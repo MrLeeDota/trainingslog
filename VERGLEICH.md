@@ -10,12 +10,85 @@ Wie gut ist jede Funktion des Trainingslogs im Vergleich zu führenden Fitness-A
 | Vorlagen | gleichauf | Ein zweites Programm übernimmt „Dran“: Nach einem Lauf aus der Bibliothek zeigte „Dran“ einen zweiten Lauf, die nächste Arnold-Einheit stand unmarkiert bei y 1323. Umbenennen löscht „Zuletzt“ und „Dran“ (Ideen 49, 50) | 14.11.2026 |
 | Übungsverwaltung | gleichauf | Technik nur als Text, ohne Bild oder Video (alle vier Vorbilder zeigen eins). Im Training liegen die letzten Einheiten im Übungs-Sheet erst nach 1–2 Wischern, und das Sheet verdeckt den Timer (Ideen 59, 60) | 15.11.2026 |
 | Verlauf | gleichauf | Zugeklappte Karten zeigen nur Datum, Dauer, Satzzahl und Kampfkraft, nicht was trainiert wurde (Lauf: „1 Satz“); nur eine Karte ist zugleich offen. Die Einheit, die als Nächste dran ist, steht im Filter immer an fünfter Stelle außerhalb des Bildschirms (Ideen 69, 72) | 15.11.2026 |
-| Fortschritt & Rekorde | offen | – | – |
+| Fortschritt & Rekorde | gleichauf | Der Rekord-Hinweis beim Abhaken steht 2,2 s oben und hinterlässt am Satz nichts. Aus dem Fortschritt öffnet eine Übung als Bearbeiten-Formular (Bestwerte 1 Wischer, Kurve 2 Wischer tief), und zurück steht die Liste wieder oben (Ideen 87, 88) | 15.11.2026 |
 | Spielelemente | offen | – | – |
 | Ausdauer-Erfassung | offen | – | – |
 | Backup & Export | offen | – | – |
 
 ## Befunde
+
+### Fortschritt & Rekorde
+
+Erste Prüfung am 15.11.2026, nach den Ideen 73–78. Spielelemente (Kampfkraft, Stufen, Serie, Erfolge, Sternkugeln) gehören zur nächsten Funktion und sind hier nicht bewertet, die fachlichen Regeln aus `bibliothek/README.md` ebenfalls nicht. Getestet in Chrome am PC im Handy-Rahmen (390 × 844, Gegenprobe 375 × 667) auf localhost, mit echten Klicks und Tastatureingaben. Ausgangsstand: 39 Übungen, 12 Vorlagen, 23 Trainings, kein laufendes Training, 4 Einträge in der Löschliste (vorher gesichert). Per Skript habe ich die Übung „Rudergerät“ (nur Zeit, Bibliothek `rudergeraet`) angelegt und die 23 Trainings durch 87 Testtrainings ersetzt (`save({all:true})`): Arnold-Split vom 27.07. bis 13.11.2026 (Mo B&R A, Di S&A A, Mi Beine, Do B&R B, Fr S&A B), rund 7 % ausgefallene Tage, Urlaubswoche 31.08.–06.09. Dazu kamen doppelte Progression bei den Grundübungen (Bankdrücken 75 → 80 kg, Kniebeugen 90 → 97,5 kg), Schulterdrücken seit 25.08. bei 50 kg stehend und Langhantelrudern seit Oktober fallend (70 kg × 8, 7, 7 → 6, 5, 5). Beinstrecker ohne Fortschritt, Klimmzüge ohne Gewicht von 8, 8, 7, 7 bis 10 × 4, danach mit +5 kg. Rumänisches Kreuzheben hatte eine Pause vom 19.08. bis 14.10. (56 Tage). Außerdem gab es neun Läufe (5 km, einmal 10 km) und sechs Einheiten Rudern. Über die Oberfläche habe ich den Fortschritt durchgeblättert, Übungen aus „Kraft, letzte 6 Wochen“ geöffnet, Zeiträume und Punkte der Kurve gewählt und einen Kalendertag bis in den Verlauf verfolgt. „Brust & Rücken B“ habe ich gestartet, einen Gewichtsrekord (Schrägbankdrücken 65 kg) und eine Bestleistung (Latzug 62,5 kg × 13) abgehakt und gespeichert; „Brust & Rücken A“ habe ich gestartet und verworfen. Danach habe ich Übungen, Vorlagen, Trainings, laufendes Training, Löschliste und Einstellungen per Skript zurückgesetzt (`save({all:true})`); nach dem Neuladen war alles zeichengleich mit dem Stand vor dem Test.
+
+**Tipps pro Ablauf** (Start auf dem Startbildschirm)
+
+| Ablauf | Trainingslog | Strong / Hevy |
+|---|---|---|
+| Fortschritt öffnen | 1 (Kachel Stufe/Kampfkraft, 343 × 213 bei y 82–295) | Hevy: Tab Profil, Statistik (1–2*); Strong: Profil oder Übung |
+| Welche Übungen stehen oder fallen? | 1 + 1 Wischer („Kraft, letzte 6 Wochen“ ab y 911): „Steigt 24 · gleich 3 · fällt 1“, Stehende zuerst | nicht belegt; JEFIT nur im Bezahl-Abo („1RM analysis“) |
+| Kurve einer stehenden Übung ansehen | 2 + 3 Wischer (Kachel, Zeile; das Sheet beginnt mit Name, Kategorie, Erfassung, Notiz, Technik, Bestwerte bei y 874, Kurve bei y 1206) | Hevy: Übung, Reiter Summary (2–3*); Strong: Übung, Reiter Charts (nur PRO) |
+| Zwei Übungen nacheinander vergleichen | 4 + 4–6 Wischer; nach „Abbrechen“ steht der Fortschritt wieder oben statt bei der Liste | nicht belegt |
+| Wert eines Kurvenpunkts ablesen | 1 Tipp auf die Kurve („Di., 22.09. · 50 kg × 7, 7, 6, 5 · ≈ 60,5 kg“) | Tipp auf den Punkt* |
+| Im Training Bestwerte und Kurve ansehen | 1 (Übungsname), Bestwerte ohne Wischen (y 491), Kurve nach 1 Wischer (y 1037) | Hevy: Name → Summary (gelesen), Strong: Name → Records |
+| Letzte Rekorde ansehen | 2 (Kachel, „Rekorde ›“ scrollt hin) | Hevy: Profil, persönliche Bestwerte (gelesen) |
+| Training eines Kalendertags ansehen | 3 + 1 Wischer (Kachel, Tag, Wischer, „Im Verlauf ›“), die Karte steht aufgeklappt oben | Hevy: Kalender, Tag (gelesen) |
+| Rekord beim Abhaken bemerken | 0, aber nur 2,2 s oben | Hevy Banner, Strong Animation, JEFIT Pop-up (gelesen) |
+
+\* Allgemeines Wissen, nicht nachgelesen.
+
+**Bedienung (Messwerte in App-Pixeln bei 390 px)**
+- Aufbau: Das Sheet ist 3820 px hoch (4,5 Bildschirme, auf dem SE 3838 px, 5,8 Bildschirme). Reihenfolge: Stufe, vier Kacheln (160 × 73 bzw. 160 × 95), Kalender ab 358, „Kraft, letzte 6 Wochen“ ab 827, „Diese Woche“ ab 1503, „Sätze pro Muskel“ ab 1702, „Letzte Rekorde“ ab 2386, Erfolge ab 2854. „Fertig“ (60 × 44) steht oben bei y 99. Bei 375 px läuft nichts über.
+- Kalender (Idee 78): Tage 41 × 44 (SE 38,7 × 44), ‹ › je 44 × 44. Ein Tipp auf den 13.11. setzt nur einen Ring um den Tag; die Zeile „Schultern & Arme B · 75 min · 21 Sätze · ★ 2 Rekorde · Im Verlauf ›“ (310 × 60) erscheint bei y 841 von 844, also unter dem Bildschirmrand. Ohne Wischen sieht man nicht, dass der Tipp etwas bewirkt hat. „Im Verlauf ›“ öffnet den Verlauf mit aufgeklappter Karte oben, zurück in den Fortschritt geht es nur über Tab Training und Kachel. Die Monatszeile „12 Trainings · 181 Sätze · 5 Rekorde / Vormonat: 26 Trainings · 404 Sätze“ vergleicht am 15. den halben November mit dem ganzen Oktober (13 px).
+- Kraft (Idee 73): Sieben Zeilen (328 × 69, Name 16 px, Wert 14 px blassblau, 7,3 : 1), zuerst „Langhantelrudern ≈ 87 kg · fällt −3,2 % · seit 8 Wochen“ und „Schulterdrücken · gleich · seit 7 Wochen“, dann die drei stärksten Steigerungen; „Alle zeigen (29)“ 120 × 44. Richtig erkannt: fallend, stehend, Klimmzüge „+5 kg · Ø 7 Wdh · steigt“; Rumänisches Kreuzheben nach der Pause steht unter „Alle zeigen“. Die Zahl „≈ 87 kg“ ist das geschätzte Maximum, nicht das Arbeitsgewicht (70 kg); das erklärt nur der Text unter der Liste.
+- Übung aus dem Fortschritt (Zeilen in Kraft und Letzte Rekorde): Es öffnet das Bearbeiten-Sheet wie im Tab Übungen, beginnend mit Namensfeld, Kategorie-Knöpfen, Erfassung, Bibliothek, Notiz und Technik. „Bestwerte“ beginnt bei y 874 (unter dem Rand), „Entwicklung“ bei y 1067, die Kurve bei 1206. „Abbrechen“ führt zurück, aber der Fortschritt steht wieder oben (vorher bei 827). Aus dem Training ist das schon besser gelöst (Idee 59): Letzte Einheiten, Bestwerte und Programm stehen oben.
+- Bestwerte (Idee 75): Zeilen 328 × 46, Begriff 14 px blassblau, Wert 14 px fett weiß. Bankdrücken: „Schwerster Satz 80 kg × 8 · Mo., 19.10.“, „Geschätztes Maximum ≈ 101,5 kg · Mo., 09.11.“; Schulterdrücken zusätzlich „Beste Wdh je Gewicht 50 kg: 7 · 45 kg: 8“. Klimmzüge: „Meiste Wdh“, „Bester Schnitt“, „Schwerstes Zusatzgewicht +5 kg × 10“. Lauf: längste Strecke 10 km, schnellstes Tempo 5:34 min/km über 5 km; Rudern: meiste Minuten 30. Ein Tipp auf einen Bestwert öffnet das Training nicht.
+- Kurve (Idee 76): Zeitraum-Knöpfe je 98 × 44, Kurve 306 × 107 ohne Achsenwerte, darunter erstes Datum, Bestwert und letztes Datum. Ein Tipp wählt den nächsten Punkt, die Zeile darunter wechselt sofort (13 px). Ein zweiter Tipp auf denselben Punkt hebt die Wahl auf. Rekord-Einheiten sind gold mit Radius 5, normale Punkte gold mit Radius 3, der letzte Punkt ebenfalls 5; auf dem Bildschirm sind Rekord und letzter Punkt kaum zu unterscheiden. Klimmzüge zeigen zwei beschriftete Abschnitte „ohne“ und „+5 kg“ mit Erklärung, die Lücke nach dem Wechsel ist gut zu sehen.
+- Hinweise beim Abhaken (Idee 74): „Neuer Rekord: 65 kg bei Schrägbankdrücken“ und „Bestleistung: 13 Wdh mit 62,5 kg (bisher 12) bei Latzug“ (zweizeilig) erscheinen oben am Bildschirm (318 × 41, 14 px) für 2,2 s, ohne Ton. Danach ist am Satz und in der Karte nichts mehr zu sehen; wer nach dem Abhaken das Handy weglegt, erfährt erst in „Training geschafft“ davon. Die Kopfzeile des Trainings zählt nur „4 Sätze erledigt“.
+- „Training geschafft“: „Neuer Rekord: Schrägbankdrücken 65 kg vorher 62,5“ und „Besser als letztes Mal“ mit „Schrägbankdrücken +2,5 kg“ (dieselbe Leistung zweimal) und „Latzug +3 Wdh gesamt · Bestleistung 62,5 kg × 13“. Bei diesem langen Text wird der Name auf 42 px gedrückt und bricht als „Latzu / g“ um (siehe Nebenbefunde). Die Bestleistung zählt nicht als Rekord und taucht in „Letzte Rekorde“ nicht auf.
+- Diese Woche und Muskeln: „Trainings 7 / Ø 5,8 · Sätze 88 / 92 · Kilometer 5 / 3,8“. Die Ruder-Minuten (nur Zeit) kommen nirgends vor. Die zwölf Muskelzeilen mit Zielbereich sind gut lesbar.
+- Letzte Rekorde (Idee 77): Fünf Zeilen (328 × 69, „Kurzhantel-Schrägbankdrücken“ bricht auf 91 px um), z. B. „Rudergerät · heute · 30 min vorher 27“, „Alle zeigen (30)“. In 3,5 Monaten Arnold-Split kamen 59 Rekorde zusammen, fast alle Gewichtssprünge.
+- Daumen: Die Kachel zum Öffnen liegt im oberen Drittel (y 82–295), „Fertig“, „Abbrechen“ und „Sichern“ oben (y 99–135). Alles andere wird erst nach Wischen erreicht und liegt dann im Daumenbereich. Im Training ist nur der Übungsname oben (y 165).
+- Rückmeldung: Zeitraum, Kurvenpunkt, „Alle zeigen“ und „Rekorde ›“ wirken sofort sichtbar; der Kalendertag nicht (siehe oben). Konsole: keine Meldungen (Aufzeichnung ab der Gegenprobe).
+
+**Was die anderen besser machen**
+- Rekorde im Training: Hevy zeigt beim Abhaken ein Banner und speichert den Rekord mit dem Training, für schwerstes Gewicht, bestes 1RM, bestes Satzvolumen, meiste Wdh und Dauer (gelesen); Strong markiert Rekorde direkt am Satz und spielt eine kurze Animation (Test vom 13.03.2026, gelesen); JEFIT zeigt ein Pop-up und führt die Rekorde in der Zusammenfassung (gelesen). Bei uns ist der Hinweis nach 2,2 s weg, und die Bestleistung bei gleichem Gewicht zählt nirgends als Rekord.
+- Übungsdetails mit Reitern: Hevy „Summary“ mit mehreren umschaltbaren Kennzahlen (schwerstes Gewicht, 1RM, Satz- und Einheitsvolumen, meiste Wdh), ein Tipp auf einen Rekord öffnet das Training; Strong „Charts“ und „Records“ mit Bestwert je Wdh-Zahl (gelesen). Bei uns gibt es eine Kurve mit einem Maß, und aus dem Fortschritt kommt man über ein Bearbeiten-Formular hin.
+- Verläufe über Wochen: Hevy zeigt Trainingszeit, Volumen und Sätze im Vergleich zu den Vormonaten (Monatsbericht, erst nach Monatsende), JEFIT Volumen und Trainingszeit über 7 und 14 Tage (kostenlos) bis zu einem Jahr (Elite). Bei uns gibt es nur „diese Woche gegen Ø 4 Wochen“ und den Monat gegen den ganzen Vormonat.
+- Körperbilder (Hevy, JEFIT, MCI geplant) statt Balken; für die Bedienung im Studio unerheblich.
+
+**Was wir besser machen**
+- Alles kostenlos und ohne Zeitgrenze: Hevy zeigt kostenlos nur 3 Monate Kurve, Strongs Diagramme gibt es nur mit PRO, JEFIT ab einem Monat nur mit Elite (gelesen bzw. Suche).
+- „Kraft, letzte 6 Wochen“ zeigt auf einen Blick, welche der rund 28 Übungen steigen, stehen oder fallen, mit „seit X Wochen“. Bei Strong und Hevy muss man jede Übung einzeln öffnen; eine ähnliche Übersicht hat nur JEFIT im Bezahl-Abo.
+- Die Bestleistung bei gleichem Gewicht passt zur doppelten Progression des Arnold-Splits; „Besser als letztes Mal“ nennt nach jedem Training, was vorangegangen ist.
+- Sätze pro Muskel mit Zielbereich 10–20; Hevy zählt Sätze pro Muskel ohne Zielbereich (gelesen).
+- Die Kurve läuft nach Datum, unterbricht bei Pausen und trennt Zusatzgewichte bei Klimmzügen; Bestwerte stehen im Training einen Tipp entfernt ohne Wischen.
+
+**Urteil: gleichauf.** Inhaltlich liegt die App vorne: Kraftentwicklung über alle Übungen, Bestleistung bei gleichem Gewicht, Muskel-Sätze mit Zielbereich und eine Kurve, die mit Pausen und Zusatzgewicht richtig umgeht, und das alles kostenlos, wofür Strong, Hevy und JEFIT teils Geld verlangen. Im Studio zählt aber vor allem, einen Rekord zu bemerken und kurz nachzusehen, was die Bestmarke ist. Das Nachsehen ist gut gelöst (1 Tipp, Bestwerte ohne Wischen). Der Rekord-Hinweis ist dagegen schwächer als bei den Vorbildern: Er erscheint 2,2 s oben, ohne bleibende Spur am Satz. Abseits des Trainings ist die Ansicht lang (4,5 Bildschirme). Wer aus der Kraft-Liste eine Übung ansieht, landet in einem Bearbeiten-Formular, wischt zweimal bis zur Kurve und beginnt danach wieder oben. Der Tipp auf einen Kalendertag zeigt sein Ergebnis unter dem Bildschirmrand. Mit den Ideen 87 und 88 wäre die Funktion vorne.
+
+**Lücken, die nicht vorgeschlagen werden:** Mehrere umschaltbare Kennzahlen pro Übung (Volumen, Satzvolumen, Rekord je Wdh-Zahl) bringen bei doppelter Progression wenig über den Einheitswert und die Bestwerte hinaus und gehörten fachlich erst zum `trainings-experte`. Körperbild statt Balken bräuchte eigene Grafiken ohne Mehrwert im Studio. Bestzeiten über Laufdistanzen wie bei Strava setzen GPS-Abschnitte voraus, die die App nicht hat. Ob Bestleistungen als Rekord zählen, gehört laut Idee 74 in die Runde „Spielelemente“. Ein Rekord-Ton bräuchte eine Audio-Freigabe wie beim Timer und ist bei Stummschalter nicht zu hören, Vibration kann Safari nicht; das sichtbare Zeichen am Satz (Idee 87) reicht. Den Monatsbericht nach Monatsende wie bei Hevy ersetzt der faire Vergleich in Idee 89.
+
+**Nebenbefunde für die Hauptsitzung** (Fehlersuche gehört zum `gym-tester`)
+- „Training geschafft“, „Besser als letztes Mal“ (`index.html` Zeile 1934): Bei langem Text („+3 Wdh gesamt · Bestleistung 62,5 kg × 13“) schrumpft der Name auf 42 px und bricht mitten im Wort um („Latzu / g“). Der Name braucht eine Mindestbreite oder die Zeile einen Umbruch unter den Namen.
+- Im Training: Nach 13 statt 12 Wdh im ersten Latzug-Satz übernahmen die beiden folgenden Sätze die 13 (wie gewollt). Danach erschien der Knopf „Ziel eintragen: 2 × 12 Wdh“, der die übernommenen 13 wieder auf 12 senken würde (`repGoal()`, Aktion „goal“). Gehört zur Satz-Erfassung.
+- „Diese Woche“ (`vWeekCompare()`, Zeile 1452) zählt bei Ausdauer nur km; Einheiten „nur Zeit“ wie Rudern tauchen dort und in den Kennzahlen nirgends auf.
+
+**Quellen**
+- Selbst gelesen (diese Prüfung):
+  - Hevy, „Live PR“ (Banner beim Abhaken, Rekord mit dem Training gespeichert, Bestwerte im Profil und in der Übungsbibliothek; Ton oder bleibendes Zeichen am Satz nennt die Seite nicht): https://www.hevyapp.com/features/live-pr/
+  - Hevy, „Monthly Report“ (Rückblick auf den Vormonat, abrufbar vom Ersten bis zum Monatsende, nur der letzte): https://www.hevyapp.com/features/monthly-report
+  - Strong Help Center, „About Exercise Detail Screen“ (History, Charts nur PRO, Records; Diagrammarten nennt der Artikel nicht): https://help.strongapp.io/article/237-about-exercise-detail
+  - RepReturn, „Strong App vs Hevy: The Best Strength Training Logger in 2026“ (13.03.2026; Strong: Kurve des geschätzten 1RM, Rekorde am Satz markiert, kurze Animation bei einem Rekord): https://repreturn.com/strong-app-vs-hevy/
+  - JEFIT Blog, „How JEFIT's Deep Training Analysis Helps You Train Better“ (06.11.2026; Tabelle kostenlos/Elite, Rekord-Pop-up, Kalender-Heatmap): https://www.jefit.com/blog/jefit-training-analysis-guide
+  - MacroFactor Help, „Viewing exercise performance over time“ (Nebenbefund: 1RM/3RM/10RM, Volumen, Satzvolumen, schwerstes Gewicht, Zeitraum wählbar): https://help.macrofactorapp.com/en/articles/344-viewing-exercise-performance-over-time
+- Nur aus Suchergebnissen:
+  - Hevy, „Exercise Performance“ und Hilfe-Center (Kurve 3 Monate, Jahr, alles; kostenlos 3 Monate; Kennzahl per Tipp wechseln): https://www.hevyapp.com/features/exercise-performance/
+  - Hevy Help Center, „Personal Records (PRs) and Set Records Explained“ (Fehler 403): https://help.hevyapp.com/hc/en-us/articles/35649367857175-Personal-Records-PRs-and-Set-Records-Explained-How-They-Work-in-the-Hevy-App
+  - Fitbod Blog, „New and Improved Exercise History & Records“ und „Estimated Strength“ (bis zu sechs Kennzahlen, Reiter Results mit Rekorden, Milestones): https://fitbod.me/blog/exercise-history-and-records/
+  - Setgraph, „Hevy vs Strong“ (Seite eines Wettbewerbers; Strong mit tieferer Auswertung, Hevy kostenlos ausreichend): https://setgraph.app/ai-blog/hevy-vs-strong
+  - Forenstimmen: Echte Reddit-Threads zu Rekorden und Diagrammen waren auch diesmal nicht zu finden, nur Zusammenfassungen von Wettbewerbern.
+- Vom `produkt-scout` am selben Tag gelesen (Einzelheiten in `APPS.md`, Abschnitt „Fortschritt & Rekorde“): MCI (ScreensDesign, Website, App Store, Roadmap, Wunschliste, WorldsApps), Strong-Hilfe zu Records, 1RM und Widgets, Strong im App Store, Hevy „Live PR“, „Gym Performance“, „Sets Per Muscle Group“, „Monthly Report“, Bevel-Wunschliste.
+- Allgemeines Wissen, nicht nachgelesen: Tipps bis zur Statistik und zur Übungskurve bei Hevy und Strong; ein Tipp auf einen Kurvenpunkt zeigt dort den Wert.
 
 ### Verlauf
 

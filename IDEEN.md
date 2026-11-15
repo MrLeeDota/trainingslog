@@ -4,6 +4,31 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 ## Vorschläge
 
+### 87. Rekord und Bestleistung bleiben am Satz sichtbar (aus Funktionsvergleich: Fortschritt & Rekorde)
+- Nutzen: hoch · Aufwand: S · Datenformat: nein
+
+Hevy zeigt beim Abhaken ein Banner und speichert den Rekord mit dem Training. Strong markiert Rekorde direkt am Satz mit einer kurzen Animation, JEFIT zeigt ein Pop-up (alles gelesen, `APPS.md`). Bei uns stehen „Neuer Rekord: 65 kg bei Schrägbankdrücken“ und „Bestleistung: 13 Wdh mit 62,5 kg (bisher 12)“ 2,2 s oben am Bildschirm, danach ist am Satz nichts mehr zu sehen; wer nach dem Abhaken das Handy weglegt, erfährt erst nach dem Speichern davon. Skizze: Beim Zeichnen der Übungskarte bekommen abgehakte Sätze, die einen Rekord (`setMark()` gegen `progress().bests`) oder die Bestleistung der Übung (`bestEffort()`) gebracht haben, einen goldenen Stern bzw. „Best“ hinter der Satznummer (nur berechnet, im laufenden Training). Der Hinweis selbst bleibt 4 s statt 2,2 s stehen, und die Kopfzeile zählt mit („6 Sätze erledigt · ★ 1“); kein zusätzlicher Tipp.
+
+### 88. Übung aus dem Fortschritt mit Bestwerten und Kurve zuerst, zurück an dieselbe Stelle (aus Funktionsvergleich: Fortschritt & Rekorde)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Hevy öffnet eine Übung mit dem Reiter „Summary“ (Rekorde und Kurve), Strong mit „Charts“ und „Records“ (gelesen). Ein Tipp auf eine Zeile in „Kraft, letzte 6 Wochen“ oder „Letzte Rekorde“ öffnet bei uns das Bearbeiten-Sheet aus dem Tab Übungen: zuerst Namensfeld, Kategorie, Erfassung, Notiz und Technik, „Bestwerte“ erst bei y 874 (unter dem Bildschirmrand), die Kurve bei y 1206. Nach „Abbrechen“ steht der Fortschritt wieder oben statt bei der Liste (vorher y 827), wer drei stehende Übungen ansieht, wischt jedes Mal zurück. Skizze: `rec-ex` öffnet das Sheet mit einer Anordnung wie aus dem Training (Idee 59): Name als Titel, Bestwerte, Kurve, letzte Einheiten, darunter „Übung bearbeiten“. `actions.close` bzw. die Rückkehr über `back` stellt den gemerkten `scrollTop` des Fortschritts wieder her.
+
+### 89. Kalender: Tagesinfo ins Bild holen, Monat bis zum gleichen Tag vergleichen (aus Funktionsvergleich: Fortschritt & Rekorde)
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+In Hevys Kalender öffnet ein Tipp auf den Tag das Training direkt, der Monatsbericht vergleicht erst nach Monatsende mit den Vormonaten (gelesen). Bei uns erscheint nach einem Tipp auf den 13.11. die Zeile mit dem Training bei y 841 von 844, also unter dem Bildschirmrand, sichtbar ist nur ein Ring um den Tag. Die Monatszeile vergleicht am 15.11. „12 Trainings · 181 Sätze“ mit dem ganzen Oktober „26 Trainings · 404 Sätze“, der Monat sieht so immer schwach aus. Skizze: Nach `cal-day` die `.cal-dayinfo` mit `scrollIntoView({block:"nearest"})` ins Bild holen; im laufenden Monat lautet die zweite Zeile z. B. „Vormonat bis zum 15.: 13 Trainings · 198 Sätze“, in vergangenen Monaten bleibt der ganze Vormonat.
+
+### 90. Bestleistungen in „Letzte Rekorde“ und in der Kurve zeigen, ohne sie zu zählen (aus Funktionsvergleich: Fortschritt & Rekorde)
+- Nutzen: mittel · Aufwand: S–M · Datenformat: nein
+
+Hevy führt neben den Rekorden eigene „Set Records“ (meiste Wdh je Gewicht), Strong die Bestleistung je Wdh-Zahl (gelesen bzw. Suche). Bei uns erscheint die Bestleistung (Idee 74) nur beim Abhaken und in „Besser als letztes Mal“. In „Letzte Rekorde“ standen nach 3,5 Monaten Arnold-Split 59 Einträge, fast alle Gewichtssprünge alle 4–5 Wochen. Die Fortschritte dazwischen (Latzug 62,5 kg × 13) tauchen dort und als Punkt in der Kurve nicht auf. Skizze: `vRecentRecords()` mischt Bestleistungen ein, die wie in `finish()` je Training und Übung berechnet werden (`priorSets(exId, w.date)`, `bestEffort()`), z. B. „Latzug · Bestleistung 62,5 kg × 13 · bisher 12“ in Grün statt Gold. Die Kurve markiert solche Einheiten mit einem grünen Ring. Rekordzahl, Kampfkraft, Erfolge und „★ Rekorde“ im Verlauf bleiben unverändert; ob Bestleistungen mitzählen, bleibt Sache der Runde „Spielelemente“.
+
+### 91. Verlauf der letzten 12 Wochen als Balken im Fortschritt (aus Funktionsvergleich: Fortschritt & Rekorde)
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Hevy zeigt Trainingszeit, Volumen und Sätze im Vergleich zu den Vormonaten, JEFIT Volumen und Trainingszeit über wählbare Zeiträume, Apple Fitness Trends über 90 Tage (gelesen bzw. Suche). Bei uns vergleicht „Diese Woche“ nur mit dem Schnitt der vier Wochen davor; ob die Sätze seit einem Urlaub wieder auf dem alten Stand sind, sieht man nicht. Einheiten „nur Zeit“ wie Rudern kommen dort nicht vor. Skizze: Unter der Tabelle „Diese Woche“ zwölf schmale Balken (eine Woche je Balken, Sätze), die laufende Woche hervorgehoben, darunter eine Zeile „Ausdauer: 45 min · 5 km“ mit Minuten aus Ausdauer und „nur Zeit“. Nur berechnet, ohne Tipp im Training.
+
 ### 83. Rudergerät in Metern mit Tempo pro 500 m (aus Fachprüfung: Ausdauer)
 - Nutzen: hoch (mit Monitor) · Aufwand: M · Datenformat: nein (optionales Feld `unit: "m500"`)
 

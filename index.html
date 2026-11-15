@@ -225,6 +225,10 @@ button.goal-btn:active{transform:skewX(-10deg) translateY(2px)}
 .goal-text{display:flex;align-items:center;gap:.3em;background:none;border-color:transparent;color:var(--muted);font-weight:600;padding-left:0;transform:none}
 .goal-text.hit{color:var(--scan)}
 .better{color:var(--scan);text-align:right}
+/* Name und langer Vergleich: der Name bricht nie mitten im Wort, der Vergleich darf in die nächste Zeile */
+.better-row{flex-wrap:wrap;gap:2px 10px}
+.better-row>span{flex:1 1 auto;min-width:40%}
+.better-row>.better{flex:0 1 auto;margin-left:auto}
 /* Verlauf (Ideen 64, 65, 67) */
 .w-gain{display:block;font-size:13px;color:var(--muted);margin-top:2px}
 .w-gain b{color:var(--ki);font-weight:700}
@@ -1631,7 +1635,8 @@ function vEntry(en, i){
   const down = up || back ? null : stepDown(en.exId, plan), showDown = down && en.sets.some(s => !s.done && num(s.a) > down);
   const goal = up || showDown || back ? null : repGoal(en, plan);   // Ziel nur zwischen zwei Gewichtsstufen, nicht neben „Steigern“ oder „Entlasten“
   // Ziel als Knopf, solange ein offener Satz noch andere Wdh hat; danach nur noch als Text
-  const goalOpen = goal && en.sets.some((s, j) => !s.done && num(s.b) !== goal[j]);
+  // Nur solange ein offener Satz unter dem Ziel liegt; wer schon mehr eingetragen hat, bekommt kein „Ziel eintragen“, das senken würde
+  const goalOpen = goal && en.sets.some((s, j) => !s.done && num(s.b) < goal[j]);
   const goalHit = goal && en.sets.every(s => s.done) && goalMet(en, goal);   // alle Sätze abgehakt und das Ziel erreicht
   // Kopf: Nur der Name teilt sich die Zeile mit ⇄ und ✕, alles darunter nutzt die volle Kartenbreite
   return `<div class="card">
@@ -1931,7 +1936,7 @@ function vSheet(s){
     ${s.records.length ? `<h2>${s.records.length === 1 ? "Neuer Rekord" : "Neue Rekorde"}</h2>
       <div class="list" style="padding:0">${s.records.map(r => `<div class="li row between"><span>${esc(r.name)}</span><span><b>${fmtNum(r.v)} ${r.unit}</b> <span class="muted">vorher ${fmtNum(r.old)}</span></span></div>`).join("")}</div>` : ""}
     ${s.better && s.better.length ? `<h2>Besser als letztes Mal</h2>
-      <div class="list" style="padding:0">${s.better.map(b => `<div class="li row between"><span>${esc(b.name)}</span><b class="better">${b.goal ? "✓ " : ""}${esc(b.label)}</b></div>`).join("")}</div>` : ""}
+      <div class="list" style="padding:0">${s.better.map(b => `<div class="li row between better-row"><span>${esc(b.name)}</span><b class="better">${b.goal ? "✓ " : ""}${esc(b.label)}</b></div>`).join("")}</div>` : ""}
     ${s.earned.length ? `<h2>${s.earned.length === 1 ? "Neuer Erfolg" : "Neue Erfolge"}</h2>
       <div class="list" style="padding:0">${s.earned.map(a => vBadge(a, true)).join("")}</div>` : ""}
     ${vBackupDue()}
@@ -2195,7 +2200,7 @@ const actions = {
   },
   goal: el => {
     const en = S.active.entries[+el.dataset.i], g = repGoal(en, entryPlan(en));
-    if (g) setValues(en, "b", j => g[j], `Ziel eingetragen: ${fmtGoal(g)}`);
+    if (g) setValues(en, "b", j => Math.max(num(en.sets[j].b), g[j]), `Ziel eingetragen: ${fmtGoal(g)}`);   // höhere Einträge bleiben
   },
   "undo-meter": () => {
     const u = undoMeter; undoMeter = null;

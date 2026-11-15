@@ -219,6 +219,16 @@ button.goal-btn:active{transform:skewX(-10deg) translateY(2px)}
 .goal-text{display:flex;align-items:center;gap:.3em;background:none;border-color:transparent;color:var(--muted);font-weight:600;padding-left:0;transform:none}
 .goal-text.hit{color:var(--scan)}
 .better{color:var(--scan);text-align:right}
+/* Verlauf (Ideen 64, 65, 67) */
+.w-gain{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.w-gain b{color:var(--ki);font-weight:700}
+.hist-head{margin:18px 2px 8px;font-size:14px;font-weight:700}
+.hist-head .muted{font-weight:400}
+button.hist-group{width:100%;min-height:52px;margin-bottom:10px;text-align:left;background:var(--card);border:2px solid var(--ink);border-radius:12px;padding:10px 14px;font-size:15px}
+.hist-filter{margin:4px -16px 6px;padding:0 16px 4px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.hist-filter::-webkit-scrollbar{display:none}
+.hist-filter .chip{white-space:nowrap;flex:none}
+.hist-open{margin:-4px 0 14px 6px;padding-left:10px;border-left:2px solid var(--line)}
 /* Entlasten: ruhiger als „Steigern“, nur umrandet */
 .step-down-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
 .step-down-row .muted{font-size:13px}
@@ -414,9 +424,10 @@ const exById = id => S.exercises.find(e => e.id === id);
 const exName = id => exById(id)?.name || "Gelöschte Übung";
 const exType = id => exById(id)?.type || "kraft";
 
-function lastFor(exId){
+// before (optional): nur Trainings, die vor diesem Zeitpunkt begonnen haben (Vergleich im Verlauf, Idee 65)
+function lastFor(exId, before = Infinity){
   for (let k = S.workouts.length - 1; k >= 0; k--){
-    const w = S.workouts[k], en = w.entries.find(e => e.exId === exId);
+    const w = S.workouts[k], en = w.date < before && w.entries.find(e => e.exId === exId);
     if (en && en.sets.length) return {date:w.date, sets:en.sets};
   }
   return null;
@@ -566,8 +577,10 @@ const goalMet = (en, g) => !!g && en.sets.every((s, j) => num(s.b) >= g[j]);
    sonst mehr Wdh beim schwersten Gewicht; „Ziel geschafft“, wenn das Ziel von „Ziel heute“ erreicht ist und mehr verlangte
    als letztes Mal. Ausdauer: mehr km, sonst bei ähnlicher Strecke (mind. 90 %) schnelleres Tempo, ohne km mehr Minuten.
    Nur Zeit: mehr Minuten. Ergebnis: {name, label, goal} oder null. Wird nur berechnet, nicht gespeichert. */
-function betterThanLast(en, plan){
-  const last = lastFor(en.exId), type = exType(en.exId), name = exName(en.exId);
+// at (optional): Beginn eines gespeicherten Trainings; verglichen wird dann mit der Einheit davor, ohne „Ziel geschafft“,
+// weil das Ziel nicht gespeichert ist (Verlauf, Idee 65)
+function betterThanLast(en, plan, at){
+  const last = lastFor(en.exId, at), type = exType(en.exId), name = exName(en.exId);
   if (!last || !en.sets.length) return null;
   const sum = (sets, f) => sets.reduce((t, s) => t + num(s[f]), 0);
   if (type === "kraft"){
@@ -575,7 +588,7 @@ function betterThanLast(en, plan){
     if (kg > kg0) return {name, label:`+${fmtNum(kg - kg0)} kg`};
     if (kg < kg0) return null;
     const reps = sets => sum(sets.filter(s => num(s.a) === kg), "b"), diff = reps(en.sets) - reps(last.sets);
-    const g = comeback(en.exId) ? null : repGoal(en, plan);   // nach langer Pause gab es kein Ziel
+    const g = at || comeback(en.exId) ? null : repGoal(en, plan);   // nach langer Pause gab es kein Ziel
     const more = g && g.some((x, j) => x > num(last.sets[Math.min(j, last.sets.length - 1)].b));
     // „gesamt“: Summe über alle Sätze, nicht pro Satz (sonst passt es nicht zu „11 Wdh, vorher 8“ bei den Rekorden)
     if (more && goalMet(en, g)) return {name, label:diff > 0 ? `Ziel geschafft · +${fmtNum(diff)} Wdh gesamt` : "Ziel geschafft", goal:true};
@@ -896,7 +909,7 @@ function flush(){
 }
 
 /* ---------- UI state ---------- */
-let ui = {tab:"training", sheet:null, open:null, next:null};   // next: der als Nächstes markierte Satz (Idee 37)
+let ui = {tab:"training", sheet:null, open:null, next:null, openGroups:new Set(), histFilter:null};   // openGroups, histFilter: Verlauf (Ideen 64, 67)   // next: der als Nächstes markierte Satz (Idee 37)
 let bootErr = null;   // gesetzt, wenn die Daten beim Start nicht geladen werden konnten
 const timer = {end:0, total:0, rang:false, by:null, prev:null, src:null};
 let undoSet = null;   // zuletzt mit „− Satz“ entfernter Satz, solange er sich zurückholen lässt
@@ -1427,23 +1440,63 @@ function vStatus(){
   const when = store.status === "off" ? "" : `<p class="muted">${last ? `Letztes Backup: ${ago[0].toLowerCase() + ago.slice(1)}` : "Noch kein Backup gesichert"}</p>`;
   return `<div class="status ${m[0]}"><i></i><span>${m[1]}</span></div>${when}`;
 }
+/* Verlauf (Ideen 64, 65, 67). Gruppen: diese und letzte Woche offen, ältere Wochen und (älter als drei Monate) Monate
+   als einzeilige Knöpfe, die ein Tipp aufklappt (ui.openGroups). Jede Karte zeigt, was das Training gebracht hat
+   (Kampfkraft und Rekorde aus workoutGain(), wie in progress() nur berechnet), aufgeklappt dazu „besser als letztes Mal“
+   je Übung. Der Filter über der Liste (ui.histFilter) zeigt nur Trainings eines Namens, ohne Gruppen. */
+function histGroup(t){
+  const thisWeek = weekStart(Date.now()), wk = weekStart(t);
+  if (wk >= thisWeek) return {key:"w" + wk, title:"Diese Woche", fixed:true};
+  if (wk >= weekStart(thisWeek - 864e5)) return {key:"w" + wk, title:"Letzte Woche", fixed:true};
+  const d = new Date(t), now = new Date(), year = d.getFullYear() !== now.getFullYear();
+  const cut = new Date(Date.now() - 91 * 864e5); cut.setDate(1); cut.setHours(0, 0, 0, 0);   // ganze Monate, die vor gut drei Monaten anfangen
+  if (t < cut.getTime()) return {key:`m${d.getFullYear()}-${d.getMonth()}`, title:d.toLocaleDateString("de-DE", {month:"long", year:"numeric"})};
+  const mon = new Date(wk), sun = new Date(wk + 6 * 864e5), m = x => x.toLocaleDateString("de-DE", {month:"short"});
+  return {key:"w" + wk, title:`${mon.getDate()}.${mon.getMonth() === sun.getMonth() ? "" : ` ${m(mon)}`}–${sun.getDate()}. ${m(sun)}${year ? ` ${sun.getFullYear()}` : ""}`};
+}
 function vHistory(){
-  const ws = [...S.workouts].reverse();
-  return `<h1>Verlauf</h1>
-  ${ws.length ? ws.map(w => {
-    const open = ui.open === w.id, n = w.entries.reduce((s, e) => s + e.sets.length, 0);
+  const gains = {}, bests = {};
+  S.workouts.forEach(w => { gains[w.id] = workoutGain(w, bests); });
+  const thisYear = new Date().getFullYear();
+  const card = w => {
+    const open = ui.open === w.id, n = w.entries.reduce((s, e) => s + e.sets.length, 0), g = gains[w.id];
     const mins = w.end ? Math.max(1, Math.round((w.end - w.date) / 60000)) : 0;
+    const date = fmtDateLong(w.date) + (new Date(w.date).getFullYear() !== thisYear ? ` ${new Date(w.date).getFullYear()}` : "");
+    const rec = g.records.length;
     return `<div class="card">
       <button class="li row between" style="padding:0" data-act="toggle-w" data-id="${w.id}">
         <span class="grow"><span class="ex-name" style="display:block">${esc(w.name)}</span>
-        <span class="muted">${fmtDateLong(w.date)}${mins ? ` · ${mins} min` : ""} · ${n} ${n === 1 ? "Satz" : "Sätze"}</span></span>
+        <span class="muted">${date}${mins ? ` · ${mins} min` : ""} · ${n} ${n === 1 ? "Satz" : "Sätze"}</span>
+        <span class="w-gain">+${fmtInt(g.power)} Kampfkraft${rec ? ` · <b>★ ${rec} ${rec === 1 ? "Rekord" : "Rekorde"}</b>` : ""}</span></span>
         <span class="muted">${open ? "▾" : "▸"}</span></button>
-      ${open ? `<div style="margin-top:8px">${w.entries.map(e => `<div class="li"><b>${esc(exName(e.exId))}</b><div class="muted">${esc(fmtSets(exType(e.exId), e.sets))}</div></div>`).join("")}
+      ${open ? `<div style="margin-top:8px">${w.entries.map(e => { const bt = exById(e.exId) ? betterThanLast(e, null, w.date) : null;
+          return `<div class="li"><div class="row between"><b>${esc(exName(e.exId))}</b>${bt ? `<span class="better">${esc(bt.label)}</span>` : ""}</div><div class="muted">${esc(fmtSets(exType(e.exId), e.sets))}</div></div>`; }).join("")}
         <div class="row between" style="margin-top:6px"><button class="small" data-act="edit-w" data-id="${w.id}">Bearbeiten</button>
         <button class="small ghost danger" data-act="del-w" data-id="${w.id}">Training löschen</button></div></div>` : ""}
     </div>`;
-  }).join("") : `<div class="card muted">Noch keine Trainings gespeichert. Starte eins im Tab „Training“.</div>`}
-  <h2>Einstellungen</h2>
+  };
+  // Filter nach Einheit (Idee 67): Namen der Trainings aus den letzten 8 Wochen, der zuletzt trainierte zuerst
+  const names = [...new Set([...S.workouts].reverse().filter(w => w.date >= Date.now() - 56 * 864e5).map(w => w.name))];
+  const f = ui.histFilter && S.workouts.some(w => w.name === ui.histFilter) ? ui.histFilter : null;
+  const chips = names.length > 1 || f ? `<div class="cat-chips hist-filter">${[...new Set(f ? [...names, f] : names)].map(nm => `<button class="chip${nm === f ? " on" : ""}" data-act="hist-filter" data-name="${esc(nm)}" aria-pressed="${nm === f}">${esc(nm)}</button>`).join("")}</div>` : "";
+  const ws = [...S.workouts].reverse();
+  let list;
+  if (!ws.length) list = `<div class="card muted">Noch keine Trainings gespeichert. Starte eins im Tab „Training“.</div>`;
+  else if (f){ const hit = ws.filter(w => w.name === f); list = `<div class="hist-head">${esc(f)} · ${hit.length} ${hit.length === 1 ? "Training" : "Trainings"}</div>${hit.map(card).join("")}`; }
+  else {
+    const groups = [];
+    ws.forEach(w => { const g = histGroup(w.date), last = groups[groups.length - 1]; if (last && last.key === g.key) last.ws.push(w); else groups.push({...g, ws:[w]}); });
+    list = groups.map(g => {
+      const n = g.ws.length, sets = g.ws.reduce((t, w) => t + w.entries.reduce((u, e) => u + e.sets.length, 0), 0);
+      const sum = `${n} ${n === 1 ? "Training" : "Trainings"} · ${sets} ${sets === 1 ? "Satz" : "Sätze"}`;
+      if (g.fixed) return `<div class="hist-head">${g.title} <span class="muted">· ${sum}</span></div>${g.ws.map(card).join("")}`;
+      const open = ui.openGroups.has(g.key);
+      return `<button class="hist-group row between" data-act="hist-group" data-key="${g.key}" aria-expanded="${open}"><span><b>${esc(g.title)}</b> <span class="muted">· ${sum}</span></span><span class="muted">${open ? "▾" : "›"}</span></button>
+        ${open ? `<div class="hist-open">${g.ws.map(card).join("")}</div>` : ""}`;
+    }).join("");
+  }
+  return `<div class="row between"><h1>Verlauf</h1>${ws.length > 4 ? `<button class="small ghost" data-act="to-settings">↓ Einstellungen</button>` : ""}</div>${chips}${list}
+  <h2 id="settings">Einstellungen</h2>
   <div class="card"><div class="row between"><span>Pausen-Timer</span>
     <select data-setting="rest" style="width:auto">${[45,60,90,120,150,180,240].map(s => `<option value="${s}" ${S.settings.rest == s ? "selected" : ""}>${fmtSec(s)}</option>`).join("")}</select></div>
     <p class="muted" style="margin:8px 0 0">Bei Vorlagen aus einem Programm gilt die Pause des Programms.</p>
@@ -1999,6 +2052,11 @@ const actions = {
     S.templates.forEach(t => t.ex = t.ex.filter(id => id !== d.id));
     save(); ui.sheet = null; render();
   },
+  "hist-group": el => { const k = el.dataset.key; if (ui.openGroups.has(k)) ui.openGroups.delete(k); else ui.openGroups.add(k); render(); },
+  // Die Knöpfe bleiben an ihrer Stelle; die Leiste wischt man seitlich, ihre Position übersteht das Neuzeichnen
+  "hist-filter": el => { const sl = $(".hist-filter")?.scrollLeft || 0; ui.histFilter = ui.histFilter === el.dataset.name ? null : el.dataset.name; render();
+    const bar = $(".hist-filter"); if (bar) bar.scrollLeft = sl; window.scrollTo(0, 0); },
+  "to-settings": () => { const h = $("#settings"); if (h) h.scrollIntoView({behavior:"smooth", block:"start"}); },
   "toggle-w": el => { ui.open = ui.open === el.dataset.id ? null : el.dataset.id; render(); },
   "edit-w": el => {
     const w = S.workouts.find(x => x.id === el.dataset.id);
@@ -2034,6 +2092,8 @@ const actions = {
     else if (old.end) w.end = old.end + (date - old.date);   // Beginn verschoben: Ende rückt mit, Dauer bleibt
     S.workouts[k] = w;
     S.workouts.sort((x, y) => x.date - y.date);   // „Letztes Mal“, Rekorde und Serie lesen die Trainings nach Datum
+    ui.openGroups.add(histGroup(w.date).key);   // liegt das Training jetzt in einer zugeklappten Woche: aufklappen
+    if (ui.histFilter && ui.histFilter !== w.name) ui.histFilter = null;   // umbenannt: Filter aufheben, damit es sichtbar bleibt
     save({put:w.id}); ui.sheet = null; ui.open = w.id; render(); toast("Training geändert");
     // Hat sich die Position im Verlauf durch ein neues Datum verschoben: das Training wieder in den Blick holen
     const card = document.querySelector(`[data-act="toggle-w"][data-id="${CSS.escape(w.id)}"]`);

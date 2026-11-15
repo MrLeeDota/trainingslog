@@ -11,10 +11,6 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 Nach einem Neuladen läuft die Pause weiter, den Piepton plant die App aber erst nach einem Tipp auf einen Knopf (`unlockAudio()` hängt am Klick-Handler für `data-act`); ein Tipp ins Wdh-Feld reichte im Test nicht, und wer nur wartet, bekommt unbemerkt gar keinen Ton. Hevy, Strong und Fitbod melden das Pausenende nativ per Mitteilung, Live Activity oder Uhr, das kann eine PWA nicht; sie kann aber zeigen, ob ihr Ton kommt. Skizze: `unlockAudio()` zusätzlich einmal bei `pointerup` irgendwo auf der Seite aufrufen, und solange eine Pause läuft und `actx` fehlt oder nicht `running` ist (auch nach der Rückkehr aus dem Hintergrund), steht neben der Restzeit ein durchgestrichener Lautsprecher, ein Tipp auf die Timer-Karte gibt den Ton frei; auf dem iPhone prüfen, ob ein Tipp nach dem Wischen als Berührung zählt.
 
-Aus der Runde Übungsverwaltung (15.11.2026):
-
-Aus dem Funktionsvergleich Übungsverwaltung (15.11.2026):
-
 ### 60. Link zu einem Technik-Video (aus Funktionsvergleich: Übungsverwaltung)
 - Nutzen: mittel · Aufwand: S · Datenformat: nein (optional ein Feld in `bibliothek/uebungen.json`, nicht in den Nutzerdaten)
 
@@ -35,6 +31,20 @@ Bei Hevy öffnet ein Tipp in der Bibliothek die Details mit Anleitung (gelesen),
 Noch nichts.
 
 ## Abgelehnt
+
+Vorerst nicht gebraucht (15.11.2026, aus der Runde Verlauf):
+
+### 66. Vergessenes Training nachtragen
+- Nutzen: mittel · Aufwand: M · Datenformat: nein
+
+Herkunft: Strong (Training starten, automatische Zeitmessung aus, Beginn und Ende setzen; gelesen) und Hevy (beim Speichern zurückdatieren, eigener Hilfeartikel; gelesen bzw. nur Suche). Bei uns geht das nur über Umwege: Vorlage starten, jeden Satz abhaken (`finish()` speichert nur abgehakte Sätze, im Arnold-Split 18–25), speichern, im Verlauf aufklappen, „Bearbeiten“, Beginn ändern, „Sichern“, aus dem Code gezählt gut 25 Tipps. Bleibt ein Training weg, stimmen „Dran“, „diese Woche X von N“, Serie und Sternkugeln nicht, und „Letztes Mal“ zeigt ältere Werte. Skizze: Über der Liste „+ Training nachtragen“; es öffnet eine Auswahl der Vorlagen (Dran oben, dazu „Ohne Vorlage“) und danach das vorhandene Sheet `edit-w` mit einem neuen Entwurf: Name der Vorlage, Beginn gestern zur Uhrzeit des letzten Trainings, Dauer leer, Übungen mit den Werten vom letzten Mal (`newEntry()` ohne `done`). `save-w` legt mit dem Merker `isNew` ein Training an, statt „Dieses Training gibt es nicht mehr“ zu melden, sortiert `S.workouts` und speichert mit `save({put:id})`; „Abbrechen“ fragt wie heute nach. Etwa 4 Tipps plus die geänderten Werte; den `daten-waechter` kurz prüfen lassen.
+
+### 68. Notiz zum Training, wahlweise mit „Wie war's?“ (MCI)
+- Nutzen: mittel · Aufwand: M · Datenformat: ja (optionale Felder am Training, mit Migration)
+
+Herkunft: MCI fragt nach dem Training in einem Feedback-Formular per Schieberegler die Intensität ab (gelesen, Bildbeschreibung bei ScreensDesign; ob das danach irgendwo im Verlauf steht, ist nicht belegt). Strong hat pro Training ein Notizfeld für Befinden, Krankheit oder Schlaf, das im Verlauf steht (gelesen), Hevy eine Beschreibung pro Training (gelesen). Bei uns gibt es nur die feste Notiz pro Übung; warum Bankdrücken an einem Tag einbrach („schlecht geschlafen“, „Schulter zwickt“), steht nirgends, und „Entlasten“ und die Kurve werten solche Tage mit, ohne dass man sich später erinnert. Skizze: In „Training geschafft“ unter den Ergebnissen drei Knöpfe „leicht · passend · hart“ und ein Feld „Notiz“ (höchstens 140 Zeichen), beides freiwillig, also im Training kein Tipp mehr; dazu dieselben Felder im Sheet `edit-w`. Gespeichert als `w.note` und `w.feel` (1–3) mit `save({put:id})`, im Verlauf als graue Zeile unter dem Datum. Migration: Fehlt ein Feld, gibt es keine Notiz bzw. Bewertung; `save-w` behält unbekannte Felder schon, beim Import werden ungültige Werte verworfen, alte Backups bleiben gültig; die CSV-Spalte gehört in die Runde „Backup & Export“. Den `daten-waechter` prüfen lassen.
+
+Aus dem Funktionsvergleich Übungsverwaltung (15.11.2026):
 
 Vorerst nicht gebraucht (15.11.2026, aus der Runde Übungsverwaltung):
 
@@ -133,6 +143,23 @@ Vorerst nicht gebraucht (14.11.2026):
 Vorbild ist Strong: Ein Tipp auf die Satznummer öffnet Aufwärmen, Drop und Versagen, und Aufwärmsätze zählen nicht in Diagramme und Kennzahlen; Hevy und JEFIT machen es ähnlich. Heute verfälschen Aufwärmsätze Rekorde, Kampfkraft und Fortschrittskurve, und sie verhindern den Steigerungsvorschlag, weil der in allen Sätzen dasselbe Gewicht verlangt. Skizze: Ein Tipp auf die Satznummer (Fläche auf 44 × 48 px vergrößern) schaltet ein goldenes „A“ um, gespeichert als `w:1` am Satz. `finish()` und `newEntry()` übernehmen das Feld, ab dem zweiten Training kostet es also keinen Tipp mehr. `stepUp`, `exSeries`, `progress()`, die Rekord-Meldung und „Letztes Mal“ überspringen bzw. kennzeichnen A-Sätze, und die CSV bekommt eine Spalte. Migration: Ein Satz ohne das Feld gilt als Arbeitssatz; alte Daten und Backups bleiben gültig, alte Spielwerte bleiben unverändert.
 
 ## Erledigt
+
+Umgesetzt am 15.11.2026 (Runde Verlauf; gym-tester ohne kritischen Fund, seine Warnungen behoben: Filterknöpfe bleiben an ihrer Stelle in einer wischbaren Zeile, Sprung zu den Einstellungen, aufgeklappte Wochen eingerückt):
+
+### 64. Verlauf nach Wochen gliedern, ältere Wochen zugeklappt
+- Nutzen: hoch · Aufwand: S · Datenformat: nein
+
+Herkunft: eigener Befund im Code, dazu Hevy (Kalender mit den Ruhetagen seit dem letzten Training oben; gelesen) und ein Nutzerwunsch in der WHOOP-Community nach einem Verlauf „auf einen Blick“ mit Wochen- und Monatssummen statt eines Analyse-Dashboards (17.08.2026, gelesen). `vHistory()` listet alle Trainings flach untereinander, jede Karte laut CSS etwa 90–110 px hoch (geschätzt, nicht gemessen), und „Einstellungen“ und „Daten & Backup“ stehen darunter: bei fünf Trainings pro Woche nach zwei Monaten rund 4.000 px tief, nach einem Jahr über 25.000 px. Außerdem nennt `fmtDateLong()` kein Jahr, ab Januar ist „Montag, 3. November“ mehrdeutig. Skizze: Diese und letzte Woche bleiben offen wie heute, je mit Überschrift „Diese Woche · 3 Trainings · 54 Sätze“ (bzw. „Letzte Woche“); ältere Wochen werden einzeilige Knöpfe „3.–9. Nov. · 5 Trainings ›“ (mindestens 48 px hoch), Wochen älter als drei Monate fasst ein Knopf pro Monat zusammen („August 2026 · 21 Trainings ›“); ein Tipp klappt auf (`ui.openWeek`). Verschiebt `save-w` ein Training in eine zugeklappte Woche, klappt diese auf, damit das Hereinscrollen weiter greift. Liegt ein Training nicht im laufenden Jahr, steht das Jahr dabei. Einstellungen und Backup liegen danach höchstens etwa 1.500 px tief; im Training kostet nichts einen Tipp.
+
+### 65. Was ein Training gebracht hat, auch später im Verlauf
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Herkunft: Hevy zeigt nach dem Speichern Rekorde, Volumen und einen Volumenvergleich (gelesen); dass Strong im Verlauf beste Sätze und Rekord-Abzeichen zeigt, ist nur allgemeines Wissen. Eine MCI-Bewertung stört (zur Ernährung), dass man jeden Eintrag öffnen muss, um seinen Inhalt zu sehen (gelesen). Bei uns stehen Kampfkraft, Rekorde und „Besser als letztes Mal“ nur einmal in „Training geschafft“; danach zeigt der Verlauf nur Datum, Dauer und Satzzahl, auch nach einem Bearbeiten. Skizze: `vHistory()` geht einmal mit leeren Bestwerten über `S.workouts` und ruft `workoutGain()` auf wie `progress()`, so hat jedes Training seine Kampfkraft und Rekorde; die zugeklappte Karte zeigt dahinter „+1.240 Kampfkraft · ★ 2 Rekorde“ (Rekorde in Gold). Aufgeklappt steht neben jeder Übung ihr Vergleich mit der vorigen Einheit („+2,5 kg“, „+3 Wdh gesamt“, „Tempo 5:02 statt 5:15“) aus `betterThanLast()`, dafür bekommt `lastFor(exId, before)` einen optionalen Stichtag; „Ziel geschafft“ entfällt hier, weil das Ziel nicht gespeichert ist. Alles nur berechnet.
+
+### 67. Verlauf nach Einheit filtern
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Herkunft: Im Wahoo-Forum wünschen sich Nutzer alle abgeschlossenen Trainings nach Namen, um eine Einheit mit den vorigen zu vergleichen (2021, gelesen), in der WHOOP-Community einen Filter nach Art (gelesen); für Strong und Hevy ist ein Filter im Verlauf nicht belegt. Im Arnold-Split wechseln sich die Einheiten ab, die vorige „Schultern & Arme A“ steht also drei bis fünf Karten tiefer zwischen anderen. Skizze: Über der Liste eine umbrechende Reihe Knöpfe (44 px hoch) mit den Namen der Einheiten aus den letzten 8 Wochen; ein Tipp zeigt nur noch Trainings mit diesem Namen, ohne das Zuklappen aus Idee 64, ein zweiter hebt den Filter auf. Der Verlauf einer einzelnen Übung steht schon im Übungs-Sheet, deshalb ist der Nutzen niedrig.
 
 Umgesetzt am 15.11.2026 (Vorschläge des funktions-testers zur Übungsverwaltung; gym-tester ohne Warnung, zwei Hinweise gleich behoben: Kategorie-Knopf folgt dem Tippen, Pause sofort gold):
 

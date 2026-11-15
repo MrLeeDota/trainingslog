@@ -196,6 +196,13 @@ button.step-up:active{transform:skewX(-10deg) translateY(2px);box-shadow:0 0 0 v
 .ex-head{align-items:flex-start}
 .ex-tools{gap:0;flex:none;margin:-10px -8px -8px 0}
 .ex-tools button{font-size:20px;color:var(--text);opacity:.75}
+/* Übungsname als Knopf (Idee 53): sieht aus wie Text, die Tap-Fläche reicht wie bei ⇄ und ✕ in den Kartenrand */
+button.ex-info{background:none;box-shadow:none;border-radius:6px;text-align:left;padding:11px 0 10px;margin:-11px 0 -10px;min-width:0}
+button.ex-info::after{content:" ›";color:var(--muted);font-style:normal;font-weight:400}
+button.ex-info:active{opacity:.7}
+.ex-type{padding:10px 0;font-size:17px}
+.lib-link{gap:8px;margin-top:10px;font-size:14px}
+.lib-link .muted{overflow-wrap:anywhere}
 /* Ziel eintragen: goldene Umrandung, zwischen „Steigern“ (gefüllt) und „Entlasten“ (orange umrandet) */
 .goal-btn{display:block;width:fit-content;margin-top:8px;padding:6px 14px 7px 12px;min-height:44px;font-size:14px;font-weight:700;color:var(--text);
   background:rgba(255,212,59,.08);border:2px solid var(--ki);border-radius:3px;transform:skewX(-10deg);box-shadow:none;text-align:left}
@@ -649,6 +656,8 @@ function loadLib(){
 function retryLib(){ if (lib.state === "error") lib.state = "idle"; }
 // Eigene Übung zu einem Bibliothekseintrag: über die gespeicherte ID oder den gleichen Namen
 function libOwner(l){ const n = l.name.toLowerCase(); return S.exercises.find(e => e.lib === l.id || String(e.name).toLowerCase() === n); }
+// Gehört der Bibliothekseintrag l schon einer anderen eigenen Übung als id (gespeicherte ID oder, ohne lib, gleicher Name)?
+const libTaken = (l, id) => S.exercises.some(e => e.id !== id && (e.lib === l.id || (!e.lib && String(e.name).toLowerCase() === l.name.toLowerCase())));
 function libOf(e){
   if (lib.state !== "ready" || !e) return null;
   const n = String(e.name || "").toLowerCase();
@@ -657,7 +666,7 @@ function libOf(e){
 // Übernimmt einen Bibliothekseintrag in die eigene Liste (falls noch nicht vorhanden) und gibt die ID der eigenen Übung zurück
 function addFromLib(l){
   const own = libOwner(l);
-  if (own) return own.id;
+  if (own){ if (!own.lib && !libTaken(l, own.id)) own.lib = l.id; return own.id; }   // am Namen erkannt: Verbindung festhalten, damit sie ein Umbenennen übersteht (Idee 54)
   const e = {id:uid(), name:l.name, cat:l.cat || "Sonstiges", type:TYPES[l.type] ? l.type : "kraft", lib:l.id};
   S.exercises.push(e);
   return e.id;
@@ -708,8 +717,8 @@ function vSwapAlt(exId, takenIds){
   const alt = swapAlternatives(exId, takenIds), gear = l => esc(((l && l.geraet) || []).join(", "));
   return `<div class="grp"><h2>Statt ${esc(exName(exId))}</h2>
     ${alt.map(x => x.own
-      ? `<button class="li row between" data-act="picked" data-id="${x.own.id}" data-name="${esc(x.own.name.toLowerCase())}"><span>${esc(x.own.name)} <span class="muted">${gear(libOf(x.own))}</span></span></button>`
-      : `<button class="li row between" data-act="picked-lib" data-lib="${esc(x.lib.id)}" data-name="${esc(x.lib.name.toLowerCase())}"><span>${esc(x.lib.name)} <span class="muted">${gear(x.lib)}</span></span><span class="lib-add" aria-hidden="true">+</span></button>`).join("")
+      ? `<button class="li row between" data-act="picked" data-id="${x.own.id}" data-name="${ownKey(x.own)}"><span>${esc(x.own.name)} <span class="muted">${gear(libOf(x.own))}</span></span></button>`
+      : `<button class="li row between" data-act="picked-lib" data-lib="${esc(x.lib.id)}" data-name="${libKey(x.lib)}"><span>${esc(x.lib.name)} <span class="muted">${gear(x.lib)}</span></span><span class="lib-add" aria-hidden="true">+</span></button>`).join("")
     || `<p class="muted">Keine passende Übung gefunden. Unten stehen alle Übungen.</p>`}</div>`;
 }
 function vLibList(){
@@ -717,8 +726,19 @@ function vLibList(){
   const free = lib.ex.filter(l => !libOwner(l));
   if (!free.length) return `<p class="muted">Alle Übungen der Bibliothek stehen schon in deiner Liste.</p>`;
   return groupByCat(free).map(([cat, list]) => `<div class="grp lib-grp"><h2>${esc(cat)}</h2>
-    ${list.map(l => `<button class="li row between" data-act="picked-lib" data-lib="${esc(l.id)}" data-name="${esc(l.name.toLowerCase())}">
+    ${list.map(l => `<button class="li row between" data-act="picked-lib" data-lib="${esc(l.id)}" data-name="${libKey(l)}">
       <span>${esc(l.name)} <span class="muted">${esc((l.geraet || []).join(", "))}</span></span><span class="lib-add" aria-hidden="true">+</span></button>`).join("")}</div>`).join("");
+}
+/* Bibliothekseinträge, mit denen sich die eigene Übung d verknüpfen lässt (Idee 54): gleiche Erfassungsart, nicht schon
+   einer anderen eigenen Übung zugeordnet; die Kategorie der Übung steht oben */
+function vLinkList(d){
+  if (lib.state !== "ready"){ loadLib(); return `<p class="muted">${lib.state === "error" ? "Die Übungsbibliothek ist gerade nicht erreichbar." : "Lade Übungsbibliothek …"}</p>`; }
+  const free = lib.ex.filter(l => (l.type || "kraft") === (d.type || "kraft") && !libTaken(l, d.id));
+  const groups = groupByCat(free).sort((a, b) => (b[0] === d.cat) - (a[0] === d.cat));
+  return groups.map(([cat, list]) => `<div class="grp lib-grp"><h2>${esc(cat)}</h2>
+    ${list.map(l => `<button class="li row between" data-act="picked-lib" data-lib="${esc(l.id)}" data-name="${libKey(l)}">
+      <span>${esc(l.name)} <span class="muted">${esc((l.geraet || []).join(", "))}</span></span>${d.lib === l.id ? `<span class="muted">✓</span>` : ""}</button>`).join("")}</div>`).join("")
+    || `<p class="muted">Keine passende Übung in der Bibliothek.</p>`;
 }
 function vUnit(p, u){
   const taken = S.templates.find(t => t.lib === u.id);
@@ -727,12 +747,18 @@ function vUnit(p, u){
     <ul class="unit-ex">${(u.uebungen || []).map(x => `<li>${esc((lib.byId.get(x.uebung) || {}).name || x.uebung)} <span class="muted">${esc(libDose(x))}</span></li>`).join("")}</ul>
     ${u.hinweis ? `<p class="muted">${esc(u.hinweis)}</p>` : ""}</div>`;
 }
-// Suche im Auswahl-Sheet; bleibt nach einem Neuzeichnen erhalten (ui.sheet.q)
+// Suchtext einer Zeile im Auswahl-Sheet (Idee 55): Name, Kategorie, Geräte und Hauptmuskel aus der Bibliothek
+// (nur der Hauptmuskel, sonst fände „Trizeps“ auch jedes Drücken für Brust und Schulter)
+const searchKey = (name, cat, l) => esc([name, cat, ...((l && l.geraet) || []), ((l && l.muskeln) || [])[0]].filter(Boolean).join(" ").toLowerCase());
+const ownKey = e => searchKey(e.name, e.cat, libOf(e)), libKey = l => searchKey(l.name, l.cat, l);
+// Suche im Auswahl-Sheet; bleibt nach einem Neuzeichnen erhalten (ui.sheet.q). Eine Zeile passt, wenn sie alle
+// Suchwörter enthält, in beliebiger Reihenfolge („trizeps kurzhantel“)
 function filterPick(q){
-  q = q.trim().toLowerCase();
+  const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  q = words.join(" ");
   document.querySelectorAll("#pick-list .grp").forEach(g => {
     let any = false;
-    g.querySelectorAll("[data-name]").forEach(b => { const hit = !q || b.dataset.name.includes(q); b.style.display = hit ? "" : "none"; any = any || hit; });
+    g.querySelectorAll("[data-name]").forEach(b => { const hit = words.every(w => b.dataset.name.includes(w)); b.style.display = hit ? "" : "none"; any = any || hit; });
     g.style.display = any ? "" : "none";
   });
   const t = $("#pick-list .lib-title");
@@ -981,6 +1007,8 @@ function ask(text, ok = "OK", danger = false, no = "Abbrechen"){
   });
 }
 function closeDlg(v){ $("#dlg").classList.remove("open"); $("#dlg").innerHTML = ""; const r = dlgResolve; dlgResolve = null; r && r(v); }
+// Übungs-Sheet öffnen; orig: Ausgangsstand, damit „Abbrechen“ oder ein Tipp neben das Sheet nach Änderungen nachfragt
+function exSheet(draft, more){ ui.sheet = {kind:"exercise", draft, orig:JSON.stringify(draft), ...more}; render(); }
 let toastT = null;
 // act (optional): Aktion aus "actions", die ein Tipp auf den Hinweis auslöst – der Hinweis bleibt dann länger stehen.
 // low: unten über Timer und Tab-Leiste statt oben, für Hinweise zu einer Aktion, die der Daumen gerade unten gemacht hat
@@ -1276,7 +1304,7 @@ function vEntry(en, i){
   const goalHit = goal && en.sets.every(s => s.done) && goalMet(en, goal);   // alle Sätze abgehakt und das Ziel erreicht
   // Kopf: Nur der Name teilt sich die Zeile mit ⇄ und ✕, alles darunter nutzt die volle Kartenbreite
   return `<div class="card">
-    <div class="row between ex-head"><div class="ex-name grow">${esc(ex.name)}</div>
+    <div class="row between ex-head">${exById(en.exId) ? `<button class="ex-name ex-info grow" data-act="ex-info" data-i="${i}" aria-label="${esc(ex.name)}: Technik, Notiz und letzte Einheiten">${esc(ex.name)}</button>` : `<div class="ex-name grow">${esc(ex.name)}</div>`}
       <span class="row ex-tools"><button class="ghost" data-act="swap" data-i="${i}" aria-label="${esc(ex.name)} gegen eine andere Übung tauschen">⇄</button>
       <button class="ghost" data-act="del-entry" data-i="${i}" aria-label="Übung entfernen">✕</button></span></div>
     ${ex.note ? `<div class="ex-note">${esc(ex.note)}</div>` : ""}
@@ -1379,6 +1407,12 @@ function vSheet(s){
     // target "lib": nur Bibliothek, um Übungen in die eigene Liste zu holen (Tab Übungen)
     // target "swap": Übung s.i im laufenden Training ersetzen, "tpl-swap": Übung s.k in der Vorlage (Entwurf in s.back);
     // passende Alternativen stehen jeweils oben
+    // target "link": eigene Übung (Entwurf in s.back) mit einem Bibliothekseintrag verknüpfen (Idee 54)
+    if (s.target === "link") return `<div class="sheet-head"><button class="ghost" data-act="close">Zurück</button><b>Mit Bibliothek verknüpfen</b><span style="width:60px"></span></div>
+      <input id="pick-q" placeholder="Suchen …" autocomplete="off">
+      <p class="muted" style="margin-top:8px">Die Übung bekommt Technik-Hinweise, Gewichtsschritt und Muskeln dieses Eintrags. Name und Verlauf bleiben.</p>
+      <p class="muted" id="pick-none" style="margin-top:12px" hidden>Keine passende Übung in der Bibliothek.</p>
+      <div id="pick-list">${vLinkList(s.back.draft)}</div>`;
     const onlyLib = s.target === "lib";
     const inWorkout = new Set((s.target === "active" || s.target === "swap") && S.active ? S.active.entries.map(e => e.exId)
       : s.target === "edit-w" ? s.back.draft.entries.map(e => e.exId) : (s.back?.draft?.ex || []));
@@ -1389,7 +1423,7 @@ function vSheet(s){
     ${onlyLib ? "" : `<button class="small ghost accent" style="margin-top:6px;padding-left:0" data-act="to-lib">↓ Zur Übungsbibliothek</button>`}
     <p class="muted" id="pick-none" style="margin-top:12px" hidden>${onlyLib ? "Keine passende Übung in der Bibliothek." : "Keine passende Übung. Über „Neu“ legst du eine eigene an."}</p>
     <div id="pick-list">${swap ? vSwapAlt(swapId, [...inWorkout]) : ""}${onlyLib ? "" : groupByCat(S.exercises).map(([cat, list]) => `<div class="grp"><h2>${esc(cat)}</h2>
-      ${list.map(e => `<button class="li row between" data-act="picked" data-id="${e.id}" data-name="${esc(e.name.toLowerCase())}"><span>${esc(e.name)}</span>${inWorkout.has(e.id) ? `<span class="muted">✓ drin</span>` : ""}</button>`).join("")}</div>`).join("")}
+      ${list.map(e => `<button class="li row between" data-act="picked" data-id="${e.id}" data-name="${ownKey(e)}"><span>${esc(e.name)}</span>${inWorkout.has(e.id) ? `<span class="muted">✓ drin</span>` : ""}</button>`).join("")}</div>`).join("")}
       ${onlyLib ? `<p class="muted">Tippen übernimmt die Übung in deine Liste.</p>` : `<h2 class="lib-title">Aus der Bibliothek</h2>`}${vLibList()}</div>`;
   }
   if (s.kind === "template"){
@@ -1408,18 +1442,22 @@ function vSheet(s){
     const hist = d.isNew ? [] : S.workouts.filter(w => w.entries.some(e => e.exId === d.id)).slice(-10).reverse();
     const chart = d.isNew ? "" : vChart(d.id);
     if (lib.state === "idle") loadLib();
-    const tech = d.isNew ? null : libOf(d);   // Technik-Hinweise aus der Bibliothek, falls die Übung dort steht
+    const tech = libOf(d);   // Technik-Hinweise aus der Bibliothek, falls die Übung dort steht (gespeicherte ID oder gleicher Name)
+    const inTraining = s.from === "training";   // aus dem Training geöffnet (Idee 53): Erfassungsart nur als Text, kein Löschen
     return `<div class="sheet-head"><button class="ghost" data-act="close">Abbrechen</button><b>${d.isNew ? "Neue Übung" : "Übung"}</b><button class="ghost accent" data-act="save-ex">Sichern</button></div>
     <label class="lbl">Name</label><input data-draft="name" value="${esc(d.name)}" placeholder="z. B. Bankdrücken" autocomplete="off">
     <label class="lbl">Kategorie</label><input data-draft="cat" list="cats" value="${esc(d.cat)}" placeholder="z. B. Brust" autocomplete="off">
     <datalist id="cats">${cats.map(c => `<option value="${esc(c)}">`).join("")}</datalist>
-    <label class="lbl">Erfassung</label><select data-draft="type">${Object.entries(TYPES).map(([k, t]) => `<option value="${k}" ${d.type === k ? "selected" : ""}>${t.label}</option>`).join("")}</select>
+    <label class="lbl">Erfassung</label>${inTraining ? `<div class="ex-type">${esc((TYPES[d.type] || TYPES.kraft).label)}</div>`
+      : `<select data-draft="type">${Object.entries(TYPES).map(([k, t]) => `<option value="${k}" ${d.type === k ? "selected" : ""}>${t.label}</option>`).join("")}</select>`}
+    ${lib.state === "ready" ? `<div class="lib-link row between"><span class="muted grow">${tech ? `Bibliothek: ${esc([tech.name, ...(tech.geraet || []).slice(0, 1), ...(tech.muskeln || []).slice(0, 1)].join(" · "))}` : "Nicht mit der Bibliothek verknüpft"}</span>
+      <button class="small ghost accent" data-act="ex-link">${tech ? "Ändern" : "Verknüpfen"}</button></div>` : ""}
     <label class="lbl">Notiz (steht im Training unter dem Namen)</label><input data-draft="note" value="${esc(d.note || "")}" placeholder="z. B. Sitz Stufe 4, enger Griff" maxlength="140" autocomplete="off">
     ${tech && tech.hinweise && tech.hinweise.length ? `<h2>Technik</h2><ul class="hints">${tech.hinweise.map(h => `<li>${esc(h)}</li>`).join("")}</ul>` : ""}
     ${d.isNew ? "" : `${chart ? `<h2>Entwicklung</h2>${chart}` : ""}
       <h2>Letzte Einheiten</h2>
       ${hist.length ? `<div class="list" style="padding:0">${hist.map(w => `<div class="li"><div class="muted">${fmtDate(w.date)} · ${esc(w.name)}</div><div>${esc(fmtSets(exType(d.id), w.entries.find(e => e.exId === d.id).sets))}</div></div>`).join("")}</div>` : `<p class="muted">Noch nicht trainiert.</p>`}
-      <button class="block ghost danger" style="margin-top:14px" data-act="del-ex">Übung löschen</button>`}`;
+      ${inTraining ? "" : `<button class="block ghost danger" style="margin-top:14px" data-act="del-ex">Übung löschen</button>`}`}`;
   }
   if (s.kind === "programs"){
     const head = `<div class="sheet-head"><button class="ghost" data-act="close">Fertig</button><b>Programme</b><span style="width:60px"></span></div>`;
@@ -1777,6 +1815,7 @@ const actions = {
   "picked-lib": el => {
     const l = lib.byId.get(el.dataset.lib);
     if (!l || !ui.sheet) return;
+    if (ui.sheet.target === "link"){ const b = ui.sheet.back; b.draft.lib = l.id; ui.sheet = b; render(); return; }   // erst „Sichern“ speichert
     const id = addFromLib(l); save();
     if (ui.sheet.target === "lib"){ render(); toast(`„${l.name}“ hinzugefügt`); return; }
     actions.picked({dataset:{id}});
@@ -1793,12 +1832,19 @@ const actions = {
     S.templates.push({id:uid(), name, ex, lib:u.id});
     save(); render(); toast(`Vorlage „${name}“ angelegt`);
   },
-  "new-ex-inline": () => { ui.sheet = {kind:"exercise", draft:{isNew:true, id:uid(), name:"", cat:"", type:"kraft"}, back:ui.sheet}; render(); },
+  // „Neu“ übernimmt das Suchwort als Namen (Idee 55)
+  "new-ex-inline": () => { const q = (ui.sheet.q || "").trim().replace(/\s+/g, " "), name = q ? q[0].toUpperCase() + q.slice(1) : "";
+    exSheet({isNew:true, id:uid(), name, cat:"", type:"kraft"}, {back:ui.sheet}); },
+  "ex-link": () => { retryLib(); ui.sheet = {kind:"picker", target:"link", back:ui.sheet}; render(); },
+  // Übungsname im Training öffnet das Übungs-Sheet (Idee 53)
+  "ex-info": el => { const en = S.active && S.active.entries[+el.dataset.i], e = en && exById(en.exId);
+    if (e) exSheet({...e}, {from:"training"}); },
   close: async () => {
     const s = ui.sheet;
     // Geänderten Entwurf eines gespeicherten Trainings nicht aus Versehen (z. B. Tipp neben das Sheet) verwerfen
     if (s && s.kind === "edit-w" && JSON.stringify(s.draft) !== s.orig && !(await ask("Änderungen an diesem Training verwerfen?", "Verwerfen", true, "Weiter bearbeiten"))) return;
     if (s && s.kind === "template" && s.orig && JSON.stringify(s.draft) !== s.orig && !(await ask("Änderungen an dieser Vorlage verwerfen?", "Verwerfen", true, "Weiter bearbeiten"))) return;
+    if (s && s.kind === "exercise" && s.orig && JSON.stringify(s.draft) !== s.orig && !(await ask("Änderungen an dieser Übung verwerfen?", "Verwerfen", true, "Weiter bearbeiten"))) return;
     if (ui.sheet !== s) return;
     ui.sheet = s && s.back || null; render();
   },
@@ -1834,11 +1880,20 @@ const actions = {
     toast(carry ? `Vorlage und ${mine.length === 1 ? "1 Training" : `${mine.length} Trainings`} umbenannt` : `Vorlage „${t.name}“ gesichert`);
   },
   "del-tpl": async () => { const d = ui.sheet.draft; if (await ask(`Vorlage „${d.name}“ löschen?`, "Löschen", true)){ S.templates = S.templates.filter(t => t.id !== d.id); save(); ui.sheet = null; render(); } },
-  "new-ex": () => { ui.sheet = {kind:"exercise", draft:{isNew:true, id:uid(), name:"", cat:"", type:"kraft"}}; render(); },
-  "edit-ex": el => { const e = exById(el.dataset.id); ui.sheet = {kind:"exercise", draft:{...e}}; render(); },
-  "save-ex": () => {
+  "new-ex": () => exSheet({isNew:true, id:uid(), name:"", cat:"", type:"kraft"}),
+  "edit-ex": el => exSheet({...exById(el.dataset.id)}),
+  "save-ex": async () => {
     const s = ui.sheet, d = s.draft;
     if (!d.name.trim()){ toast("Bitte einen Namen eingeben"); return; }
+    const n = d.name.trim().toLowerCase(), dup = S.exercises.find(x => x.id !== d.id && String(x.name).toLowerCase() === n);
+    if (d.isNew && dup){   // gleicher Name schon in der eigenen Liste (Idee 55)
+      if (!(s.back && s.back.kind === "picker")){ toast(`„${dup.name}“ steht schon in deiner Liste`); return; }
+      if (!(await ask(`„${dup.name}“ steht schon in deiner Liste. Diese Übung nehmen?`, "Nehmen", false, "Zurück")) || ui.sheet !== s) return;
+      ui.sheet = s.back; actions.picked({dataset:{id:dup.id}}); return;
+    }
+    // Verbindung zur Bibliothek festhalten (Idee 54): War die Übung nur über ihren Namen zugeordnet, bleibt die Zuordnung
+    // nach dem Umbenennen erhalten; eine neue Übung mit dem Namen eines Bibliothekseintrags wird mit ihm verknüpft
+    if (!d.lib){ const was = libOf(d.isNew ? d : exById(d.id) || d); if (was && !libTaken(was, d.id)){ d.lib = was.id; if (d.isNew && !String(d.cat || "").trim()) d.cat = was.cat || ""; } }
     // Alle übrigen Felder der Übung bleiben erhalten, auch solche, die diese Version noch nicht kennt.
     // note ist optional: ohne Notiz bleibt die Übung im bisherigen Format {id, name, cat, type}
     const {isNew, ...rest} = d, note = String(d.note || "").trim().slice(0, 140);

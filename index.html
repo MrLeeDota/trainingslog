@@ -740,6 +740,22 @@ function vLinkList(d){
       <span>${esc(l.name)} <span class="muted">${esc((l.geraet || []).join(", "))}</span></span>${d.lib === l.id ? `<span class="muted">✓</span>` : ""}</button>`).join("")}</div>`).join("")
     || `<p class="muted">Keine passende Übung in der Bibliothek.</p>`;
 }
+// „Zuletzt“ oben im Auswahl-Sheet (Idee 57): die sechs zuletzt trainierten Übungen, die noch nicht drin sind
+function vRecent(taken){
+  const seen = new Map();
+  for (let k = S.workouts.length - 1; k >= 0 && seen.size < 6; k--)
+    S.workouts[k].entries.forEach(en => { if (seen.size < 6 && !seen.has(en.exId) && !taken.has(en.exId) && exById(en.exId)) seen.set(en.exId, S.workouts[k].date); });
+  if (!seen.size) return "";
+  return `<div class="grp recent"><h2>Zuletzt</h2>${[...seen].map(([id, t]) => { const e = exById(id), r = relDay(t);
+    return `<button class="li row between" data-act="picked" data-id="${id}" data-name="${ownKey(e)}"><span>${esc(e.name)}</span><span class="muted">${r[0].toLowerCase() + r.slice(1)}</span></button>`; }).join("")}</div>`;
+}
+// Eigene Übungen, auf die sich der Verlauf von d übertragen lässt (Idee 58): gleiche Erfassungsart, nicht d selbst
+function vTransferList(d){
+  const list = S.exercises.filter(e => e.id !== d.id && (e.type || "kraft") === (d.type || "kraft"));
+  return groupByCat(list).sort((a, b) => (b[0] === d.cat) - (a[0] === d.cat)).map(([cat, l]) => `<div class="grp"><h2>${esc(cat)}</h2>
+    ${l.map(e => `<button class="li row between" data-act="picked" data-id="${e.id}" data-name="${ownKey(e)}"><span>${esc(e.name)}</span></button>`).join("")}</div>`).join("")
+    || `<p class="muted">Keine andere Übung mit derselben Erfassungsart.</p>`;
+}
 function vUnit(p, u){
   const taken = S.templates.find(t => t.lib === u.id);
   return `<div class="unit"><div class="row between"><b class="unit-name">${esc(u.name)}</b>
@@ -759,7 +775,7 @@ function filterPick(q){
   document.querySelectorAll("#pick-list .grp").forEach(g => {
     let any = false;
     g.querySelectorAll("[data-name]").forEach(b => { const hit = words.every(w => b.dataset.name.includes(w)); b.style.display = hit ? "" : "none"; any = any || hit; });
-    g.style.display = any ? "" : "none";
+    g.style.display = any && !(q && g.classList.contains("recent")) ? "" : "none";   // „Zuletzt“ nur ohne Suche, die Treffer stehen in ihrer Kategorie
   });
   const t = $("#pick-list .lib-title");
   if (t) t.style.display = [...document.querySelectorAll("#pick-list .lib-grp")].some(g => g.style.display !== "none") || !q ? "" : "none";
@@ -1007,6 +1023,37 @@ function ask(text, ok = "OK", danger = false, no = "Abbrechen"){
   });
 }
 function closeDlg(v){ $("#dlg").classList.remove("open"); $("#dlg").innerHTML = ""; const r = dlgResolve; dlgResolve = null; r && r(v); }
+/* Verlauf von Übung from auf Übung to übertragen (Idee 58): exId in allen gespeicherten Trainings, in den Vorlagen und im
+   laufenden Training umsetzen, danach from löschen. Stehen beide in einem Training, kommen die Sätze in einen Eintrag
+   (an der Stelle des ersten, in der Reihenfolge der Einträge). Nur nach Rückfrage; s: das Auswahl-Sheet, das gefragt hat. */
+async function transferHistory(from, to, s){
+  const a = exById(from), b = exById(to);
+  if (!a || !b || from === to || (a.type || "kraft") !== (b.type || "kraft")) return;   // Sätze würden sonst anders gelesen
+  const ws = S.workouts.filter(w => w.entries.some(e => e.exId === from));
+  const ok = await ask(`${ws.length === 1 ? "1 Training" : `${ws.length} Trainings`} von „${a.name}“ zu „${b.name}“ übertragen? „${a.name}“ wird danach gelöscht. Das lässt sich nicht rückgängig machen.`, "Übertragen", true);
+  if (!ok || ui.sheet !== s || !exById(from) || !exById(to)) return;
+  // Einträge von from in to umsetzen. Nur wenn dadurch to doppelt wird, kommen die Sätze in den ersten Eintrag;
+  // schon vorher doppelte Einträge von to bleiben, wie sie sind. Felder, die nur der zweite Eintrag hat, wandern mit.
+  const merge = entries => {
+    const out = [];
+    entries.forEach(en => {
+      const moved = en.exId === from;
+      if (moved) en.exId = to;
+      if (en.planEx === from) en.planEx = to;
+      const first = en.exId === to && out.find(x => x.exId === to && (moved || x.moved));
+      if (first){ first.sets.push(...en.sets); for (const k in en) if (!(k in first)) first[k] = en[k]; }
+      else { if (moved) Object.defineProperty(en, "moved", {value:true, configurable:true}); out.push(en); }   // nicht aufzählbar, wird nicht gespeichert
+    });
+    out.forEach(en => delete en.moved);
+    return out;
+  };
+  ws.forEach(w => { w.entries = merge(w.entries); save({put:w.id}); });
+  S.templates.forEach(t => { t.ex = [...new Set(t.ex.map(id => id === from ? to : id))]; });
+  if (S.active){ S.active.entries = merge(S.active.entries); keepRest(); }   // Position des markierten Satzes neu festhalten
+  S.exercises = S.exercises.filter(e => e.id !== from);
+  save(); ui.sheet = null; render();
+  toast(`Verlauf von „${a.name}“ jetzt bei „${b.name}“`);
+}
 // Übungs-Sheet öffnen; orig: Ausgangsstand, damit „Abbrechen“ oder ein Tipp neben das Sheet nach Änderungen nachfragt
 function exSheet(draft, more){ ui.sheet = {kind:"exercise", draft, orig:JSON.stringify(draft), ...more}; render(); }
 let toastT = null;
@@ -1413,6 +1460,12 @@ function vSheet(s){
       <p class="muted" style="margin-top:8px">Die Übung bekommt Technik-Hinweise, Gewichtsschritt und Muskeln dieses Eintrags. Name und Verlauf bleiben.</p>
       <p class="muted" id="pick-none" style="margin-top:12px" hidden>Keine passende Übung in der Bibliothek.</p>
       <div id="pick-list">${vLinkList(s.back.draft)}</div>`;
+    // target "transfer": Verlauf der Übung s.back.draft auf eine andere eigene Übung übertragen (Idee 58)
+    if (s.target === "transfer") return `<div class="sheet-head"><button class="ghost" data-act="close">Zurück</button><b>Verlauf übertragen</b><span style="width:60px"></span></div>
+      <input id="pick-q" placeholder="Suchen …" autocomplete="off">
+      <p class="muted" style="margin-top:8px">Alle Sätze von „${esc(s.back.draft.name)}“ kommen zu der Übung, die du wählst. „${esc(s.back.draft.name)}“ wird danach gelöscht.</p>
+      <p class="muted" id="pick-none" style="margin-top:12px" hidden>Keine passende Übung.</p>
+      <div id="pick-list">${vTransferList(s.back.draft)}</div>`;
     const onlyLib = s.target === "lib";
     const inWorkout = new Set((s.target === "active" || s.target === "swap") && S.active ? S.active.entries.map(e => e.exId)
       : s.target === "edit-w" ? s.back.draft.entries.map(e => e.exId) : (s.back?.draft?.ex || []));
@@ -1422,7 +1475,7 @@ function vSheet(s){
     <input id="pick-q" placeholder="Suchen …" autocomplete="off">
     ${onlyLib ? "" : `<button class="small ghost accent" style="margin-top:6px;padding-left:0" data-act="to-lib">↓ Zur Übungsbibliothek</button>`}
     <p class="muted" id="pick-none" style="margin-top:12px" hidden>${onlyLib ? "Keine passende Übung in der Bibliothek." : "Keine passende Übung. Über „Neu“ legst du eine eigene an."}</p>
-    <div id="pick-list">${swap ? vSwapAlt(swapId, [...inWorkout]) : ""}${onlyLib ? "" : groupByCat(S.exercises).map(([cat, list]) => `<div class="grp"><h2>${esc(cat)}</h2>
+    <div id="pick-list">${swap ? vSwapAlt(swapId, [...inWorkout]) : onlyLib ? "" : vRecent(inWorkout)}${onlyLib ? "" : groupByCat(S.exercises).map(([cat, list]) => `<div class="grp"><h2>${esc(cat)}</h2>
       ${list.map(e => `<button class="li row between" data-act="picked" data-id="${e.id}" data-name="${ownKey(e)}"><span>${esc(e.name)}</span>${inWorkout.has(e.id) ? `<span class="muted">✓ drin</span>` : ""}</button>`).join("")}</div>`).join("")}
       ${onlyLib ? `<p class="muted">Tippen übernimmt die Übung in deine Liste.</p>` : `<h2 class="lib-title">Aus der Bibliothek</h2>`}${vLibList()}</div>`;
   }
@@ -1457,7 +1510,8 @@ function vSheet(s){
     ${d.isNew ? "" : `${chart ? `<h2>Entwicklung</h2>${chart}` : ""}
       <h2>Letzte Einheiten</h2>
       ${hist.length ? `<div class="list" style="padding:0">${hist.map(w => `<div class="li"><div class="muted">${fmtDate(w.date)} · ${esc(w.name)}</div><div>${esc(fmtSets(exType(d.id), w.entries.find(e => e.exId === d.id).sets))}</div></div>`).join("")}</div>` : `<p class="muted">Noch nicht trainiert.</p>`}
-      ${inTraining ? "" : `<button class="block ghost danger" style="margin-top:14px" data-act="del-ex">Übung löschen</button>`}`}`;
+      ${inTraining ? "" : `${hist.length ? `<button class="block ghost" style="margin-top:14px" data-act="ex-transfer">Verlauf übertragen auf …</button>` : ""}
+      <button class="block ghost danger" style="margin-top:${hist.length ? 4 : 14}px" data-act="del-ex">Übung löschen</button>`}`}`;
   }
   if (s.kind === "programs"){
     const head = `<div class="sheet-head"><button class="ghost" data-act="close">Fertig</button><b>Programme</b><span style="width:60px"></span></div>`;
@@ -1776,8 +1830,9 @@ const actions = {
   "del-entry": async el => { if (await ask("Übung aus diesem Training entfernen?", "Entfernen", true)){ S.active.entries.splice(+el.dataset.i, 1); save(); render(); } },
   pick: el => { retryLib(); ui.sheet = {kind:"picker", target:el.dataset.target, back:ui.sheet}; render(); },
   swap: el => { retryLib(); ui.sheet = {kind:"picker", target:"swap", i:+el.dataset.i}; render(); },
-  picked: el => {
+  picked: async el => {
     const s = ui.sheet, id = el.dataset.id;
+    if (s.target === "transfer"){ await transferHistory(s.back.draft.id, id, s); return; }
     if (s.target === "active"){ S.active.entries.push(newEntry(id)); save(); ui.sheet = null; render(); setTimeout(() => window.scrollTo({top:document.body.scrollHeight, behavior:"smooth"}), 30); }
     else if (s.target === "swap"){
       // Tauschen: Die neue Übung kommt an dieselbe Stelle. Sind schon Sätze abgehakt, bleiben sie bei der alten Übung,
@@ -1835,6 +1890,7 @@ const actions = {
   // „Neu“ übernimmt das Suchwort als Namen (Idee 55)
   "new-ex-inline": () => { const q = (ui.sheet.q || "").trim().replace(/\s+/g, " "), name = q ? q[0].toUpperCase() + q.slice(1) : "";
     exSheet({isNew:true, id:uid(), name, cat:"", type:"kraft"}, {back:ui.sheet}); },
+  "ex-transfer": () => { ui.sheet = {kind:"picker", target:"transfer", back:ui.sheet}; render(); },
   "ex-link": () => { retryLib(); ui.sheet = {kind:"picker", target:"link", back:ui.sheet}; render(); },
   // Übungsname im Training öffnet das Übungs-Sheet (Idee 53)
   "ex-info": el => { const en = S.active && S.active.entries[+el.dataset.i], e = en && exById(en.exId);

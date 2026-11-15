@@ -13,26 +13,18 @@ Nach einem Neuladen läuft die Pause weiter, den Piepton plant die App aber erst
 
 Aus der Runde Übungsverwaltung (15.11.2026):
 
-### 56. Übungen mit Verlauf ausblenden statt löschen
-- Nutzen: mittel · Aufwand: M · Datenformat: ja (optionales Feld an der Übung, mit Migration)
-
-Herkunft: Strong blendet Übungen per Wischen aus und holt sie über ein altes Training zurück (gelesen), Exercise.com archiviert statt zu löschen, metric.coach behält beim Löschen den Namen in alten Sätzen, Caliber löscht den Verlauf mit (nur Suche). Bei uns verspricht die Rückfrage „Alte Trainings bleiben erhalten“, danach stehen die Sätze im Verlauf, im Bearbeiten-Sheet und in der CSV aber als „Gelöschte Übung“ (`exName()`), ohne Kurve und ohne Weg zurück, auch im nächsten Backup. Skizze: Hat die Übung gespeicherte Trainings, heißt der Knopf „Übung ausblenden“: Sie fällt wie heute aus den Vorlagen und verschwindet aus dem Auswahl-Sheet, den Alternativen und der Liste im Tab Übungen (dort am Ende zugeklappt „Ausgeblendet (2)“ mit „Einblenden“); Name, Verlauf und Kurve bleiben. Ohne Trainings wird wie bisher gelöscht. Gespeichert wird `hidden:true`; `libOwner()` findet ausgeblendete Übungen weiter, eine Übernahme aus der Bibliothek blendet sie also wieder ein, statt einen Doppelgänger anzulegen. Migration: Fehlt das Feld, ist die Übung sichtbar, und nur `true` zählt (`normalize()` übernimmt Übungen ungeprüft, `save-ex` behält unbekannte Felder); ältere App-Stände zeigen sie einfach wieder an. Nebenbei fragt `save-ex` nach, wenn sich die Erfassungsart einer Übung mit Verlauf ändert („12 Trainings werden dann als Minuten gelesen“). Den `daten-waechter` prüfen lassen.
-
-### 57. Zuletzt trainierte Übungen oben im Auswahl-Sheet
-- Nutzen: niedrig · Aufwand: S · Datenformat: nein
-
-Herkunft: Hevy führt „Recent Exercises“ vor den eigenen Übungen (nur Suche). Bei uns stehen im Auswahl-Sheet alle eigenen Übungen alphabetisch nach Kategorie; wer im freien Training, beim Nachtragen im Verlauf oder beim Bauen einer Vorlage eine Übung sucht, die er ständig macht, muss tippen oder wischen. Skizze: Über den Kategorien steht die Gruppe „Zuletzt“ mit den sechs zuletzt trainierten Übungen, die noch nicht im Training bzw. in der Vorlage sind, jeweils mit „vor 3 Tagen“, berechnet aus `S.workouts`. Beim Tauschen bleibt es bei den Alternativen oben, und die Suche blendet die Gruppe aus wie die anderen. Der Nutzen ist niedrig, weil der Nutzer meist mit Programm-Vorlagen trainiert.
-
-### 58. Verlauf einer Übung auf eine andere übertragen
-- Nutzen: niedrig · Aufwand: M · Datenformat: nein (ändert nach Rückfrage `exId` in gespeicherten Trainings)
-
-Herkunft: Strong überträgt im Bearbeiten einer Übung mit „Transfer Exercise Data“ die Daten auf eine andere derselben Kategorie, ohne Rückgängig (gelesen); StrengthLog bietet beim Löschen an, die Daten zu verschieben (nur Suche). Doppelte Übungen entstehen bei uns, wenn eine eigene Übung anders heißt als die Bibliothek (siehe Idee 54); dann sind „Letztes Mal“, „Steigern“ und die Kurve auf zwei Übungen verteilt. Skizze: Im Übungs-Sheet öffnet „Verlauf übertragen auf …“ das Auswahl-Sheet mit eigenen Übungen gleicher Erfassungsart. Nach der Rückfrage „8 Trainings von „Schulterdrücken KH“ zu „Kurzhantel-Schulterdrücken“ übertragen? „Schulterdrücken KH“ wird danach gelöscht.“ setzt die App `exId` in diesen Trainings um (`save({put:id})`), ersetzt die Übung in Vorlagen und im laufenden Training und löscht die alte. Stehen beide in einem Training, kommen die Sätze in einen Eintrag. Vorher ein Backup anbieten und den `daten-waechter` prüfen lassen.
-
 ## Angenommen
 
 Noch nichts.
 
 ## Abgelehnt
+
+Vorerst nicht gebraucht (15.11.2026, aus der Runde Übungsverwaltung):
+
+### 56. Übungen mit Verlauf ausblenden statt löschen
+- Nutzen: mittel · Aufwand: M · Datenformat: ja (optionales Feld an der Übung, mit Migration)
+
+Herkunft: Strong blendet Übungen per Wischen aus und holt sie über ein altes Training zurück (gelesen), Exercise.com archiviert statt zu löschen, metric.coach behält beim Löschen den Namen in alten Sätzen, Caliber löscht den Verlauf mit (nur Suche). Bei uns verspricht die Rückfrage „Alte Trainings bleiben erhalten“, danach stehen die Sätze im Verlauf, im Bearbeiten-Sheet und in der CSV aber als „Gelöschte Übung“ (`exName()`), ohne Kurve und ohne Weg zurück, auch im nächsten Backup. Skizze: Hat die Übung gespeicherte Trainings, heißt der Knopf „Übung ausblenden“: Sie fällt wie heute aus den Vorlagen und verschwindet aus dem Auswahl-Sheet, den Alternativen und der Liste im Tab Übungen (dort am Ende zugeklappt „Ausgeblendet (2)“ mit „Einblenden“); Name, Verlauf und Kurve bleiben. Ohne Trainings wird wie bisher gelöscht. Gespeichert wird `hidden:true`; `libOwner()` findet ausgeblendete Übungen weiter, eine Übernahme aus der Bibliothek blendet sie also wieder ein, statt einen Doppelgänger anzulegen. Migration: Fehlt das Feld, ist die Übung sichtbar, und nur `true` zählt (`normalize()` übernimmt Übungen ungeprüft, `save-ex` behält unbekannte Felder); ältere App-Stände zeigen sie einfach wieder an. Nebenbei fragt `save-ex` nach, wenn sich die Erfassungsart einer Übung mit Verlauf ändert („12 Trainings werden dann als Minuten gelesen“). Den `daten-waechter` prüfen lassen.
 
 Vorerst nicht gebraucht (14.11.2026, aus der Runde Vorlagen):
 
@@ -124,6 +116,18 @@ Vorerst nicht gebraucht (14.11.2026):
 Vorbild ist Strong: Ein Tipp auf die Satznummer öffnet Aufwärmen, Drop und Versagen, und Aufwärmsätze zählen nicht in Diagramme und Kennzahlen; Hevy und JEFIT machen es ähnlich. Heute verfälschen Aufwärmsätze Rekorde, Kampfkraft und Fortschrittskurve, und sie verhindern den Steigerungsvorschlag, weil der in allen Sätzen dasselbe Gewicht verlangt. Skizze: Ein Tipp auf die Satznummer (Fläche auf 44 × 48 px vergrößern) schaltet ein goldenes „A“ um, gespeichert als `w:1` am Satz. `finish()` und `newEntry()` übernehmen das Feld, ab dem zweiten Training kostet es also keinen Tipp mehr. `stepUp`, `exSeries`, `progress()`, die Rekord-Meldung und „Letztes Mal“ überspringen bzw. kennzeichnen A-Sätze, und die CSV bekommt eine Spalte. Migration: Ein Satz ohne das Feld gilt als Arbeitssatz; alte Daten und Backups bleiben gültig, alte Spielwerte bleiben unverändert.
 
 ## Erledigt
+
+Umgesetzt am 15.11.2026 (Runde Übungsverwaltung; gym-tester ohne Warnung, drei Warnungen des daten-waechter zum Zusammenlegen behoben: nur übertragene Einträge werden zusammengelegt, Felder des zweiten Eintrags bleiben, Markierung des nächsten Satzes wird neu festgehalten):
+
+### 57. Zuletzt trainierte Übungen oben im Auswahl-Sheet
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Herkunft: Hevy führt „Recent Exercises“ vor den eigenen Übungen (nur Suche). Bei uns stehen im Auswahl-Sheet alle eigenen Übungen alphabetisch nach Kategorie; wer im freien Training, beim Nachtragen im Verlauf oder beim Bauen einer Vorlage eine Übung sucht, die er ständig macht, muss tippen oder wischen. Skizze: Über den Kategorien steht die Gruppe „Zuletzt“ mit den sechs zuletzt trainierten Übungen, die noch nicht im Training bzw. in der Vorlage sind, jeweils mit „vor 3 Tagen“, berechnet aus `S.workouts`. Beim Tauschen bleibt es bei den Alternativen oben, und die Suche blendet die Gruppe aus wie die anderen. Der Nutzen ist niedrig, weil der Nutzer meist mit Programm-Vorlagen trainiert.
+
+### 58. Verlauf einer Übung auf eine andere übertragen
+- Nutzen: niedrig · Aufwand: M · Datenformat: nein (ändert nach Rückfrage `exId` in gespeicherten Trainings)
+
+Herkunft: Strong überträgt im Bearbeiten einer Übung mit „Transfer Exercise Data“ die Daten auf eine andere derselben Kategorie, ohne Rückgängig (gelesen); StrengthLog bietet beim Löschen an, die Daten zu verschieben (nur Suche). Doppelte Übungen entstehen bei uns, wenn eine eigene Übung anders heißt als die Bibliothek (siehe Idee 54); dann sind „Letztes Mal“, „Steigern“ und die Kurve auf zwei Übungen verteilt. Skizze: Im Übungs-Sheet öffnet „Verlauf übertragen auf …“ das Auswahl-Sheet mit eigenen Übungen gleicher Erfassungsart. Nach der Rückfrage „8 Trainings von „Schulterdrücken KH“ zu „Kurzhantel-Schulterdrücken“ übertragen? „Schulterdrücken KH“ wird danach gelöscht.“ setzt die App `exId` in diesen Trainings um (`save({put:id})`), ersetzt die Übung in Vorlagen und im laufenden Training und löscht die alte. Stehen beide in einem Training, kommen die Sätze in einen Eintrag. Vorher ein Backup anbieten und den `daten-waechter` prüfen lassen.
 
 Umgesetzt am 15.11.2026 (Runde Übungsverwaltung; gym-tester und daten-waechter ohne Warnung, dazu umgesetzt: keine Bibliotheks-ID an zwei Übungen, Rückfrage vor dem Verwerfen im Übungs-Sheet):
 

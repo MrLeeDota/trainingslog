@@ -234,6 +234,11 @@ button.goal-btn:active{transform:skewX(-10deg) translateY(2px)}
 .w-gain b{color:var(--ki);font-weight:700}
 .w-brief{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
 .w-rec{color:var(--ki);font-weight:700}
+.best-txt{color:var(--scan);font-weight:700}
+/* Rekord (★ gold) und Bestleistung (✦ grün) hinter der Satznummer (Idee 87) */
+.set-mark{font-style:normal;font-size:11px;vertical-align:super;margin-left:1px}
+.set-mark.rec{color:var(--ki)}
+.set-mark.best{color:var(--scan)}
 .hist-head{margin:18px 2px 8px;font-size:14px;font-weight:700}
 .hist-head .muted{font-weight:400}
 button.hist-group{width:100%;min-height:52px;margin-bottom:10px;text-align:left;background:var(--card);border:2px solid var(--ink);border-radius:12px;padding:10px 14px;font-size:15px}
@@ -1321,13 +1326,13 @@ function exSheet(draft, more){ ui.sheet = {kind:"exercise", draft, orig:JSON.str
 let toastT = null;
 // act (optional): Aktion aus "actions", die ein Tipp auf den Hinweis auslöst – der Hinweis bleibt dann länger stehen.
 // low: unten über Timer und Tab-Leiste statt oben, für Hinweise zu einer Aktion, die der Daumen gerade unten gemacht hat
-function toast(msg, act, low){
+function toast(msg, act, low, ms){
   const t = $("#toast"); t.textContent = msg;
   t.classList.toggle("notimer", !!low && !$("#timer").classList.contains("show"));
   if (act) t.dataset.act = act; else delete t.dataset.act;
   t.classList.toggle("low", !!low);
   t.classList.add("show"); clearTimeout(toastT);
-  toastT = setTimeout(() => t.classList.remove("show"), act ? 10000 : 2200);
+  toastT = setTimeout(() => t.classList.remove("show"), act ? 10000 : ms || 2200);
 }
 
 /* ---------- Fortschritt (Spielelemente) ----------
@@ -1613,19 +1618,42 @@ function vTraining(){
     <button class="block" data-act="start" data-id="">+ Freies Training</button>`;
   }
   const done = a.entries.reduce((n, e) => n + e.sets.filter(s => s.done).length, 0);
+  setMarksNow = setMarks();
+  const nRec = [...setMarksNow.values()].filter(m => m === "rec").length, nBest = setMarksNow.size - nRec;
   return `<div class="live-head row between">
-      <div class="grow"><h1 style="margin:0 0 2px">${esc(a.name)}</h1><div class="muted"><span id="elapsed"></span> · ${done} ${done === 1 ? "Satz" : "Sätze"} erledigt</div></div>
+      <div class="grow"><h1 style="margin:0 0 2px">${esc(a.name)}</h1><div class="muted"><span id="elapsed"></span> · ${done} ${done === 1 ? "Satz" : "Sätze"} erledigt${nRec ? ` · <span class="w-rec">★ ${nRec}</span>` : ""}${nBest ? ` · <span class="best-txt">✦ ${nBest}</span>` : ""}</div></div>
       <button class="ghost danger" data-act="discard">Verwerfen</button>
     </div>
     ${a.entries.map(vEntry).join("") || `<div class="card muted">Noch keine Übung. Füge unten eine hinzu.</div>`}
     <button class="block" data-act="pick" data-target="active">+ Übung hinzufügen</button>
     <button class="block primary" style="margin-top:12px" data-act="finish">Training beenden & speichern</button>`;
 }
+/* Rekord und Bestleistung am Satz (Idee 87): abgehakte Sätze im laufenden Training, die einen Rekord (setMark() gegen die
+   Bestwerte aller gespeicherten Trainings und die Sätze davor) oder eine Bestleistung (bestEffort()) gebracht haben.
+   Ergebnis: Map Satz → "rec" | "best"; nur berechnet, einmal pro Zeichnen in vTraining(). */
+let setMarksNow = new Map();
+function setMarks(){
+  const out = new Map();
+  if (!S.active) return out;
+  const bests = progress(S.workouts).bests;
+  S.active.entries.forEach(en => {
+    const type = exType(en.exId), run = {...(bests[en.exId] || {})}, ps = type === "kraft" ? priorSets(en.exId) : null, earlier = [];
+    en.sets.forEach(s => {
+      if (!s.done) return;
+      const [unit, v] = setMark(type, s);
+      if (run[unit] > 0 && v > run[unit]) out.set(s, "rec");
+      else if (ps && bestEffort(en.exId, s, [...ps.prior, ...earlier], ps.recentTop)) out.set(s, "best");
+      if (v > (run[unit] || 0)) run[unit] = v;
+      if (num(s.a) > 0 && num(s.b) > 0) earlier.push({kg:num(s.a), reps:num(s.b)});
+    });
+  });
+  return out;
+}
 function vEntry(en, i){
   const ex = exById(en.exId) || {name:"Gelöschte Übung", type:"kraft"};
   const T = inputTypes(ex.type);
   const last = lastFor(en.exId);
-  const cols = `grid-template-columns:26px repeat(${T.f.length},1fr) 52px`;
+  const cols = `grid-template-columns:${en.sets.length >= 10 ? 34 : 26}px repeat(${T.f.length},1fr) 52px`;   // ab 10 Sätzen Platz für „10★“
   // Steigerungsknopf nur, solange noch ein offener Satz unter dem vorgeschlagenen Gewicht liegt
   const plan = entryPlan(en);   // Richtwert, wenn die Vorlage aus einem Bibliotheks-Programm stammt
   const back = comeback(en.exId);   // lange Pause: Wiedereinstieg statt Steigern, Entlasten und Ziel
@@ -1653,7 +1681,7 @@ function vEntry(en, i){
     ${showBack ? `<div class="step-down-row"><button class="step-down" data-act="comeback" data-i="${i}" aria-label="Gewicht für den Wiedereinstieg in den offenen Sätzen senken: ${backTo}">Wiedereinstieg: ${backTo}</button><span class="muted">${weeks(back.weeks)} Pause</span></div>` : ""}
     <div class="set head" style="${cols}"><span>#</span>${T.f.map(f => `<span>${f[1]}</span>`).join("")}<span></span></div>
     ${en.sets.map((s, j) => `<div class="set ${s.done ? "done" : s === ui.next ? "next" : ""}" style="${cols}">
-      <span class="num">${j + 1}</span>
+      <span class="num">${j + 1}${(m => m === "rec" ? `<i class="set-mark rec" title="Rekord">★</i>` : m === "best" ? `<i class="set-mark best" title="Bestleistung">✦</i>` : "")(setMarksNow.get(s))}</span>
       ${T.f.map(f => `<input inputmode="${f[2]}" autocomplete="off" data-i="${i}" data-j="${j}" data-f="${f[0]}" value="${esc(f[0] === "am" || f[0] === "as" ? minPart(s, f[0]) : s[f[0]])}" placeholder="–">`).join("")}
       <button class="check" data-act="check" data-i="${i}" data-j="${j}" aria-label="Satz ${j + 1} abhaken">✓</button>
     </div>`).join("")}
@@ -1866,6 +1894,13 @@ function vSheet(s){
     const vTech = tech && tech.hinweise && tech.hinweise.length ? `<h2>Technik</h2><ul class="hints">${tech.hinweise.map(h => `<li>${esc(h)}</li>`).join("")}</ul>` : "";
     const vHist = list => list.length ? `<div class="list" style="padding:0">${list.map(w => `<div class="li"><div class="muted">${fmtDate(w.date)} · ${esc(w.name)}</div><div>${esc(fmtSets(exType(d.id), w.entries.find(e => e.exId === d.id).sets, kmhOf(d.id)))}</div></div>`).join("")}</div>` : `<p class="muted">Noch nicht trainiert.</p>`;
     const head = `<div class="sheet-head"><button class="ghost" data-act="close">Abbrechen</button><b${inTraining ? ` id="sheet-rest"${restLabel() !== "Übung" ? ` class="resting"` : ""}` : ""}>${inTraining ? restLabel() : d.isNew ? "Neue Übung" : "Übung"}</b><button class="ghost accent" data-act="save-ex">Sichern</button></div>`;
+    if (s.from === "progress"){
+      // Aus dem Fortschritt (Idee 88): Bestwerte und Kurve zuerst, dann die letzten Einheiten, die Stammdaten am Ende
+      return `${head}<div class="ex-sheet-name">${esc(d.name)}</div>
+      ${vBests(d.id)}${chart ? `<h2>Entwicklung</h2>${chart}` : ""}
+      <h2>Letzte Einheiten</h2>${vHist(hist.slice(0, 5))}
+      ${vTech}<h2>Übung bearbeiten</h2>${fName}${fCat}${fType}${fLink}${fNote}`;
+    }
     if (inTraining){
       // Aus dem Training (Idee 59): zuerst, was man zwischen zwei Sätzen nachsieht – letzte Einheiten, Richtwert, Technik,
       // Notiz, Kurve –, die Stammdaten am Ende. Die Kopfzeile zeigt die laufende Pause (tick()).
@@ -1974,10 +2009,12 @@ function render(){
     b.classList.toggle("live", b.dataset.tab === "training" && !!S.active);
   });
   const sh = $("#sheet"), wasOpen = sh.classList.contains("open"), oldPanel = sh.querySelector(".panel"), st = oldPanel ? oldPanel.scrollTop : 0;
+  if (lastSheet && lastSheet !== ui.sheet && oldPanel) lastSheet.scrollPos = st;   // Scrollstand merken, falls man dorthin zurückkehrt (back)
   if (ui.sheet){
     sh.innerHTML = `<div class="backdrop" data-act="close"></div><div class="panel${wasOpen ? "" : " anim"}${ui.sheet.kind === "picker" ? " tall" : ""}">${vSheet(ui.sheet)}</div>`;
     sh.classList.add("open");
     if (wasOpen && ui.sheet === lastSheet) sh.querySelector(".panel").scrollTop = st;
+    else if (ui.sheet.scrollPos) sh.querySelector(".panel").scrollTop = ui.sheet.scrollPos;   // zurück an dieselbe Stelle (Idee 88)
   } else { sh.innerHTML = ""; sh.classList.remove("open"); }
   lastSheet = ui.sheet;
   if (ui.sheet && ui.sheet.kind === "picker" && ui.sheet.q){ $("#pick-q").value = ui.sheet.q; filterPick(ui.sheet.q); }
@@ -2176,12 +2213,12 @@ const actions = {
       // Sofort melden, wenn der Satz den bisherigen Bestwert der Übung übertrifft (und nicht schon ein früherer Satz heute).
       const type = exType(en.exId), [unit, v] = setMark(type, s), best = (progress(S.workouts).bests[en.exId] || {})[unit] || 0;
       const today = Math.max(0, ...en.sets.filter(x => x !== s && x.done).map(x => { const m = setMark(type, x); return m[0] === unit ? m[1] : 0; }));
-      if (best > 0 && v > best && v > today) toast(`Neuer Rekord: ${fmtNum(v)} ${unit} bei ${exName(en.exId)}`);
+      if (best > 0 && v > best && v > today) toast(`★ Neuer Rekord: ${fmtNum(v)} ${unit} bei ${exName(en.exId)}`, null, false, 4000);
       else if (type === "kraft"){
         // Bestleistung (Idee 74): frühere Trainings und die schon abgehakten Sätze heute; einmal pro Übung und Training
         const ps = priorSets(en.exId), earlier = en.sets.filter(x => x !== s && x.done).map(x => ({kg:num(x.a), reps:num(x.b)})).filter(x => x.kg > 0 && x.reps > 0);
         const b = bestEffort(en.exId, s, [...ps.prior, ...earlier], ps.recentTop);
-        if (b && !en.sets.some(x => x !== s && x.done && bestEffort(en.exId, x, ps.prior, ps.recentTop))) toast(`Bestleistung: ${fmtBest(b)} bei ${exName(en.exId)}`);
+        if (b && !en.sets.some(x => x !== s && x.done && bestEffort(en.exId, x, ps.prior, ps.recentTop))) toast(`✦ Bestleistung: ${fmtBest(b)} bei ${exName(en.exId)}`, null, false, 4000);
       }
     }
   },
@@ -2499,7 +2536,7 @@ const actions = {
   "to-recs": () => { const h = $("#recs"); if (h) h.scrollIntoView({behavior:"smooth", block:"start"}); },
   "trend-all": () => { ui.sheet.allTrend = !ui.sheet.allTrend; render(); },
   "recs-all": () => { ui.sheet.allRec = !ui.sheet.allRec; render(); },
-  "rec-ex": el => { const e = exById(el.dataset.id); if (e) exSheet({...e}, {back:ui.sheet}); },
+  "rec-ex": el => { const e = exById(el.dataset.id); if (e) exSheet({...e}, {back:ui.sheet, from:"progress"}); },
   reload: () => { saveNow(); location.reload(); }
 };
 

@@ -4,16 +4,6 @@ Hier stehen die Ideen für die Weiterentwicklung. Der Agent `produkt-scout` fül
 
 ## Vorschläge
 
-### 87. Rekord und Bestleistung bleiben am Satz sichtbar (aus Funktionsvergleich: Fortschritt & Rekorde)
-- Nutzen: hoch · Aufwand: S · Datenformat: nein
-
-Hevy zeigt beim Abhaken ein Banner und speichert den Rekord mit dem Training. Strong markiert Rekorde direkt am Satz mit einer kurzen Animation, JEFIT zeigt ein Pop-up (alles gelesen, `APPS.md`). Bei uns stehen „Neuer Rekord: 65 kg bei Schrägbankdrücken“ und „Bestleistung: 13 Wdh mit 62,5 kg (bisher 12)“ 2,2 s oben am Bildschirm, danach ist am Satz nichts mehr zu sehen; wer nach dem Abhaken das Handy weglegt, erfährt erst nach dem Speichern davon. Skizze: Beim Zeichnen der Übungskarte bekommen abgehakte Sätze, die einen Rekord (`setMark()` gegen `progress().bests`) oder die Bestleistung der Übung (`bestEffort()`) gebracht haben, einen goldenen Stern bzw. „Best“ hinter der Satznummer (nur berechnet, im laufenden Training). Der Hinweis selbst bleibt 4 s statt 2,2 s stehen, und die Kopfzeile zählt mit („6 Sätze erledigt · ★ 1“); kein zusätzlicher Tipp.
-
-### 88. Übung aus dem Fortschritt mit Bestwerten und Kurve zuerst, zurück an dieselbe Stelle (aus Funktionsvergleich: Fortschritt & Rekorde)
-- Nutzen: mittel · Aufwand: S · Datenformat: nein
-
-Hevy öffnet eine Übung mit dem Reiter „Summary“ (Rekorde und Kurve), Strong mit „Charts“ und „Records“ (gelesen). Ein Tipp auf eine Zeile in „Kraft, letzte 6 Wochen“ oder „Letzte Rekorde“ öffnet bei uns das Bearbeiten-Sheet aus dem Tab Übungen: zuerst Namensfeld, Kategorie, Erfassung, Notiz und Technik, „Bestwerte“ erst bei y 874 (unter dem Bildschirmrand), die Kurve bei y 1206. Nach „Abbrechen“ steht der Fortschritt wieder oben statt bei der Liste (vorher y 827), wer drei stehende Übungen ansieht, wischt jedes Mal zurück. Skizze: `rec-ex` öffnet das Sheet mit einer Anordnung wie aus dem Training (Idee 59): Name als Titel, Bestwerte, Kurve, letzte Einheiten, darunter „Übung bearbeiten“. `actions.close` bzw. die Rückkehr über `back` stellt den gemerkten `scrollTop` des Fortschritts wieder her.
-
 ### 89. Kalender: Tagesinfo ins Bild holen, Monat bis zum gleichen Tag vergleichen (aus Funktionsvergleich: Fortschritt & Rekorde)
 - Nutzen: niedrig · Aufwand: S · Datenformat: nein
 
@@ -188,6 +178,18 @@ Vorerst nicht gebraucht (14.11.2026):
 Vorbild ist Strong: Ein Tipp auf die Satznummer öffnet Aufwärmen, Drop und Versagen, und Aufwärmsätze zählen nicht in Diagramme und Kennzahlen; Hevy und JEFIT machen es ähnlich. Heute verfälschen Aufwärmsätze Rekorde, Kampfkraft und Fortschrittskurve, und sie verhindern den Steigerungsvorschlag, weil der in allen Sätzen dasselbe Gewicht verlangt. Skizze: Ein Tipp auf die Satznummer (Fläche auf 44 × 48 px vergrößern) schaltet ein goldenes „A“ um, gespeichert als `w:1` am Satz. `finish()` und `newEntry()` übernehmen das Feld, ab dem zweiten Training kostet es also keinen Tipp mehr. `stepUp`, `exSeries`, `progress()`, die Rekord-Meldung und „Letztes Mal“ überspringen bzw. kennzeichnen A-Sätze, und die CSV bekommt eine Spalte. Migration: Ein Satz ohne das Feld gilt als Arbeitssatz; alte Daten und Backups bleiben gültig, alte Spielwerte bleiben unverändert.
 
 ## Erledigt
+
+Umgesetzt am 15.11.2026 (Vorschläge des funktions-testers zu Fortschritt & Rekorde; gym-tester ohne Warnung, ab 10 Sätzen breitere Spalte für die Satznummer):
+
+### 87. Rekord und Bestleistung bleiben am Satz sichtbar (aus Funktionsvergleich: Fortschritt & Rekorde)
+- Nutzen: hoch · Aufwand: S · Datenformat: nein
+
+Hevy zeigt beim Abhaken ein Banner und speichert den Rekord mit dem Training. Strong markiert Rekorde direkt am Satz mit einer kurzen Animation, JEFIT zeigt ein Pop-up (alles gelesen, `APPS.md`). Bei uns stehen „Neuer Rekord: 65 kg bei Schrägbankdrücken“ und „Bestleistung: 13 Wdh mit 62,5 kg (bisher 12)“ 2,2 s oben am Bildschirm, danach ist am Satz nichts mehr zu sehen; wer nach dem Abhaken das Handy weglegt, erfährt erst nach dem Speichern davon. Skizze: Beim Zeichnen der Übungskarte bekommen abgehakte Sätze, die einen Rekord (`setMark()` gegen `progress().bests`) oder die Bestleistung der Übung (`bestEffort()`) gebracht haben, einen goldenen Stern bzw. „Best“ hinter der Satznummer (nur berechnet, im laufenden Training). Der Hinweis selbst bleibt 4 s statt 2,2 s stehen, und die Kopfzeile zählt mit („6 Sätze erledigt · ★ 1“); kein zusätzlicher Tipp.
+
+### 88. Übung aus dem Fortschritt mit Bestwerten und Kurve zuerst, zurück an dieselbe Stelle (aus Funktionsvergleich: Fortschritt & Rekorde)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Hevy öffnet eine Übung mit dem Reiter „Summary“ (Rekorde und Kurve), Strong mit „Charts“ und „Records“ (gelesen). Ein Tipp auf eine Zeile in „Kraft, letzte 6 Wochen“ oder „Letzte Rekorde“ öffnet bei uns das Bearbeiten-Sheet aus dem Tab Übungen: zuerst Namensfeld, Kategorie, Erfassung, Notiz und Technik, „Bestwerte“ erst bei y 874 (unter dem Bildschirmrand), die Kurve bei y 1206. Nach „Abbrechen“ steht der Fortschritt wieder oben statt bei der Liste (vorher y 827), wer drei stehende Übungen ansieht, wischt jedes Mal zurück. Skizze: `rec-ex` öffnet das Sheet mit einer Anordnung wie aus dem Training (Idee 59): Name als Titel, Bestwerte, Kurve, letzte Einheiten, darunter „Übung bearbeiten“. `actions.close` bzw. die Rückkehr über `back` stellt den gemerkten `scrollTop` des Fortschritts wieder her.
 
 Umgesetzt am 15.11.2026 (Fachprüfung Ausdauer durch den trainings-experte; Vorschlag 9, Schlagzahl und Watt erfassen, vorerst nicht):
 

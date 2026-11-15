@@ -8,7 +8,7 @@ Wie gut ist jede Funktion des Trainingslogs im Vergleich zu führenden Fitness-A
 | „Letztes Mal“ | vorne | „Ziel heute“ ist nur Text: Das Ziel zu schaffen kostet 8–11 Tipps pro Übung, mit Übernahme per Tipp wären es 4–5 (Idee 31) | 14.11.2026 |
 | Pausen-Timer | gleichauf | Das Pausenende meldet nur ein Piepton (still bei Stummschalter, im Hintergrund abgesagt) und 8 s Gold. Nach Neuladen oder Tab-Wechsel steht das Training oben statt beim markierten Satz (Ideen 42, 43) | 14.11.2026 |
 | Vorlagen | gleichauf | Ein zweites Programm übernimmt „Dran“: Nach einem Lauf aus der Bibliothek zeigte „Dran“ einen zweiten Lauf, die nächste Arnold-Einheit stand unmarkiert bei y 1323. Umbenennen löscht „Zuletzt“ und „Dran“ (Ideen 49, 50) | 14.11.2026 |
-| Übungsverwaltung | offen | – | – |
+| Übungsverwaltung | gleichauf | Technik nur als Text, ohne Bild oder Video (alle vier Vorbilder zeigen eins). Im Training liegen die letzten Einheiten im Übungs-Sheet erst nach 1–2 Wischern, und das Sheet verdeckt den Timer (Ideen 59, 60) | 15.11.2026 |
 | Verlauf | offen | – | – |
 | Fortschritt & Rekorde | offen | – | – |
 | Spielelemente | offen | – | – |
@@ -16,6 +16,74 @@ Wie gut ist jede Funktion des Trainingslogs im Vergleich zu führenden Fitness-A
 | Backup & Export | offen | – | – |
 
 ## Befunde
+
+### Übungsverwaltung
+
+Erste Prüfung am 15.11.2026, nach den Ideen 53, 54, 55, 57 und 58 (56 abgelehnt). Getestet in Chrome am PC im Handy-Rahmen (390 × 844, Gegenprobe 375 × 667) auf localhost, mit echten Klicks und Tastatureingaben. Ausgangsstand: 39 Übungen, 12 Vorlagen, 23 Trainings (vorher gesichert). Per Skript kamen dazu (mit `save({put:id})`): die eigene Übung „Seitheben KH“ ohne Bibliothek und acht Arnold-Split-Trainings vom 02.11. bis 15.11.2026 (B&R A zweimal, S&A A zweimal, S&A B zweimal, Beine, B&R B), „Seitheben KH“ darin am 03.11. und 06.11. Über die Oberfläche habe ich den Verlauf von „Seitheben KH“ auf „Seitheben“ übertragen, „Seitheben Maschine“ im Tab Übungen angelegt, „Trizepsdrücken am Kabel“ aus der Bibliothek übernommen, „Brust & Rücken A“ gestartet, die Notiz von Bankdrücken im Training geändert und „Kabelzug crossover“ (über „Neu“ mit Suchwort) und „Y-T-W-Heben“ (Bibliothek) ins Training geholt. Das Training wurde verworfen. Danach habe ich Übungen, Vorlagen, Trainings, laufendes Training, Einstellungen und Löschliste per Skript zurückgesetzt (`save({all:true})`); nach dem Neuladen war alles zeichengleich mit dem Stand vor dem Test.
+
+**Tipps pro Ablauf**
+
+| Ablauf | Trainingslog | Strong / Hevy |
+|---|---|---|
+| Im Training Technik ansehen und zurück | 2 (Name, Abbrechen). Technik ab y 563 von 844 (SE: y 548 von 667, nur der erste Punkt sichtbar) | 2: Tipp auf den Namen, Reiter „About“ bzw. „How to“ (Strong gelesen, Hevy gelesen) |
+| Im Training die letzten Einheiten ansehen | 2 + 1 Wischer (SE 1–2): „Letzte Einheiten“ beginnt bei y 957 (SE 936) | 2–3: Tipp auf den Namen, Reiter „History“ |
+| Im Training die Notiz ändern | 3 + Tasten (Name, Feld, Sichern); die Notiz steht sofort in der Karte, die Position bleibt | Hevy: angeheftete Notiz direkt an der Übung, Tipps nicht belegt |
+| Übung aus „Zuletzt“ ins Training holen | 2 („+ Übung hinzufügen“, Zeile); der Knopf liegt am Ende des Trainings (y 2370 von 2682, 2–3 Wischer) | 2–3*, Hevy zeigt zuletzt genutzte Übungen oben (gelesen) |
+| Übung per Suche ins Training holen | 3 + Tasten | 3 + Tasten* |
+| Neue Übung aus der Suche („Kabelzug crossover“) | 4 + Tasten (+ Übung, Suchfeld, Neu, Sichern); der Name steht schon drin, ohne Kategorie landet sie unter „Sonstiges“ | Strong und Hevy: „New“ bzw. „Create Exercise“, Name neu tippen* |
+| Bibliotheksübung ins Training holen | 3 + Tasten, die neue Karte scrollt ins Bild | entfällt, die Bibliothek ist dort die Übungsliste |
+| Neue Übung im Tab Übungen | 4 + 26 Tasten (+ Neue Übung, Name, Kategorie, Sichern) | nicht belegt |
+| Übung im Tab Übungen öffnen (Seitheben) | 1 + 2–3 Wischer (y 2394 von 2943, keine Suche) | Suche und Filter (Hevy gelesen, Strong Wissen) |
+| Verlauf übertragen („Seitheben KH“ → „Seitheben“) | 4 + 3–4 Wischer (Übung, Verlauf übertragen, Ziel, Übertragen) | Strong: „Edit“ → „Transfer Exercise Data“ (gelesen); Hevy nicht belegt |
+| Mit der Bibliothek verknüpfen | 3–4 + Tasten (Verknüpfen, ggf. Suche, Eintrag, Sichern) | – |
+
+\* Allgemeines Wissen, nicht nachgelesen.
+
+**Bedienung (Messwerte in App-Pixeln bei 390 px)**
+- Tab Übungen: 40 Übungen in 9 Kategorien, alphabetisch, die Seite ist 2943 px hoch (3,5 Bildschirme). Zeilen 311 × 51, Name 16 px, „Best 80 kg ›“ 14 px blassblau. „+ Neue Übung“ und „+ Aus der Bibliothek“ messen je 168 × 67. Es gibt dort weder Suche noch „Zuletzt“. Nach „Sichern“ einer neuen Übung kommt keine Meldung, die Liste steht oben und die neue Übung irgendwo unter ihrer Kategorie.
+- Übungs-Sheet (Tab): Name, Kategorie, Erfassung, Bibliothekszeile („Bibliothek: Seitheben · Kurzhantel · seitliche Schulter“ mit „Ändern“, sonst „Nicht mit der Bibliothek verknüpft“ mit „Verknüpfen“), Notiz, Technik, Entwicklung, „Letzte Einheiten“ (bis 10), „Verlauf übertragen auf …“ und „Übung löschen“. Das Sheet ist 1492 px hoch; die beiden letzten Knöpfe (je 328 × 44) liegen nur 4 px auseinander, beide fragen nach. Abbrechen 97 × 44, Sichern 78 × 44, Verknüpfen/Ändern 75 × 44, Felder 328 × 47.
+- Übungs-Sheet aus dem Training (Idee 53): Der Name ist ein Knopf von 223 × 45 (bei zweizeiligem Namen 223 × 69) mit „›“. Das Sheet zeigt die Erfassungsart als Text und kein Löschen und Übertragen. Oben stehen aber Name und Kategorie als Felder (290 px), Technik erst ab y 563, „Letzte Einheiten“ ab y 957. Programm-Richtwert und Programm-Hinweis fehlen. Das Sheet liegt über dem Pausen-Timer (z-index 60 gegen 40), die Restzeit ist in dieser Zeit nicht zu sehen. Nach „Sichern“ stand die neue Notiz (13 px blassblau) sofort unter dem Namen, der markierte nächste Satz blieb.
+- Auswahl-Sheet (Ideen 55, 57): Feste Höhe 760 px, Inhalt ohne Suche 5404 px, „Aus der Bibliothek“ beginnt bei 3122. „Zuletzt“ zeigte sechs Übungen mit „heute“, richtig nach der Regel, im Brust-Rücken-Training allerdings lauter Schulter- und Armübungen aus der Einheit vom Morgen. Die Suche fand „kurzhantel schulter“ (Arnold-Drücken, Kurzhantel-Schulterdrücken, Seitheben, dazu Y-T-W-Heben aus der Bibliothek), „trizeps“ (Dips, Stirndrücken, Trizepsdrücken am Kabel, Überkopf-Trizepsstrecken, Enges Bankdrücken) und „butterfly maschine“. Bei „kabelzug crossover“ stand „Keine passende Übung. Über „Neu“ legst du eine eigene an.“, und „Neu“ übernahm „Kabelzug crossover“ als Namen. Zeilen 328 × 51, Bibliothekszeilen 343 × 50, Suchfeld 328 × 47, „Neu“ 52 × 44, „Zurück“ 68 × 44. Eigene Übungen zeigen in der Liste kein Gerät, Bibliothekszeilen schon. Eine Bibliotheksübung lässt sich vor der Übernahme nicht ansehen.
+- Verknüpfen (Idee 54): Die Liste zeigt nur freie Einträge gleicher Erfassungsart, die eigene Kategorie oben. Für „Seitheben Maschine“ gab es unter Schultern nur „Außenrotation am Kabel“ und „Y-T-W-Heben“, weil „Seitheben“ schon vergeben ist. Eine Maschinen-Variante bekommt also keine Technik und keinen Muskel aus der Bibliothek. Die Suche „seitlich“ fand über den Hauptmuskel „Holzhacker am Kabel“.
+- Übertragen (Idee 58): Die Rückfrage nennt Zahl, beide Namen und „nicht rückgängig“, danach meldet die App „Verlauf von „Seitheben KH“ jetzt bei „Seitheben““. Die Zielliste beginnt mit der eigenen Kategorie, der ähnliche Name „Seitheben“ stand dort an sechster Stelle.
+- Daumen: „Sichern“, „Abbrechen“, „Neu“ und das Suchfeld stehen oben (y 99–198 von 844), einhändig schwer erreichbar. Im Training betrifft das nur das Sichern einer Notiz und „Neu“; die Zeilen des Auswahl-Sheets und „+ Übung hinzufügen“ liegen im Daumenbereich. Das Sheet für eine neue Übung ist kürzer, seine Kopfzeile liegt bei y 355.
+- Lesbarkeit: Technik 14 px weiß, Bibliothekszeile 14 px blassblau (etwa 7,3 : 1). Die Kopfzeile „Mit Bibliothek verknüpfen“ brach beim ersten Öffnen auf zwei Zeilen um, beim zweiten nicht (vermutlich die Schrift beim ersten Laden). Bei 375 px läuft nichts über.
+- Rückmeldung: Übernahme aus der Bibliothek („„Trizepsdrücken am Kabel“ hinzugefügt“, die Suche bleibt stehen), Übertragen und Notiz sind gut zu sehen. Eine neue Übung im Tab Übungen bekommt keine Meldung. Eine Verknüpfung wirkt erst nach „Sichern“, das sagt die App nicht. Konsole: keine Meldungen (Aufzeichnung ab der Gegenprobe).
+
+**Was die anderen besser machen**
+- Technik mit Bild oder Video: MCI zeigt 3D-Animationen und nummerierte Schritte, Hevy eine Animation pro Übung, Strong Video oder Bilder, Fitbod im „How To“ ein Video (Fitbod nur Suche). Bei uns stehen zwei bis drei Sätze Text.
+- Übungsdetails in Reitern: Hevy öffnet im laufenden Training per Tipp auf den Namen „Summary“, „History“ und „How to“, ohne das Training zu unterbrechen; Strong „About“, „History“, „Charts“, „Records“. Man ist mit einem Tipp beim Verlauf. Bei uns ist es ein langes Formular, das mit Name und Kategorie beginnt.
+- Die Übungsliste ist durchsuchbar und filterbar (Hevy nach Gerät und Muskel, JEFIT nach Muskel und Gerät, nur Suche), Hevy zeigt zuletzt genutzte Übungen oben. Unser Tab Übungen hat beides nicht, nur das Auswahl-Sheet.
+- Eigene Übungen tragen bei Hevy Gerät, Haupt- und Nebenmuskeln und eine Erfassungsart, bei Fitbod Muskeln. Bei uns hängt das an der Verknüpfung mit der Bibliothek, und jeder Bibliothekseintrag gehört höchstens einer eigenen Übung.
+- Hevy dupliziert Übungen, Strong blendet aus statt zu löschen (siehe Idee 56, abgelehnt).
+
+**Was wir besser machen**
+- „Neu“ übernimmt das Suchwort, und die Suche findet Name, Kategorie, Gerät und Hauptmuskel in beliebiger Reihenfolge. Das war für Strong und Hevy nicht zu belegen.
+- Eigene Übungen sind unbegrenzt und kostenlos; Hevy erlaubt ohne Pro höchstens 7 (Hilfe-Center, nur Suche). Ein unabhängiger Test nennt das eine häufige Kritik. Eine Übernahme aus der Bibliothek kostet im Training nicht mehr Tipps als eine eigene Übung per Suche (3 + Tasten), und die Verknüpfung bringt Technik, Gewichtsschritt und Muskelzuordnung mit.
+- Die Notiz lässt sich mitten im Training mit 3 Tipps ändern und steht sofort in der Karte. „Verlauf übertragen“ wie bei Strong, mit klarer Rückfrage. Alles offline.
+
+**Urteil: gleichauf.** Im Studio zählt vor allem, schnell eine Übung zu finden oder anzulegen und mitten im Training nachzusehen, wie sie geht und was man letztes Mal gemacht hat. Das Finden und Anlegen ist mit „Zuletzt“, der Suche nach Muskel und Gerät und „Neu“ mit Suchwort so schnell wie bei Strong und Hevy, teils schneller, und ohne Grenze für eigene Übungen. Beim Nachsehen liegen die Vorbilder vorne: Sie zeigen die Technik als Bild oder Video und öffnen den Verlauf mit einem Reiter. Bei uns liegt er hinter Name, Kategorie, Technik und Kurve, 1–2 Wischer tief, und das Sheet verdeckt solange den Timer. Bei der Pflege (Tab Übungen ohne Suche, keine Meldung nach dem Anlegen, Muskeln nur über die Bibliothek) sind Hevy und Strong bequemer; das zählt im Studio weniger. Mit den Ideen 59 und 60 wäre die Funktion beim Nachsehen gleichwertig.
+
+**Lücken, die nicht vorgeschlagen werden:** Ausblenden statt Löschen ist Idee 56 (abgelehnt). Eigene Animationen oder Bilder in der App bräuchten Bildrechte und viel Speicher im Cache; der Link zu einem Video (Idee 60) reicht. Haupt- und Nebenmuskeln von Hand für eigene Übungen bräuchten ein neues Feld mit Migration, für einen Nutzer, der fast nur Bibliotheksübungen nutzt; die Kategorie trägt die Zuordnung schon (Idee 62 macht sie verlässlicher). Duplizieren von Übungen kommt selten vor. Favoriten braucht es neben „Zuletzt“ nicht. Eine zweite eigene Übung auf denselben Bibliothekseintrag (Maschinen-Variante) würde Gewichtsschritt und Muskelzählung doppelt belegen; das sollte erst der `trainings-experte` bewerten.
+
+**Nebenbefunde für die Hauptsitzung** (Fehlersuche gehört zum `gym-tester`)
+- Eine neue Übung ohne Kategorie bekommt still „Sonstiges“ (`save-ex`, `index.html` Zeile 1956) und zählt dann in „Sätze pro Muskel“ unter „Ohne Zuordnung“. Beim Anlegen über „Neu“ im Training passiert das leicht, weil man nur den Namen braucht.
+- Idee 55 nannte als Option „dieselbe Suche oben im Tab Übungen“; umgesetzt ist sie nur im Auswahl-Sheet (`vExercises()`, Zeile 1406).
+
+**Quellen**
+- Selbst gelesen (diese Prüfung):
+  - Hevy, „Exercise Performance“ (Reiter Summary, History, How to; Tipp auf den Namen im laufenden Training; zuletzt genutzte Übungen oben, eigene weiter unten; Suche und Filter nach Gerät und Muskel): https://www.hevyapp.com/features/exercise-performance/
+  - Strong Help Center, „How do I create a custom exercise?“ (03.05.2021, nennt keine Felder): https://help.strongapp.io/article/97-create-custom-exercises
+- Nur aus Suchergebnissen:
+  - Fitbod Help, Bereich „Workout Schedule & Logging“ (Exercise Details mit „How To“ und Video, Verlauf über „…“ → Exercise History): https://help.fitbod.me/hc/en-us/sections/1500000505721-Workout-Schedule-Logging
+  - Fitbod Blog, „New and Improved Exercise History & Records“ (Fehler 403): https://fitbod.me/blog/exercise-history-and-records/
+  - Hevy Help Center, „How to Create, Edit and Duplicate Custom Exercises in Hevy“: https://help.hevyapp.com/hc/en-us/articles/34264544382615-How-to-Create-Edit-and-Duplicate-Custom-Exercises-in-Hevy
+  - Hevy Help Center, „Hevy Pro Subscription“ (eigene Übungen kostenlos höchstens 7): https://help.hevyapp.com/hc/en-us/articles/35119778922263-Hevy-Pro-Subscription-How-to-get-Pro-and-What-Does-It-Include
+  - Dr. Muscle, „HEVY Workout App: Independent Review“ (Grenze als häufige Kritik; Seite eines Wettbewerbers): https://dr-muscle.com/hevy-workout-app-review/
+  - JEFIT, Übungsdatenbank (Filter nach Muskelgruppe und Gerät, rund 1300 Übungen): https://www.jefit.com/exercises
+  - Forenstimmen: Echte Reddit-Threads zur Übungsverwaltung waren nicht zu finden.
+- Vom `produkt-scout` am selben Tag gelesen (Einzelheiten in `APPS.md`, Abschnitt „Übungsverwaltung“): MCI (App Store, ScreensDesign-Bildbeschreibungen, Roadmap, WorldsApps), Strong-Hilfe zu Detailansicht, eigenen Übungen, Ausblenden und Übertragen, Hevy „Exercise Library“ und „Custom Exercises“.
+- Allgemeines Wissen, nicht nachgelesen: Strong filtert die Übungsliste nach Körperteil; Tipps zum Hinzufügen bei Strong und Hevy.
 
 ### Vorlagen
 

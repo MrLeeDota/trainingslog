@@ -13,6 +13,33 @@ Nach einem Neuladen läuft die Pause weiter, den Piepton plant die App aber erst
 
 Aus der Runde Übungsverwaltung (15.11.2026):
 
+Aus dem Funktionsvergleich Übungsverwaltung (15.11.2026):
+
+### 59. Übungs-Sheet im Training: letzte Einheiten und Technik zuerst, Restzeit sichtbar (aus Funktionsvergleich: Übungsverwaltung)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein
+
+Hevy öffnet per Tipp auf den Namen im laufenden Training die Reiter „Summary“, „History“ und „How to“, Strong „About“ und „History“; man ist mit einem Tipp beim Verlauf. Unser Sheet aus dem Training (Idee 53) beginnt mit den Feldern Name und Kategorie (290 px). Die Technik steht erst ab y 563 von 844, auf dem SE ist nur der erste Punkt zu sehen, und „Letzte Einheiten“ beginnt bei y 957, also 1–2 Wischer tief. Dabei verdeckt das Sheet den Pausen-Timer (z-index 60 gegen 40). Skizze: Mit `from:"training"` zeigt `vSheet()` in dieser Reihenfolge die letzten drei Einheiten kompakt (wie „Letztes Mal“, mit Datum), den Programm-Richtwert aus `entryPlan()`, die Technik, die Notiz und darunter die Kurve; Name und Kategorie stehen als Felder am Ende. Läuft eine Pause, zeigt die Kopfzeile statt „Übung“ die Restzeit (z. B. „Pause 1:48“, in `tick()` mit aufgefrischt). Im Tab Übungen bleibt alles wie heute.
+
+### 60. Link zu einem Technik-Video (aus Funktionsvergleich: Übungsverwaltung)
+- Nutzen: mittel · Aufwand: S · Datenformat: nein (optional ein Feld in `bibliothek/uebungen.json`, nicht in den Nutzerdaten)
+
+MCI zeigt zu jeder Übung eine 3D-Animation, Hevy eine Animation, Strong Video oder Bilder, Fitbod im „How To“ ein Video. Bei uns stehen zwei bis drei Sätze Text; wer eine neue Übung aus dem Programm (z. B. Y-T-W-Heben oder Kurzhantel-Pullover) zum ersten Mal macht, hat kein Bild davon. Eigene Videos in der App bräuchten Bildrechte und Speicher. Skizze: Unter „Technik“ steht ein Link „Video ansehen ↗“, der eine YouTube-Suche nach dem Bibliotheksnamen plus „Technik“ in einem neuen Fenster öffnet (`target="_blank"`, `rel="noopener"`; als installierte PWA öffnet iOS ein Browserfenster über der App, das Training läuft weiter). Besser sind feste Links pro Übung, die der `trainings-experte` als optionales Feld `video` in der Bibliothek pflegt; fehlt es, bleibt die Suche. Offline ist der Link ausgegraut.
+
+### 61. Tab Übungen: Suche und „Zuletzt“ oben, neue Übung danach zeigen (aus Funktionsvergleich: Übungsverwaltung)
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Hevy zeigt in der Übungsliste zuletzt genutzte Übungen oben und hat Suche und Filter nach Gerät und Muskel (gelesen). Unser Tab Übungen ist mit 40 Übungen 2943 px hoch, Seitheben liegt bei y 2394 (2–3 Wischer), eine Suche gibt es dort nicht. Idee 55 hatte sie als Option genannt, umgesetzt ist sie nur im Auswahl-Sheet. Nach „Sichern“ einer neuen Übung kommt keine Meldung, und die Liste bleibt oben stehen. Skizze: Über der Liste dasselbe Suchfeld wie im Auswahl-Sheet (`searchKey()`, `filterPick()` auf die Liste angewendet) und die Gruppe „Zuletzt“ aus `vRecent()`; nach dem Anlegen meldet die App „„Seitheben Maschine“ angelegt“ und scrollt die neue Zeile ins Bild.
+
+### 62. Kategorie mit einem Tipp wählen statt tippen (aus Funktionsvergleich: Übungsverwaltung)
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Hevy lässt bei eigenen Übungen Gerät und Muskeln aus Listen wählen (gelesen). Bei uns ist die Kategorie ein freies Textfeld mit Vorschlagsliste: „Schultern“ kostet 9 Tasten, ein Tippfehler wie „Schulter“ legt eine neue Gruppe an, und wer über „Neu“ im Training nur den Namen einträgt, bekommt still „Sonstiges“. Die Übung zählt dann in „Sätze pro Muskel“ unter „Ohne Zuordnung“ (im Test „Kabelzug crossover“). Skizze: Unter dem Feld eine Reihe Knöpfe mit den vorhandenen Kategorien (mindestens 44 px hoch, umbrechend), ein Tipp setzt die Kategorie, das Feld bleibt für neue. Beim Anlegen über „Neu“ aus dem Auswahl-Sheet ist die Kategorie vorgewählt, die zur Suche passt (Suchwort ist eine Kategorie) oder zur Übung, an deren Stelle getauscht wird.
+
+### 63. Bibliotheksübung vor dem Übernehmen ansehen (aus Funktionsvergleich: Übungsverwaltung)
+- Nutzen: niedrig · Aufwand: S · Datenformat: nein
+
+Bei Hevy öffnet ein Tipp in der Bibliothek die Details mit Anleitung (gelesen), MCI zeigt Übungsdetails als Fenster (gelesen, Bildbeschreibungen). Bei uns übernimmt ein Tipp in „+ Aus der Bibliothek“ die Übung sofort; Technik, Muskeln und Gerät sieht man erst danach im Übungs-Sheet, und wer nur stöbert, hat danach Übungen in der Liste, die er nicht wollte. Skizze: Nur im Tab Übungen (Ziel `lib`) öffnet ein Tipp auf eine Bibliothekszeile eine Vorschau mit Gerät, Hauptmuskel, Technik und den Programmen, in denen die Übung vorkommt, unten „In meine Liste“; im Auswahl-Sheet beim Training bleibt es bei einem Tipp.
+
 ## Angenommen
 
 Noch nichts.
